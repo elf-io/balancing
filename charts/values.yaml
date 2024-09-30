@@ -130,8 +130,8 @@ elfAgent:
       memory: 128Mi
 
   ## @param elfAgent.securityContext the security Context of elfAgent pod
-  securityContext: {}
-  # runAsUser: 0
+  securityContext:
+    privileged: true
 
   httpServer:
     ## @param elfAgent.httpServer.port the http Port for elfAgent, for health checking

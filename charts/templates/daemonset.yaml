@@ -135,8 +135,6 @@ spec:
           resources:
           {{- toYaml . | trim | nindent 12 }}
           {{- end }}
-          securityContext:
-            privileged: true
           env:
             - name: ENV_LOG_LEVEL
               value: {{ .Values.elfAgent.debug.logLevel | quote }}
