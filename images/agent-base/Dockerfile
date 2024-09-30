@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 ARG GOLANG_IMAGE=docker.io/library/golang:1.23.1
-ARG UBUNTU_IMAGE=docker.io/library/ubuntu:24.04
+ARG UBUNTU_IMAGE=docker.io/library/ubuntu:24.10
 
 #========= build gops ===============
 FROM --platform=${TARGETPLATFORM} ${GOLANG_IMAGE} as gops-cni-builder
@@ -29,15 +29,12 @@ RUN chmod +x /build-gops.sh && /build-gops.sh
 FROM --platform=${TARGETPLATFORM} ${UBUNTU_IMAGE} as rootfs
 ARG TARGETARCH
 COPY /install-others.sh /install-others.sh
-COPY /configure-iptables-wrapper.sh /configure-iptables-wrapper.sh
-COPY /iptables-wrapper /usr/sbin/iptables-wrapper
 
 #fix warning: debconf: delaying package configuration, since apt-utils is not installed
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get upgrade -y
 
 WORKDIR /
-RUN chmod +x /configure-iptables-wrapper.sh && /configure-iptables-wrapper.sh && rm -f /configure-iptables-wrapper.sh
 
 ARG TARGETPLATFORM
 COPY --from=gops-cni-builder /out/${TARGETPLATFORM}/bin/gops /bin/gops
