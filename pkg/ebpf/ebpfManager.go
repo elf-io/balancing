@@ -20,8 +20,8 @@ import (
 const (
 	HostMountInfoPath = "/proc/mounts"
 	BpfFSPath         = "/sys/fs/bpf"
-	MapsPinpath       = BpfFSPath + "/welan"
-	CgroupV2Path      = "/run/welan/cgroupv2"
+	MapsPinpath       = BpfFSPath + "/elf"
+	CgroupV2Path      = "/var/run/elf"
 
 	EventChanLength = 1000
 )
