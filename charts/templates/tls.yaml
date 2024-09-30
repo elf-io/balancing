@@ -90,7 +90,6 @@ webhooks:
       caBundle: {{ .ca.Cert | b64enc }}
       {{- end }}
     failurePolicy: Fail
-    # ====modify====
     name: balancingpolicy.balancing.elf.io
     rules:
       - apiGroups:
