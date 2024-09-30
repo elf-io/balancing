@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/cilium/ebpf"
 	"github.com/cilium/ebpf/link"
+	"github.com/elf-io/balancing/pkg/types"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	discovery "k8s.io/api/discovery/v1"
@@ -18,11 +19,6 @@ import (
 
 // -------------------------------------------
 const (
-	HostMountInfoPath = "/proc/mounts"
-	BpfFSPath         = "/sys/fs/bpf"
-	MapsPinpath       = BpfFSPath + "/elf"
-	CgroupV2Path      = "/var/run/elf"
-
 	EventChanLength = 1000
 )
 
@@ -111,7 +107,7 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 
 	s.Event = make(chan MapEventValue, EventChanLength)
 
-	if err := checkOrMountBpfFs(BpfFSPath); err != nil {
+	if err := checkOrMountBpfFs(types.BpfFSPath); err != nil {
 		return fmt.Errorf("failed to mount bpf fs: %v", err)
 	}
 
@@ -122,31 +118,31 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 
 	// attach to cgroup
 	// sync.Once.Do(func() {
-	if err := checkOrMountCgroupV2(CgroupV2Path); err != nil {
+	if err := checkOrMountCgroupV2(types.CgroupV2Path); err != nil {
 		return fmt.Errorf("failed to mount cgroup v2: %s", err)
 	}
 	// })
 
 	// create the directory for map pin path
-	if stat, err := os.Stat(MapsPinpath); err != nil {
+	if stat, err := os.Stat(types.MapsPinpath); err != nil {
 		if os.IsNotExist(err) {
-			err = os.MkdirAll(MapsPinpath, os.ModePerm)
+			err = os.MkdirAll(types.MapsPinpath, os.ModePerm)
 			if err != nil {
-				return fmt.Errorf("failed to mkdir %s: %v", MapsPinpath, err)
+				return fmt.Errorf("failed to mkdir %s: %v", types.MapsPinpath, err)
 			}
 		} else {
-			return fmt.Errorf("Failed to stat the path %s: %w", MapsPinpath, err)
+			return fmt.Errorf("Failed to stat the path %s: %w", types.MapsPinpath, err)
 		}
 	} else {
 		if !stat.IsDir() {
-			return fmt.Errorf("%s is a file which is not a directory", MapsPinpath)
+			return fmt.Errorf("%s is a file which is not a directory", types.MapsPinpath)
 		}
 	}
 
 	// 这个函数( loadBpf_xxxObjects )是 bpf2go 生成的 go 文件中 加载 ebpf 程序到内核
 	err := loadBpf_cgroupObjects(&s.BpfObjCgroup, &ebpf.CollectionOptions{
 		Maps: ebpf.MapOptions{
-			PinPath: MapsPinpath,
+			PinPath: types.MapsPinpath,
 		}})
 	if err != nil {
 		return fmt.Errorf("failed to load ebpf obj: %v", err)
@@ -155,7 +151,7 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 	// 把 ebpf 程序再挂载到 cgroup
 	// https://github.com/cilium/ebpf/blob/main/link/cgroup.go#L43
 	s.CgroupLink, err = link.AttachCgroup(link.CgroupOptions{
-		Path:    CgroupV2Path,
+		Path:    types.CgroupV2Path,
 		Attach:  ebpf.AttachCGroupInet4Connect,
 		Program: s.BpfObjCgroup.bpf_cgroupPrograms.Sock4Connect,
 	})
@@ -163,7 +159,7 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 		return fmt.Errorf("Error attaching Sock4Connect to cgroup: %v", err)
 	}
 	s.CgroupLink, err = link.AttachCgroup(link.CgroupOptions{
-		Path:    CgroupV2Path,
+		Path:    types.CgroupV2Path,
 		Attach:  ebpf.AttachCGroupUDP4Sendmsg,
 		Program: s.BpfObjCgroup.bpf_cgroupPrograms.Sock4Sendmsg,
 	})
@@ -171,7 +167,7 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 		return fmt.Errorf("Error attaching Sock4Sendmsg to cgroup: %v", err)
 	}
 	s.CgroupLink, err = link.AttachCgroup(link.CgroupOptions{
-		Path:    CgroupV2Path,
+		Path:    types.CgroupV2Path,
 		Attach:  ebpf.AttachCGroupUDP4Recvmsg,
 		Program: s.BpfObjCgroup.bpf_cgroupPrograms.Sock4Recvmsg,
 	})
@@ -179,7 +175,7 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 		return fmt.Errorf("Error attaching Sock4Recvmsg to cgroup: %v", err)
 	}
 	s.CgroupLink, err = link.AttachCgroup(link.CgroupOptions{
-		Path:    CgroupV2Path,
+		Path:    types.CgroupV2Path,
 		Attach:  ebpf.AttachCgroupInet4GetPeername,
 		Program: s.BpfObjCgroup.bpf_cgroupPrograms.Sock4Getpeername,
 	})
@@ -250,7 +246,7 @@ func (s *EbpfProgramStruct) LoadAllEbpfMap(mapPinDir string) error {
 	var err error
 	mapdir := mapPinDir
 	if len(mapdir) == 0 {
-		mapdir = MapsPinpath
+		mapdir = types.MapsPinpath
 	}
 
 	f := filepath.Join(mapdir, "map_affinity")

@@ -5,11 +5,13 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/elf-io/balancing/pkg/types"
+	"github.com/elf-io/balancing/pkg/utils"
 	"golang.org/x/sys/unix"
 	corev1 "k8s.io/api/core/v1"
 	discovery "k8s.io/api/discovery/v1"
 	"net"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -26,7 +28,14 @@ func checkMount(mountPath string, mountType string) (bool, error) {
 	// }
 	// return false, nil
 
-	f, err := os.Open(HostMountInfoPath)
+	// in host
+	mountsPath := "/proc/mounts"
+	if utils.FileExists(path.Join(types.HostProcMountDir, mountsPath)) {
+		// in container
+		mountsPath = path.Join(types.HostProcMountDir, mountsPath)
+	}
+
+	f, err := os.Open(mountsPath)
 	if err != nil {
 		return false, fmt.Errorf("failed to read mount file: %v", err)
 	}

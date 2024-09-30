@@ -4,19 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/elf-io/balancing/pkg/types"
+	"github.com/elf-io/balancing/pkg/utils"
 	"os"
 	"path"
 	"regexp"
 	"strings"
 )
-
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
-}
 
 // getPodAndContainerID 从给定的 cgroup 路径中提取 Pod ID 和 Container ID。
 //
@@ -53,7 +46,7 @@ func getPodAndContainerID(pid uint32) (podId string, containerId string, host bo
 
 	// in host
 	cgroupPath := fmt.Sprintf("/proc/%d/cgroup", pid)
-	if fileExists(path.Join(types.HostProcMountDir, cgroupPath)) {
+	if utils.FileExists(path.Join(types.HostProcMountDir, cgroupPath)) {
 		// in container
 		cgroupPath = path.Join(types.HostProcMountDir, cgroupPath)
 	}
