@@ -248,4 +248,24 @@ struct {
 //} map_event SEC(".maps");
 
 
+//======================================= map ： 存储工作配置
+
+#define INDEX_DEBUG_LEVEL   0
+#define INDEX_ENABLE_IPV4   1
+#define INDEX_ENABLE_IPV6   2
+
+/* This a array map for configuration
+    0 :  debug level ( 0:VERBOSE , 1:INFO, 2:ERROR)
+    1 :  enable ipv4 ( 0: disabled , 1:enabled)
+    2 :  enable ipv6 ( 0: disabled , 1:enabled)
+*/
+// https://docs.kernel.org/bpf/map_array.html
+struct {
+        __uint(type, BPF_MAP_TYPE_ARRAY); // All array elements are pre-allocated and zero initialized when created
+        __type(key, __u32); // key 就是数组中的索引（index）（因此 key 一定 是整形），因此无需对 key 进行哈希 . All array elements are pre-allocated and zero initialized at init time. Key is an index in array and can only be 4 bytes (32-bit)
+        __type(value, __u32);  // The value stored can be of any size , however, all array elements are aligned to 8 bytes
+        __uint(pinning, 1);
+        __uint(max_entries, 10);
+} configure_map SEC(".maps");
+
 #endif /* __MAP_H__ */

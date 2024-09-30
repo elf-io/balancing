@@ -1,24 +1,5 @@
-
 #include "common.h"
 #include "map.h"
-
-
-
-// 169.254.0.10 的大端十六进制表示
-//#define FLOAT_IP   0x0a00feda
-#define FLOAT_IP   0xa9fe000a
-#define FLOAT_PORT 80
-
-// 172.25.132.16  的小端十六进制表示
-#define ENDPOINT_IP    0x108419ac
-//#define ENDPOINT_IP    0xac198410
-#define ENDPOINT_PORT  80
-
-static __always_inline __u32 get_ctx_port( __be16 port) {
-  return (__u32) port ;
-}
-
-
 
 /* use BPF_MAP_TYPE_RINGBUF */
 //static __always_inline void ringbuf_output(  struct event_value *data )
@@ -43,7 +24,7 @@ static __always_inline __u32 get_ctx_port( __be16 port) {
 //    bpf_ringbuf_submit(event, 0);
 //}
 
-static __always_inline void perf_event_output(void *ctx, void *data, __u64 size)
+static __always_inline void perf_event_output(void *ctx, void *data, __u64 size ,  __u32 debug_level )
 {
     int ret = bpf_perf_event_output(ctx, &map_event, BPF_F_CURRENT_CPU, data, size );
     if (ret) {
@@ -63,7 +44,7 @@ static __always_inline  bool ctx_in_hostns(void *ctx )
 
 //-------------------------------------
 
-static __always_inline bool get_service( __be32 dest_ip, __u16 dst_port, __u8 ip_proto  , struct mapkey_service *svckey , struct mapvalue_service *svcval ) {
+static __always_inline bool get_service( __be32 dest_ip, __u16 dst_port, __u8 ip_proto  , struct mapkey_service *svckey , struct mapvalue_service *svcval ,  __u32 debug_level ) {
     struct mapvalue_service *t ;
 
     // search NAT_TYPE_BALANCING
@@ -128,7 +109,7 @@ succeed:
     return true ;
 }
 
-static __always_inline struct mapvalue_affinity* get_affinity_and_update( struct bpf_sock_addr *ctx , __u32 affinity_second , __u8 ip_proto ) {
+static __always_inline struct mapvalue_affinity* get_affinity_and_update( struct bpf_sock_addr *ctx , __u32 affinity_second , __u8 ip_proto , __u32 debug_level ) {
 
     if (affinity_second == 0 ) {
         return NULL ;
@@ -174,7 +155,7 @@ static __always_inline struct mapvalue_affinity* get_affinity_and_update( struct
 
 //----------------------
 
-static __always_inline int execute_nat(struct bpf_sock_addr *ctx) {
+static __always_inline int execute_nat(struct bpf_sock_addr *ctx , __u32 debug_level ) {
 
 	__u32 dst_ip = ctx->user_ip4;
 	// user_port is saved in network order, convert to host order
@@ -226,7 +207,7 @@ static __always_inline int execute_nat(struct bpf_sock_addr *ctx) {
     // ------------- find service value
     struct mapkey_service svckey;
     struct mapvalue_service svcval;
-    if ( ! get_service( dst_ip , dst_port , ip_proto , &svckey, &svcval) ) {
+    if ( ! get_service( dst_ip , dst_port , ip_proto , &svckey, &svcval , debug_level ) ) {
         // these packets may be forwarding for non-service
         debugf(DEBUG_VERSBOSE, "did not find service value for %pI4:%d\n" , &dst_ip  , dst_port   );
         return 2;
@@ -248,7 +229,7 @@ static __always_inline int execute_nat(struct bpf_sock_addr *ctx) {
     //------------ check affinity history
     if ( svcval.affinity_second > 0 ) {
         debugf(DEBUG_VERSBOSE, "search affinity service for %pI4:%d\n" ,&dst_ip  , dst_port   );
-        struct mapvalue_affinity *affinityValue = get_affinity_and_update(ctx, svcval.affinity_second , ip_proto ) ;
+        struct mapvalue_affinity *affinityValue = get_affinity_and_update(ctx, svcval.affinity_second , ip_proto , debug_level ) ;
         if (affinityValue) {
             // update
             debugf(DEBUG_INFO, "nat by sencondary affinity, for %pI4:%d\n" , &dst_ip  , dst_port   );
@@ -364,11 +345,44 @@ set_nat:
 
 output_event:
     // ringbuf_output( &e );
-    perf_event_output(ctx, &evt , sizeof(evt) ) ;
+    perf_event_output(ctx, &evt , sizeof(evt) , debug_level ) ;
 
     return 0 ;
 }
 
+//----------------------
+
+static __always_inline int get_configure(__u32 *debug_level , __u32 *ipv4_enabled , __u32 *ipv6_enabled ) {
+    __u32 map_index ;
+    __u32 *ptr ;
+    char fmt[] = "elb cgroup: failed to get configure " ;
+
+    map_index = INDEX_DEBUG_LEVEL ;
+    ptr = bpf_map_lookup_elem(&debug_map, &map_index);
+    if !ptr  {
+         bpf_trace_printk(fmt, sizeof(fmt) );
+         return 1;
+    }
+    *debug_level = *ptr;
+
+    map_index=INDEX_ENABLE_IPV4;
+    ptr = bpf_map_lookup_elem(&debug_map, &map_index);
+    if !ptr  {
+         bpf_trace_printk(fmt, sizeof(fmt) );
+         return 1;
+    }
+    *ipv4_enabled = *ptr;
+
+    map_index=INDEX_ENABLE_IPV6;
+    ptr = bpf_map_lookup_elem(&debug_map, &map_index);
+    if !ptr  {
+         bpf_trace_printk(fmt, sizeof(fmt) );
+         return 1;
+    }
+    *ipv6_enabled = *ptr;
+
+    return 0;
+}
 
 //----------------------------------
 
@@ -376,6 +390,15 @@ SEC("cgroup/connect4")
 int sock4_connect(struct bpf_sock_addr *ctx) {
 	int err;
 
+    __u32 debug_level ;
+    __u32 ipv4_enabled ;
+    __u32 ipv6_enabled ;
+    if get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled) {
+        return SYS_PROCEED;
+    }
+    if ipv4_enabled == 0 {
+        return SYS_PROCEED;
+    }
 
     //debugf(DEBUG_VERSBOSE, "connect4: dst_ip=%pI4 dst_port=%d\n" ,&dst_ip, bpf_htons(dst_port) );
 
@@ -383,7 +406,7 @@ int sock4_connect(struct bpf_sock_addr *ctx) {
     //debugf(DEBUG_VERSBOSE, "connect4: src_ip=%pI4  \n" , ctx->msg_src_ip4  );
 
     // for tcp and udp
-	err = execute_nat(ctx);
+	err = execute_nat(ctx, debug_level );
 
 	return SYS_PROCEED;
 }
@@ -393,11 +416,20 @@ int sock4_sendmsg(struct bpf_sock_addr *ctx)
 {
 	int err;
 
+    __u32 debug_level ;
+    __u32 ipv4_enabled ;
+    __u32 ipv6_enabled ;
+    if get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled) {
+        return SYS_PROCEED;
+    }
+    if ipv4_enabled == 0 {
+        return SYS_PROCEED;
+    }
 
     //debugf(DEBUG_VERSBOSE , "sendmsg4: dst_ip=%pI4 dst_port=%d\n" ,&dst_ip, bpf_htons(dst_port) );
 
     // for UDP
-	err = execute_nat(ctx);
+	err = execute_nat(ctx, *debug_val_ptr , debug_level );
 
 	return SYS_PROCEED;
 }
@@ -408,6 +440,15 @@ int sock4_recvmsg(struct bpf_sock_addr *ctx)
 {
 	int err;
 
+    __u32 debug_level ;
+    __u32 ipv4_enabled ;
+    __u32 ipv6_enabled ;
+    if get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled) {
+        return SYS_PROCEED;
+    }
+    if ipv4_enabled == 0 {
+        return SYS_PROCEED;
+    }
 
     //debugf(DEBUG_VERSBOSE, "recvmsg4: dst_ip=%pI4 dst_port=%d\n" ,&dst_ip, bpf_htons(dst_port) );
 
@@ -419,6 +460,15 @@ int sock4_getpeername(struct bpf_sock_addr *ctx)
 {
 	int err;
 
+    __u32 debug_level ;
+    __u32 ipv4_enabled ;
+    __u32 ipv6_enabled ;
+    if get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled) {
+        return SYS_PROCEED;
+    }
+    if ipv4_enabled == 0 {
+        return SYS_PROCEED;
+    }
 
     //debugf(DEBUG_VERSBOSE , "getpeername4: dst_ip=%pI4 dst_port=%d\n" ,&dst_ip, bpf_htons(dst_port) );
 

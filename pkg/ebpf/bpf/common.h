@@ -64,7 +64,7 @@ enum debug_level {
 #else
 #define debugf(level, fmt, ...)                                     \
     ({                                                              \
-        if( level >= DEBUG_LEVEL ) {                                \
+        if( level >= debug_level ) {                                \
             if ( level == DEBUG_VERSBOSE ) {                         \
                 char ____fmt[] = "[verb] " fmt ;                  \
                 bpf_trace_printk(____fmt, sizeof(____fmt), ##__VA_ARGS__);  \
