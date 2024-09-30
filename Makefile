@@ -436,19 +436,6 @@ check_doc:
 	@ echo "all doc is ok "
 
 
-# ==============================
-
-.PHONY: validate_openapi_sdk
-validate_openapi_sdk:
-	tools/golang/goSwagger.sh validate $(OPENAPI_SDK_DIR)
-
-
-.PHONY: update_openapi_sdk
-update_openapi_sdk:
-	tools/golang/goSwagger.sh clean $(OPENAPI_SDK_DIR)
-	tools/golang/goSwagger.sh generate $(OPENAPI_SDK_DIR)
-
-
 #=================================
 
 

@@ -38,8 +38,8 @@ func NewServerCertKey(host string, alternateIPs []net.IP, alternateDNS []string)
 		return nil, nil, nil, err
 	}
 
-	CommonName := types.TlsCaCommonName
-	Organization := []string{types.TlsCaCommonName}
+	CommonName := types.OrgName
+	Organization := []string{types.OrgName}
 
 	tmpl := x509.Certificate{
 		SerialNumber: new(big.Int).SetInt64(0),
