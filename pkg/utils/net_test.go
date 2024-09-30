@@ -7,7 +7,7 @@ import (
 	"fmt"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/elf-io/elf/pkg/utils"
+	"github.com/elf-io/balancing/pkg/utils"
 	"net"
 )
 

@@ -32,7 +32,7 @@ spec:
       jsonPath: .spec.enabled
       name: enabled
       type: boolean
-    name: v1beta
+    name: v1beta1
     schema:
       openAPIV3Schema:
         description: adds a column to "kubectl get" output for this CRD https://github.com/kubernetes-sigs/controller-tools/blob/main/pkg/crd/markers/crd.go#L195

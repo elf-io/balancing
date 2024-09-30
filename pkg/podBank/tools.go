@@ -3,7 +3,7 @@ package podBank
 import (
 	"bufio"
 	"fmt"
-	"github.com/elf-io/elf/pkg/types"
+	"github.com/elf-io/balancing/pkg/types"
 	"os"
 	"path"
 	"regexp"

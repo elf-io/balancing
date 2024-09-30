@@ -18,4 +18,4 @@
 // +kubebuilder:rbac:groups="coordination.k8s.io",resources=leases,verbs=create;get;update
 // +kubebuilder:rbac:groups=admissionregistration.k8s.io,resources=mutatingwebhookconfigurations;validatingwebhookconfigurations,verbs=get;list;watch;create;update;patch;delete
 
-package v1beta
+package v1beta1

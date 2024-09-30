@@ -4,7 +4,7 @@
 package main
 
 import (
-	"github.com/elf-io/elf/cmd/agent/cmd"
+	"github.com/elf-io/balancing/cmd/agent/cmd"
 )
 
 func main() {

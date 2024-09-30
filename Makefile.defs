@@ -2,7 +2,7 @@
 GO_VERSION := 1.23.1
 
 REGISTER ?= ghcr.io
-GIT_REPO ?= elf-io/elf
+GIT_REPO ?= elf-io/balancing
 
 
 

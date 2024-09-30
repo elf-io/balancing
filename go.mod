@@ -1,4 +1,4 @@
-module github.com/elf-io/elf
+module github.com/elf-io/balancing
 
 go 1.23
 

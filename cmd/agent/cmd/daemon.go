@@ -4,8 +4,8 @@
 package cmd
 
 import (
-	"github.com/elf-io/elf/pkg/debug"
-	"github.com/elf-io/elf/pkg/types"
+	"github.com/elf-io/balancing/pkg/debug"
+	"github.com/elf-io/balancing/pkg/types"
 	"time"
 )
 

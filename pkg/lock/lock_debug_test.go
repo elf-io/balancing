@@ -7,7 +7,7 @@
 package lock_test
 
 import (
-	"github.com/elf-io/elf/pkg/lock"
+	"github.com/elf-io/balancing/pkg/lock"
 	. "github.com/onsi/ginkgo/v2"
 )
 

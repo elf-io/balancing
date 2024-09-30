@@ -5,7 +5,7 @@ package ebpfWriter
 
 import (
 	"fmt"
-	"github.com/elf-io/elf/pkg/k8s"
+	"github.com/elf-io/balancing/pkg/k8s"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	discovery "k8s.io/api/discovery/v1"

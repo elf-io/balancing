@@ -5,12 +5,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/elf-io/elf/pkg/ebpf"
-	"github.com/elf-io/elf/pkg/ebpfEvent"
-	"github.com/elf-io/elf/pkg/ebpfWriter"
-	"github.com/elf-io/elf/pkg/nodeId"
-	"github.com/elf-io/elf/pkg/podBank"
-	"github.com/elf-io/elf/pkg/types"
+	"github.com/elf-io/balancing/pkg/ebpf"
+	"github.com/elf-io/balancing/pkg/ebpfEvent"
+	"github.com/elf-io/balancing/pkg/ebpfWriter"
+	"github.com/elf-io/balancing/pkg/nodeId"
+	"github.com/elf-io/balancing/pkg/podBank"
+	"github.com/elf-io/balancing/pkg/types"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"

@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/elf-io/elf/pkg/ebpf"
+	"github.com/elf-io/balancing/pkg/ebpf"
 	"os"
 )
 

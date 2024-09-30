@@ -3,8 +3,8 @@ package nodeId
 import (
 	"context"
 	"fmt"
-	"github.com/elf-io/elf/pkg/lock"
-	"github.com/elf-io/elf/pkg/types"
+	"github.com/elf-io/balancing/pkg/lock"
+	"github.com/elf-io/balancing/pkg/types"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"

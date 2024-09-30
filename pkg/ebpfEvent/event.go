@@ -2,9 +2,9 @@ package ebpfEvent
 
 import (
 	"fmt"
-	"github.com/elf-io/elf/pkg/ebpf"
-	"github.com/elf-io/elf/pkg/podBank"
-	"github.com/elf-io/elf/pkg/types"
+	"github.com/elf-io/balancing/pkg/ebpf"
+	"github.com/elf-io/balancing/pkg/podBank"
+	"github.com/elf-io/balancing/pkg/types"
 	"go.uber.org/zap"
 	"time"
 )

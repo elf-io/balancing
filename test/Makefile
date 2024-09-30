@@ -78,7 +78,7 @@ install_proscope:
 
 #==================
 
-# this will auto tag github ci image : agent:xxx -> github.com/elf-io/elf/agent:xxx
+# this will auto tag github ci image : agent:xxx -> github.com/elf-io/balancing/agent:xxx
 .PHONY: check_images_ready
 check_images_ready:
 	echo "check image  " ; \

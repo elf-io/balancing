@@ -1,7 +1,7 @@
 // Copyright 2024 Authors of elf-io
 // SPDX-License-Identifier: Apache-2.0
 
-package v1beta
+package v1beta1
 
 import (
 	"k8s.io/apimachinery/pkg/runtime/schema"

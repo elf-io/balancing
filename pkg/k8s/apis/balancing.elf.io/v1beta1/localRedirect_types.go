@@ -9,7 +9,7 @@
 // https://github.com/kubernetes-sigs/controller-tools/blob/master/pkg/crd/markers/validation.go
 // https://book.kubebuilder.io/reference/markers/crd-validation.html
 
-package v1beta
+package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

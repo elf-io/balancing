@@ -1,7 +1,7 @@
 name: Lint CODEOWNERS checks
 
 env:
-  REPOSITY_NAME: github.com/elf-io/elf
+  REPOSITY_NAME: github.com/elf-io/balancing
 
 # Any change in triggers needs to be reflected in the concurrency group.
 on:

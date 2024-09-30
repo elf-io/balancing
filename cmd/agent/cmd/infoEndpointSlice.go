@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"github.com/google/go-cmp/cmp"
-	"github.com/elf-io/elf/pkg/ebpfWriter"
-	"github.com/elf-io/elf/pkg/k8s"
+	"github.com/elf-io/balancing/pkg/ebpfWriter"
+	"github.com/elf-io/balancing/pkg/k8s"
 	"go.uber.org/zap"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	kubeinformers "k8s.io/client-go/informers"

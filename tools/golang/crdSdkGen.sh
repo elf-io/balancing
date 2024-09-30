@@ -8,6 +8,7 @@
 set -o errexit
 set -o nounset
 set -o pipefail
+set -x
 
 # refer to https://github.com/kubernetes/sample-controller/blob/master/hack/update-codegen.sh
 
@@ -25,6 +26,19 @@ SPDX_COPYRIGHT_HEADER="${PROJECT_ROOT}/tools/copyright-header.txt"
 TMP_DIR="${PROJECT_ROOT}/output/codeGen"
 LICENSE_FILE="${TMP_DIR}/boilerplate.go.txt"
 GO_PATH_DIR="${TMP_DIR}/go"
+
+
+#check version
+(
+  cd ${PROJECT_ROOT}/${APIS_PKG}/*
+  VERSIONS=$(ls)
+  for NAME in ${VERSIONS}  ; do
+      if ! grep -E '^v[0-9]+((alpha|beta)[0-9]+)?$' <<< "${NAME}" &>/dev/null  ; then
+          echo "error, $NAME must comply with format '^v[0-9]+((alpha|beta)[0-9]+)?$' "
+          exit 1
+      fi
+  done
+)
 
 rm -rf ${TMP_DIR}
 mkdir -p ${TMP_DIR}

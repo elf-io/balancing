@@ -3,7 +3,7 @@ package ebpf
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/elf-io/elf/pkg/nodeId"
+	"github.com/elf-io/balancing/pkg/nodeId"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	discovery "k8s.io/api/discovery/v1"

@@ -4,8 +4,8 @@
 package cmd
 
 import (
-	"github.com/elf-io/elf/pkg/logger"
-	"github.com/elf-io/elf/pkg/types"
+	"github.com/elf-io/balancing/pkg/logger"
+	"github.com/elf-io/balancing/pkg/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"

@@ -4,7 +4,7 @@
 package cmd
 
 import (
-	"github.com/elf-io/elf/pkg/types"
+	"github.com/elf-io/balancing/pkg/types"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"os"

@@ -4,8 +4,8 @@
 package ebpfWriter
 
 import (
-	"github.com/elf-io/elf/pkg/ebpf"
-	"github.com/elf-io/elf/pkg/lock"
+	"github.com/elf-io/balancing/pkg/ebpf"
+	"github.com/elf-io/balancing/pkg/lock"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	discovery "k8s.io/api/discovery/v1"

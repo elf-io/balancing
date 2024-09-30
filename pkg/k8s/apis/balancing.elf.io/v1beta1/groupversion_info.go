@@ -4,10 +4,10 @@
 // +kubebuilder:object:generate=true
 // +groupName=balancing.elf.io
 
-package v1beta
+package v1beta1
 
 import (
-	"github.com/elf-io/elf/pkg/types"
+	"github.com/elf-io/balancing/pkg/types"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )

@@ -4,7 +4,7 @@
 package main
 
 import (
-	"github.com/elf-io/elf/cmd/inspect/cmd"
+	"github.com/elf-io/balancing/cmd/inspect/cmd"
 )
 
 func main() {

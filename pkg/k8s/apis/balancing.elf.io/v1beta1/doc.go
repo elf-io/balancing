@@ -2,4 +2,4 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // +groupName=balancing.elf.io
-package v1beta
+package v1beta1

@@ -3,7 +3,7 @@
 package main
 
 import (
-	"github.com/elf-io/elf/cmd/controller/cmd"
+	"github.com/elf-io/balancing/cmd/controller/cmd"
 )
 
 func main() {

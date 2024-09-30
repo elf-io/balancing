@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"github.com/google/go-cmp/cmp"
-	"github.com/elf-io/elf/pkg/ebpfWriter"
-	"github.com/elf-io/elf/pkg/nodeId"
-	"github.com/elf-io/elf/pkg/types"
+	"github.com/elf-io/balancing/pkg/ebpfWriter"
+	"github.com/elf-io/balancing/pkg/nodeId"
+	"github.com/elf-io/balancing/pkg/types"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	kubeinformers "k8s.io/client-go/informers"

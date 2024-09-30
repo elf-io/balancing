@@ -1,7 +1,7 @@
 package podBank
 
 import (
-	"github.com/elf-io/elf/pkg/lock"
+	"github.com/elf-io/balancing/pkg/lock"
 )
 
 // PodName 封装 Podname 和 Namespace

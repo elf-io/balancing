@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/binary"
 	"fmt"
-	"github.com/elf-io/elf/pkg/types"
+	"github.com/elf-io/balancing/pkg/types"
 	"golang.org/x/sys/unix"
 	corev1 "k8s.io/api/core/v1"
 	discovery "k8s.io/api/discovery/v1"

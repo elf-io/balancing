@@ -11,7 +11,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
-	"github.com/elf-io/elf/pkg/types"
+	"github.com/elf-io/balancing/pkg/types"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/util/cert"
 	"k8s.io/client-go/util/keyutil"
