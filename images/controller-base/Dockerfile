@@ -3,7 +3,7 @@
 # Copyright 2024 Authors of elf-io
 # SPDX-License-Identifier: Apache-2.0
 
-ARG GOLANG_IMAGE=docker.io/library/golang:1.21.7
+ARG GOLANG_IMAGE=docker.io/library/golang:1.23.1
 ARG UBUNTU_IMAGE=docker.io/library/ubuntu:24.04
 
 #========= build gops ===============
