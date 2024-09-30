@@ -1,0 +1,53 @@
+{{- if .Values.elfAgent.prometheus.prometheusRule.install -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Values.elfAgent.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ default .Release.Namespace .Values.elfAgent.prometheus.prometheusRule.namespace }}
+  labels:
+    {{- include "project.elfAgent.labels" . | nindent 4 }}
+    {{- if .Values.global.commonLabels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.elfAgent.prometheus.prometheusRule.labels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.prometheus.prometheusRule.labels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.global.commonAnnotations .Values.elfAgent.prometheus.prometheusRule.annotations }}
+  annotations:
+    {{- if .Values.global.commonAnnotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.elfAgent.prometheus.prometheusRule.annotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.prometheus.prometheusRule.annotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  groups: []
+{{- end }}
+---
+{{- if .Values.elfController.prometheus.prometheusRule.install -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ default .Release.Namespace .Values.elfController.prometheus.prometheusRule.namespace }}
+  labels:
+    {{- include "project.elfController.labels" . | nindent 4 }}
+    {{- if .Values.global.commonLabels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.elfController.prometheus.prometheusRule.labels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.elfController.prometheus.prometheusRule.labels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.global.commonAnnotations .Values.elfController.prometheus.prometheusRule.annotations }}
+  annotations:
+    {{- if .Values.global.commonAnnotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.elfController.prometheus.prometheusRule.annotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.elfController.prometheus.prometheusRule.annotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  groups: []
+{{- end }}

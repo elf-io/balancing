@@ -1,0 +1,186 @@
+apiVersion: {{ include "capabilities.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "project.elfController.labels" . | nindent 4 }}
+      {{- if .Values.global.commonLabels }}
+      {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
+      {{- end }}
+  {{- if .Values.global.commonAnnotations }}
+  annotations:
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.elfController.replicas }}
+  selector:
+    matchLabels:
+      {{- include "project.elfController.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- if or .Values.elfController.podAnnotations .Values.global.commonAnnotations }}
+      annotations:
+        {{- if .Values.global.commonAnnotations }}
+        {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.elfController.podAnnotations }}
+        {{- include "tplvalues.render" ( dict "value" .Values.elfController.podAnnotations "context" $ ) | nindent 8 }}
+        {{- end }}
+        {{- end }}
+      labels:
+        {{- include "project.elfController.selectorLabels" . | nindent 8 }}
+        {{- if .Values.global.commonLabels }}
+        {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.elfController.podLabels }}
+        {{- include "tplvalues.render" ( dict "value" .Values.elfController.podLabels "context" $ ) | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if .Values.elfController.image.imagePullSecrets }}
+      imagePullSecrets:
+      {{- with .Values.elfController.image.imagePullSecrets }}
+      {{- toYaml . | trim | nindent 6 }}
+      {{- end }}
+      {{- end }}
+      serviceAccountName: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
+      priorityClassName: {{ default "system-node-critical" .Values.elfController.priorityClassName }}
+      {{- if .Values.elfController.hostnetwork }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- else }}
+      hostNetwork: false
+      dnsPolicy: ClusterFirst
+      {{- end }}
+      restartPolicy: Always
+      {{- with .Values.elfController.tolerations }}
+      tolerations:
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with .Values.elfController.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.elfController.affinity }}
+      affinity:
+      {{- include "tplvalues.render" (dict "value" .Values.elfController.affinity "context" $) | nindent 6 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
+          image: {{ include "project.elfController.image" . | quote }}
+          imagePullPolicy: {{ .Values.elfController.image.pullPolicy }}
+          command:
+            - {{ .Values.elfController.cmdBinName }}
+          args:
+            - --config-path=/tmp/config-map/conf.yml
+            - --tls-ca-cert=/etc/tls/ca.crt
+            - --tls-server-cert=/etc/tls/tls.crt
+            - --tls-server-key=/etc/tls/tls.key
+          {{- with .Values.elfController.extraArgs }}
+          {{- toYaml . | trim | nindent 8 }}
+          {{- end }}
+          ports:
+          {{- if .Values.elfController.prometheus.enabled }}
+          - name: metrics
+            containerPort: {{ .Values.elfController.prometheus.port }}
+            protocol: TCP
+          {{- end }}
+          - name: http
+            containerPort: {{ .Values.elfController.httpServer.port }}
+            protocol: TCP
+          - name: webhook
+            containerPort: {{ .Values.elfController.webhookPort }}
+            protocol: TCP
+          {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.Version }}
+          startupProbe:
+            httpGet:
+              path: /healthy/startup
+              port: {{ .Values.elfController.httpServer.port }}
+              scheme: HTTP
+            failureThreshold: {{ .Values.elfController.httpServer.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.elfController.httpServer.startupProbe.periodSeconds }}
+            successThreshold: 1
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthy/liveness
+              port: {{ .Values.elfController.httpServer.port }}
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: {{ .Values.elfController.httpServer.livenessProbe.periodSeconds }}
+            successThreshold: 1
+            failureThreshold: {{ .Values.elfController.httpServer.livenessProbe.failureThreshold }}
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthy/readiness
+              port: {{ .Values.elfController.httpServer.port }}
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: {{ .Values.elfController.httpServer.readinessProbe.periodSeconds }}
+            successThreshold: 1
+            failureThreshold: {{ .Values.elfController.httpServer.readinessProbe.failureThreshold }}
+            timeoutSeconds: 5
+          {{- with .Values.elfController.resources }}
+          resources:
+          {{- toYaml . | trim | nindent 12 }}
+          {{- end }}
+          env:
+            - name: ENV_LOG_LEVEL
+              value: {{ .Values.elfController.debug.logLevel | quote }}
+            - name: ENV_ENABLED_METRIC
+              value: {{ .Values.elfController.prometheus.enabled | quote }}
+            - name: ENV_METRIC_HTTP_PORT
+              value: {{ .Values.elfController.prometheus.port | quote }}
+            - name: ENV_GOPS_LISTEN_PORT
+              value: {{ .Values.elfController.debug.gopsPort | quote }}
+            - name: ENV_WEBHOOK_PORT
+              value: {{ .Values.elfController.webhookPort | quote }}
+            - name: ENV_HTTP_PORT
+              value: {{ .Values.elfController.httpServer.port | quote }}
+            - name: ENV_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ENV_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- with .Values.elfController.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.elfController.securityContext }}
+          securityContext:
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+          volumeMounts:
+            - name: config-path
+              mountPath: /tmp/config-map
+              readOnly: true
+            - name: tls
+              mountPath: /etc/tls
+              readOnly: true
+            {{- if .Values.elfController.extraVolumes }}
+            {{- include "tplvalues.render" ( dict "value" .Values.elfController.extraVolumeMounts "context" $ ) | nindent 12 }}
+            {{- end }}
+      volumes:
+        # To read the configuration from the config map
+        - name: config-path
+          configMap:
+            name: {{ .Values.global.configName }}
+        - name: tls
+          projected:
+            defaultMode: 0400
+            sources:
+              - secret:
+                  name: {{ .Values.elfController.tls.secretName | trunc 63 | trimSuffix "-" }}
+                  items:
+                    - key: tls.crt
+                      path: tls.crt
+                    - key: tls.key
+                      path: tls.key
+                    - key: ca.crt
+                      path: ca.crt
+      {{- if .Values.elfController.extraVolumeMounts }}
+      {{- include "tplvalues.render" ( dict "value" .Values.elfController.extraVolumeMounts "context" $ ) | nindent 6 }}
+      {{- end }}

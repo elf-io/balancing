@@ -1,0 +1,179 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name:  {{ .Values.elfAgent.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "project.elfAgent.labels" . | nindent 4 }}
+    {{- if .Values.global.commonLabels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.global.commonAnnotations }}
+  annotations:
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "project.elfAgent.selectorLabels" . | nindent 6 }}
+  {{- with .Values.elfAgent.updateStrategy }}
+  updateStrategy:
+    {{- toYaml . | trim | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      {{- if or .Values.elfAgent.podAnnotations .Values.global.commonAnnotations }}
+      annotations:
+        {{- if .Values.global.commonAnnotations }}
+        {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.elfAgent.podAnnotations }}
+        {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.podAnnotations "context" $ ) | nindent 8 }}
+        {{- end }}
+        {{- end }}
+      labels:
+        {{- include "project.elfAgent.selectorLabels" . | nindent 8 }}
+        {{- if .Values.global.commonLabels }}
+        {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.elfAgent.podLabels }}
+        {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.podLabels "context" $ ) | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if .Values.elfAgent.image.imagePullSecrets }}
+      imagePullSecrets:
+      {{- with .Values.elfAgent.image.imagePullSecrets }}
+      {{- toYaml . | trim | nindent 6 }}
+      {{- end }}
+      {{- end }}
+      serviceAccountName: {{ .Values.elfAgent.name | trunc 63 | trimSuffix "-" }}
+      priorityClassName: {{ default "system-node-critical" .Values.elfAgent.priorityClassName }}
+      {{- if .Values.elfAgent.hostnetwork }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- else }}
+      hostNetwork: false
+      dnsPolicy: ClusterFirst
+      {{- end }}
+      restartPolicy: Always
+      {{- with .Values.elfAgent.tolerations }}
+      tolerations:
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with .Values.elfAgent.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.elfAgent.affinity }}
+      affinity:
+      {{- include "tplvalues.render" (dict "value" .Values.elfAgent.affinity "context" $) | nindent 6 }}
+      {{- else }}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux
+              # Compatible with Kubernetes 1.12.x and 1.13.x
+              - matchExpressions:
+                  - key: beta.kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux
+      {{- end }}
+      containers:
+        - name: {{ .Values.elfAgent.name | trunc 63 | trimSuffix "-" }}
+          image: {{ include "project.elfAgent.image" . | quote }}
+          imagePullPolicy: {{ .Values.elfAgent.image.pullPolicy }}
+          command:
+            - {{ .Values.elfAgent.cmdBinName }}
+          args:
+            - --config-path=/tmp/config-map/conf.yml
+          {{- with .Values.elfAgent.extraArgs }}
+          {{- toYaml . | trim | nindent 8 }}
+          {{- end }}
+          {{- if .Values.elfAgent.prometheus.enabled }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.elfAgent.prometheus.port }}
+              protocol: TCP
+          {{- end }}
+          {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.Version }}
+          startupProbe:
+            httpGet:
+              path: /healthy/startup
+              port: {{ .Values.elfAgent.httpServer.port }}
+              scheme: HTTP
+            failureThreshold: {{ .Values.elfAgent.httpServer.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.elfAgent.httpServer.startupProbe.periodSeconds }}
+            successThreshold: 1
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthy/liveness
+              port: {{ .Values.elfAgent.httpServer.port }}
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: {{ .Values.elfAgent.httpServer.livenessProbe.periodSeconds }}
+            successThreshold: 1
+            failureThreshold: {{ .Values.elfAgent.httpServer.livenessProbe.failureThreshold }}
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthy/readiness
+              port: {{ .Values.elfAgent.httpServer.port }}
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: {{ .Values.elfAgent.httpServer.readinessProbe.periodSeconds }}
+            successThreshold: 1
+            failureThreshold: {{ .Values.elfAgent.httpServer.readinessProbe.failureThreshold }}
+            timeoutSeconds: 5
+          {{- with .Values.elfAgent.resources }}
+          resources:
+          {{- toYaml . | trim | nindent 12 }}
+          {{- end }}
+          env:
+            - name: ENV_LOG_LEVEL
+              value: {{ .Values.elfAgent.debug.logLevel | quote }}
+            - name: ENV_ENABLED_METRIC
+              value: {{ .Values.elfAgent.prometheus.enabled | quote }}
+            - name: ENV_METRIC_HTTP_PORT
+              value: {{ .Values.elfAgent.prometheus.port | quote }}
+            - name: ENV_HTTP_PORT
+              value: {{ .Values.elfAgent.httpServer.port | quote }}
+            - name: ENV_GOPS_LISTEN_PORT
+              value: {{ .Values.elfAgent.debug.gopsPort | quote }}
+            - name: ENV_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ENV_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- with .Values.elfAgent.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.elfAgent.securityContext }}
+          securityContext:
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+          volumeMounts:
+            - name: config-path
+              mountPath: /tmp/config-map
+              readOnly: true
+            {{- if .Values.elfAgent.extraVolumes }}
+            {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.extraVolumeMounts "context" $ ) | nindent 12 }}
+            {{- end }}
+      volumes:
+        # To read the configuration from the config map
+        - name: config-path
+          configMap:
+            defaultMode: 0400
+            name: {{ .Values.global.configName }}
+      {{- if .Values.elfAgent.extraVolumeMounts }}
+      {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.extraVolumeMounts "context" $ ) | nindent 6 }}
+      {{- end }}

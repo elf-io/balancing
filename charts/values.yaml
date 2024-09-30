@@ -1,0 +1,446 @@
+
+## @section Global parameters
+##
+global:
+  ## @param global.imageRegistryOverride Global Docker image registry
+  imageRegistryOverride: ""
+
+  ## @param global.imageTagOverride Global Docker image tag
+  imageTagOverride: ""
+
+  ## @param global.name instance name
+  ## default elf
+  name: "elf"
+
+  ## @param global.clusterDnsDomain cluster dns domain
+  clusterDnsDomain: "cluster.local"
+
+  ## @param global.commonAnnotations Annotations to add to all deployed objects
+  commonAnnotations: {}
+
+  ## @param global.commonLabels Labels to add to all deployed objects
+  commonLabels: {}
+  #  label1: v1
+  #  labele: v2
+
+  ## @param global.configName the configmap name
+  configName: "elf"
+
+## @section feature parameters
+feature:
+  ## @param feature.enableIPv4 enable ipv4
+  enableIPv4: true
+
+  ## @param feature.enableIPv6 enable ipv6
+  enableIPv6: false
+
+## @section elfAgent parameters
+##
+elfAgent:
+  ## @param elfAgent.name the elfAgent name
+  name: "elf-agent"
+
+  ## @param elfAgent.cmdBinName the binary name of elfAgent
+  cmdBinName: "/usr/bin/agent"
+
+  ## @param elfAgent.hostnetwork enable hostnetwork mode of elfAgent pod
+  hostnetwork: true
+
+  image:
+    ## @param elfAgent.image.registry the image registry of elfAgent
+    registry: ghcr.io
+
+    ## @param elfAgent.image.repository the image repository of elfAgent
+    repository: elf-io/elf-agent
+
+    ## @param elfAgent.image.pullPolicy the image pullPolicy of elfAgent
+    pullPolicy: IfNotPresent
+
+    ## @param elfAgent.image.digest the image digest of elfAgent, which takes preference over tag
+    digest: ""
+
+    ## @param elfAgent.image.tag the image tag of elfAgent, overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+    ## @param elfAgent.image.imagePullSecrets the image imagePullSecrets of elfAgent
+    imagePullSecrets: []
+    # - name: "image-pull-secret"
+
+  ## @skip elfAgent.nodeSelector.kubernetes.io/os
+  nodeSelector:
+    kubernetes.io/os: linux
+
+  serviceAccount:
+    ## @param elfAgent.serviceAccount.create create the service account for the elfAgent
+    create: true
+    ## @param elfAgent.serviceAccount.annotations the annotations of elfAgent service account
+    annotations: {}
+
+  ## @skip elfAgent.updateStrategy.rollingUpdate.maxUnavailable
+  ## @skip elfAgent.updateStrategy.type
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 2
+    type: RollingUpdate
+
+  service:
+    ## @param elfAgent.service.annotations the annotations for elfAgent service
+    annotations: {}
+    ## @param elfAgent.service.type the type for elfAgent service
+    type: ClusterIP
+
+  ## @skip elfAgent.tolerations
+  tolerations:
+    - operator: Exists
+
+  ## @param elfAgent.priorityClassName the priority Class Name for elfAgent
+  priorityClassName: "system-node-critical"
+
+  ## @param elfAgent.affinity the affinity of elfAgent
+  affinity: {}
+
+  ## @param elfAgent.extraArgs the additional arguments of elfAgent container
+  extraArgs: []
+
+  ## @param elfAgent.extraEnv the additional environment variables of elfAgent container
+  extraEnv: []
+
+  ## @param elfAgent.extraVolumes the additional volumes of elfAgent container
+  extraVolumes: []
+
+  ## @param elfAgent.extraVolumeMounts the additional hostPath mounts of elfAgent container
+  extraVolumeMounts: []
+
+  ## @param elfAgent.podAnnotations the additional annotations of elfAgent pod
+  podAnnotations: {}
+
+  ## @param elfAgent.podLabels the additional label of elfAgent pod
+  podLabels: {}
+
+  resources:
+    ## @param elfAgent.resources.limits.cpu the cpu limit of elfAgent pod
+    ## @param elfAgent.resources.limits.memory the memory limit of elfAgent pod
+    ## @param elfAgent.resources.requests.cpu the cpu requests of elfAgent pod
+    ## @param elfAgent.resources.requests.memory the memory requests of elfAgent pod
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  ## @param elfAgent.securityContext the security Context of elfAgent pod
+  securityContext: {}
+  # runAsUser: 0
+
+  httpServer:
+    ## @param elfAgent.httpServer.port the http Port for elfAgent, for health checking
+    port: 5710
+
+    startupProbe:
+      ## @param elfAgent.httpServer.startupProbe.failureThreshold the failure threshold of startup probe for elfAgent health checking
+      failureThreshold: 60
+      ## @param elfAgent.httpServer.startupProbe.periodSeconds the period seconds of startup probe for elfAgent health checking
+      periodSeconds: 2
+
+    livenessProbe:
+      ## @param elfAgent.httpServer.livenessProbe.failureThreshold the failure threshold of startup probe for elfAgent health checking
+      failureThreshold: 6
+      ## @param elfAgent.httpServer.livenessProbe.periodSeconds the period seconds of startup probe for elfAgent health checking
+      periodSeconds: 10
+
+    readinessProbe:
+      ## @param elfAgent.httpServer.readinessProbe.failureThreshold the failure threshold of startup probe for elfAgent health checking
+      failureThreshold: 3
+      ## @param elfAgent.httpServer.readinessProbe.periodSeconds the period seconds of startup probe for elfAgent health checking
+      periodSeconds: 10
+
+  prometheus:
+    ## @param elfAgent.prometheus.enabled enable template agent to collect metrics
+    enabled: false
+
+    ## @param elfAgent.prometheus.port the metrics port of template agent
+    port: 5711
+
+    serviceMonitor:
+      ## @param elfAgent.prometheus.serviceMonitor.install install serviceMonitor for template agent. This requires the prometheus CRDs to be available
+      install: false
+
+      ## @param elfAgent.prometheus.serviceMonitor.namespace the serviceMonitor namespace. Default to the namespace of helm instance
+      namespace: ""
+
+      ## @param elfAgent.prometheus.serviceMonitor.annotations the additional annotations of elfAgent serviceMonitor
+      annotations: {}
+
+      ## @param elfAgent.prometheus.serviceMonitor.labels the additional label of elfAgent serviceMonitor
+      labels: {}
+
+    prometheusRule:
+      ## @param elfAgent.prometheus.prometheusRule.install install prometheusRule for template agent. This requires the prometheus CRDs to be available
+      install: false
+
+      ## @param elfAgent.prometheus.prometheusRule.namespace the prometheusRule namespace. Default to the namespace of helm instance
+      namespace: ""
+
+      ## @param elfAgent.prometheus.prometheusRule.annotations the additional annotations of elfAgent prometheusRule
+      annotations: {}
+
+      ## @param elfAgent.prometheus.prometheusRule.labels the additional label of elfAgent prometheusRule
+      labels: {}
+
+    grafanaDashboard:
+      ## @param elfAgent.prometheus.grafanaDashboard.install install grafanaDashboard for template agent. This requires the prometheus CRDs to be available
+      install: false
+
+      ## @param elfAgent.prometheus.grafanaDashboard.namespace the grafanaDashboard namespace. Default to the namespace of helm instance
+      namespace: ""
+
+      ## @param elfAgent.prometheus.grafanaDashboard.annotations the additional annotations of elfAgent grafanaDashboard
+      annotations: {}
+
+      ## @param elfAgent.prometheus.grafanaDashboard.labels the additional label of elfAgent grafanaDashboard
+      labels: {}
+
+  debug:
+    ## @param elfAgent.debug.logLevel the log level of template agent [debug, info, warn, error, fatal, panic]
+    logLevel: "info"
+    ## @param elfAgent.debug.gopsPort the gops port of template agent
+    gopsPort: 5712
+
+## @section elfController parameters
+##
+elfController:
+  ## @param elfController.name the elfController name
+  name: "elf-controller"
+
+  ## @param elfController.replicas the replicas number of elfController pod
+  replicas: 1
+
+  ## @param elfController.binName the binName name of elfController
+  cmdBinName: "/usr/bin/controller"
+
+  ## @param elfController.hostnetwork enable hostnetwork mode of elfController pod. Notice, if no CNI available before template installation, must enable this
+  hostnetwork: false
+
+  image:
+    ## @param elfController.image.registry the image registry of elfController
+    registry: ghcr.io
+
+    ## @param elfController.image.repository the image repository of elfController
+    repository: elf-io/elf-controller
+
+    ## @param elfController.image.pullPolicy the image pullPolicy of elfController
+    pullPolicy: IfNotPresent
+
+    ## @param elfController.image.digest the image digest of elfController, which takes preference over tag
+    digest: ""
+
+    ## @param elfController.image.tag the image tag of elfController, overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+    ## @param elfController.image.imagePullSecrets the image imagePullSecrets of elfController
+    imagePullSecrets: []
+    # - name: "image-pull-secret"
+
+  ## @skip elfController.nodeSelector.kubernetes.io/os
+  nodeSelector:
+    kubernetes.io/os: linux
+
+  serviceAccount:
+    ## @param elfController.serviceAccount.create create the service account for the elfController
+    create: true
+    ## @param elfController.serviceAccount.annotations the annotations of elfController service account
+    annotations: {}
+
+  service:
+    ## @param elfController.service.annotations the annotations for elfController service
+    annotations: {}
+    ## @param elfController.service.type the type for elfController service
+    type: ClusterIP
+
+  ## @skip elfController.tolerations
+  tolerations:
+    - operator: Exists
+
+  ## @param elfController.priorityClassName the priority Class Name for elfController
+  priorityClassName: "system-node-critical"
+
+  ## @param elfController.affinity the affinity of elfController
+  affinity: {}
+
+  ## @param elfController.extraArgs the additional arguments of elfController container
+  extraArgs: []
+
+  ## @param elfController.extraEnv the additional environment variables of elfController container
+  extraEnv: []
+
+  ## @param elfController.extraVolumes the additional volumes of elfController container
+  extraVolumes: []
+    # - name: test-val
+  #   mountPath: /host/tmp
+
+  ## @param elfController.extraVolumeMounts the additional hostPath mounts of elfController container
+  extraVolumeMounts: []
+    # - name: test-val
+  #   mountPath: /tmp
+
+  ## @param elfController.podAnnotations the additional annotations of elfController pod
+  podAnnotations: {}
+  # test: 100
+
+  ## @param elfController.podLabels the additional label of elfController pod
+  podLabels: {}
+
+  ## @param elfController.securityContext the security Context of elfController pod
+  securityContext: {}
+  # runAsUser: 0
+
+  resources:
+    ## @param elfController.resources.limits.cpu the cpu limit of elfController pod
+    ## @param elfController.resources.limits.memory the memory limit of elfController pod
+    ## @param elfController.resources.requests.cpu the cpu requests of elfController pod
+    ## @param elfController.resources.requests.memory the memory requests of elfController pod
+    limits:
+      cpu: 500m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  podDisruptionBudget:
+    ## @param elfController.podDisruptionBudget.enabled enable podDisruptionBudget for elfController pod
+    enabled: false
+
+    ## @param elfController.podDisruptionBudget.minAvailable minimum number/percentage of pods that should remain scheduled.
+    minAvailable: 1
+
+  httpServer:
+    ## @param elfController.port the http Port for elfController, for health checking and http service
+    port: 5720
+
+    startupProbe:
+      ## @param elfController.httpServer.startupProbe.failureThreshold the failure threshold of startup probe for elfController health checking
+      failureThreshold: 30
+
+      ## @param elfController.httpServer.startupProbe.periodSeconds the period seconds of startup probe for elfController health checking
+      periodSeconds: 2
+
+    livenessProbe:
+      ## @param elfController.httpServer.livenessProbe.failureThreshold the failure threshold of startup probe for elfController health checking
+      failureThreshold: 6
+
+      ## @param elfController.httpServer.livenessProbe.periodSeconds the period seconds of startup probe for elfController health checking
+      periodSeconds: 10
+
+    readinessProbe:
+      ## @param elfController.httpServer.readinessProbe.failureThreshold the failure threshold of startup probe for elfController health checking
+      failureThreshold: 3
+
+      ## @param elfController.httpServer.readinessProbe.periodSeconds the period seconds of startup probe for elfController health checking
+      periodSeconds: 10
+
+  ## @param elfController.webhookPort the http port for elfController webhook
+  webhookPort: 5722
+
+  prometheus:
+    ## @param elfController.prometheus.enabled enable template Controller to collect metrics
+    enabled: false
+
+    ## @param elfController.prometheus.port the metrics port of template Controller
+    port: 5721
+
+    serviceMonitor:
+      ## @param elfController.prometheus.serviceMonitor.install install serviceMonitor for template agent. This requires the prometheus CRDs to be available
+      install: false
+
+      ## @param elfController.prometheus.serviceMonitor.namespace the serviceMonitor namespace. Default to the namespace of helm instance
+      namespace: ""
+
+      ## @param elfController.prometheus.serviceMonitor.annotations the additional annotations of elfController serviceMonitor
+      annotations: {}
+
+      ## @param elfController.prometheus.serviceMonitor.labels the additional label of elfController serviceMonitor
+      labels: {}
+
+    prometheusRule:
+      ## @param elfController.prometheus.prometheusRule.install install prometheusRule for template agent. This requires the prometheus CRDs to be available
+      install: false
+
+      ## @param elfController.prometheus.prometheusRule.namespace the prometheusRule namespace. Default to the namespace of helm instance
+      namespace: ""
+
+      ## @param elfController.prometheus.prometheusRule.annotations the additional annotations of elfController prometheusRule
+      annotations: {}
+
+      ## @param elfController.prometheus.prometheusRule.labels the additional label of elfController prometheusRule
+      labels: {}
+
+    grafanaDashboard:
+      ## @param elfController.prometheus.grafanaDashboard.install install grafanaDashboard for template agent. This requires the prometheus CRDs to be available
+      install: false
+
+      ## @param elfController.prometheus.grafanaDashboard.namespace the grafanaDashboard namespace. Default to the namespace of helm instance
+      namespace: ""
+
+      ## @param elfController.prometheus.grafanaDashboard.annotations the additional annotations of elfController grafanaDashboard
+      annotations: {}
+
+      ## @param elfController.prometheus.grafanaDashboard.labels the additional label of elfController grafanaDashboard
+      labels: {}
+
+  debug:
+    ## @param elfController.debug.logLevel the log level of template Controller [debug, info, warn, error, fatal, panic]
+    logLevel: "info"
+
+    ## @param elfController.debug.gopsPort the gops port of template Controller
+    gopsPort: 5724
+
+  ## TLS configuration for webhook
+  tls:
+    ## @param elfController.tls.method the method for generating TLS certificates. [ provided , certmanager , auto]
+    ## - provided:     provide all certificates by helm options
+    ## - certmanager:  This method use cert-manager to generate & rotate certificates.
+    ## - auto:         Auto generate cert.
+    method: auto
+
+    ## @param elfController.tls.secretName the secret name for storing TLS certificates
+    secretName: "template-controller-server-certs"
+
+    ## for certmanager method
+    certmanager:
+      ## @param elfController.tls.certmanager.certValidityDuration generated certificates validity duration in days for 'certmanager' method
+      certValidityDuration: 365
+
+      ## @param elfController.tls.certmanager.issuerName issuer name of cert manager 'certmanager'. If not specified, a CA issuer will be created.
+      issuerName: ""
+
+      ## @param elfController.tls.certmanager.extraDnsNames extra DNS names added to certificate when it's auto generated
+      extraDnsNames: []
+
+      ## @param elfController.tls.certmanager.extraIPAddresses extra IP addresses added to certificate when it's auto generated
+      extraIPAddresses: []
+
+    ## for provided method
+    provided:
+      ## @param elfController.tls.provided.tlsCert encoded tls certificate for provided method
+      ## @param elfController.tls.provided.tlsKey encoded tls key for provided method
+      ## @param elfController.tls.provided.tlsCa encoded tls CA for provided method
+      tlsCert: ""
+      tlsKey: ""
+      tlsCa: ""
+
+    ## for auto method
+    auto:
+      ## @param elfController.tls.auto.caExpiration ca expiration for auto method
+      # in day , default 200 years
+      caExpiration: '73000'
+
+      ## @param elfController.tls.auto.certExpiration server cert expiration for auto method
+      # in day, default 200 years
+      certExpiration: '73000'
+
+      ## @param elfController.tls.auto.extraIpAddresses extra IP addresses of server certificate for auto method
+      extraIpAddresses: []
+
+      ## @param elfController.tls.auto.extraDnsNames extra DNS names of server cert for auto method
+      extraDnsNames: []

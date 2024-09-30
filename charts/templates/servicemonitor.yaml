@@ -1,0 +1,83 @@
+{{- if .Values.elfAgent.prometheus.serviceMonitor.install -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Values.elfAgent.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ default .Release.Namespace .Values.elfAgent.prometheus.serviceMonitor.namespace }}
+  labels:
+    {{- include "project.elfAgent.labels" . | nindent 4 }}
+    {{- if .Values.global.commonLabels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.elfAgent.prometheus.serviceMonitor.labels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.prometheus.serviceMonitor.labels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.global.commonAnnotations .Values.elfAgent.prometheus.serviceMonitor.annotations }}
+  annotations:
+    {{- if .Values.global.commonAnnotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.elfAgent.prometheus.serviceMonitor.annotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.prometheus.serviceMonitor.annotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  endpoints:
+    - interval: 30s
+      path: /metrics
+      port: metrics
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace | quote }}
+  selector:
+    matchLabels:
+      {{- include "project.elfAgent.selectorLabels" . | nindent 6 }}
+      {{- if .Values.global.commonLabels }}
+      {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 6 }}
+      {{- end }}
+      {{- if .Values.elfAgent.podLabels }}
+      {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.podLabels "context" $ ) | nindent 6 }}
+      {{- end }}
+  {{- end }}
+---
+{{- if .Values.elfController.prometheus.serviceMonitor.install -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ default .Release.Namespace .Values.elfController.prometheus.serviceMonitor.namespace }}
+  labels:
+    {{- include "project.elfController.labels" . | nindent 4 }}
+    {{- if .Values.global.commonLabels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.elfController.prometheus.serviceMonitor.labels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.elfController.prometheus.serviceMonitor.labels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.global.commonAnnotations .Values.elfController.prometheus.serviceMonitor.annotations }}
+  annotations:
+    {{- if .Values.global.commonAnnotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.elfController.prometheus.serviceMonitor.annotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.elfController.prometheus.serviceMonitor.annotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  endpoints:
+    - interval: 30s
+      path: /metrics
+      port: metrics
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace | quote }}
+  selector:
+    matchLabels:
+      {{- include "project.elfController.selectorLabels" . | nindent 6 }}
+      {{- if .Values.global.commonLabels }}
+      {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 6 }}
+      {{- end }}
+      {{- if .Values.elfController.podLabels }}
+      {{- include "tplvalues.render" ( dict "value" .Values.elfController.podLabels "context" $ ) | nindent 6 }}
+      {{- end }}
+{{- end }}

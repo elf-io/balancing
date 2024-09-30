@@ -1,0 +1,217 @@
+name: Auto CherryPick PR
+
+permissions: write-all
+
+env:
+  PR_LABEL_PREFIX_CHERRYPICK: "cherrypick-"
+  CHERRYPICK_LABEL: "robot-cherrypick"
+  DEFAULT_REVIEWER: "weizhoublue"
+
+on:
+  push:
+    branches:
+      - 'release-*'
+      - 'main'
+  workflow_dispatch:
+    inputs:
+      prNumber:
+        description: 'pr number'
+        required: true
+      destBranch:
+        description: 'dest branch, if empty, follow the pr label'
+        required: false
+
+jobs:
+  cherry_pick:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+      - name: cherry pick
+        env:
+          GITHUB_TOKEN: ${{ secrets.WELAN_PAT }}
+          JSON: ${{ toJSON(github) }}
+        run: |
+          set -x
+          echo "============ print var ======== "
+          if ${{ github.event_name == 'workflow_dispatch' }}; then
+                PR_NUMBER=${{ github.event.inputs.prNumber }}
+          else
+                grep -Eio "Merge pull request #[0-9]+ " <<< "${JSON}" || true
+                echo "try to get PR from commit"
+                COMMIT=` echo "${JSON}" | jq '.event.commits[0].id' | tr -d '"' ` || true
+                if [ -n "${COMMIT}" ]; then
+                    PR_NUMBER=`curl  --retry 10  -s -H "Accept: application/vnd.github.groot-preview+json"  https://api.github.com/repos/${{ github.repository }}/commits/${COMMIT}/pulls | jq -r '.[].number' `
+                else
+                    echo "error, failed to get any commit ID"
+                fi
+                if [ -z "${PR_NUMBER}" ] ; then
+                    PR_NUMBER=` grep -Eio "Merge pull request #[0-9]+ " <<< "${JSON}" | grep -Eo "[0-9]+" | uniq ` || true
+                fi
+                if [ -z "${PR_NUMBER}" ] ; then
+                    echo "error, failed to get PR NUMBER"
+                    exit 1
+                fi
+                #    grep -Ei "https://github.com/.*/commit" <<< "${JSON}"
+                #PR_COMMITS=` grep -Ei "https://github.com/.*/commit" <<< "${JSON}" | awk -F'"' '{print $4}' | uniq -c | awk '{ if ($1 == 1 ) print $2}' | awk -F'/' '{print $NF}' | tr '\n' ' '  `
+                #    grep '"username":'  <<< "${JSON}"
+                #PR_AUTHOR=` grep '"username":' <<< "${JSON}" | awk -F'"' '{print $4}' | sort | uniq  | grep -v "web-flow"  | head -1 | tr -d '\n' `
+                #    [ -n "${PR_AUTHOR}" ] || { echo "no PR_AUTHOR, ignore" ; }
+          #
+          fi
+          RP_API_BODY=` curl  --retry 10  https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER} -s -H "Accept: application/vnd.github.groot-preview+json" `
+          PR_COMMITS=` echo "${RP_API_BODY}" |  jq ' .merge_commit_sha ' | tr -d '"' `
+          PR_AUTHOR=` echo "${RP_API_BODY}" |  jq ' .user.login ' | tr -d '"' `
+          PR_URL="https://github.com/${{ github.repository }}/pull/${PR_NUMBER}"
+          ACTION_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          #gh pr view ${PR_NUMBER} || { echo "failed to get pr ${PR_NUMBER}" ; exit 1 ; }
+          #PR_LABEL=` gh pr view ${PR_NUMBER} | grep -i "^labels:" | tr ',' ' ' | tr -s ' ' | sed 's/labels://g' `
+          #    [ -n "${PR_LABEL}" ] || { echo "no PR_LABEL, ignore" ; }
+          PR_LABEL=` echo "${RP_API_BODY}" |  jq ' .labels[].name ' | tr -d '"' | tr '\n' ' ' `
+          #PR_TITLE=`gh pr view ${PR_NUMBER} | sed -n '1 p' `
+          #     [ -n "${PR_TITLE}" ] || { echo "error, no PR_TITLE " ; exit 1 ; }
+          PR_TITLE=` echo "${RP_API_BODY}" |  jq ' .title ' | tr -d '"' `
+          #
+          if [ -z "${PR_COMMITS}" ]; then
+              echo "error, failed to get pr commits"
+          fi
+          echo "number: ${PR_NUMBER}"
+          echo "action url: ${ACTION_URL}"
+          echo "PR_COMMITS: ${PR_COMMITS}"
+          echo "author: ${PR_AUTHOR}"
+          echo "url: ${PR_URL}"
+          echo "PR_LABEL: ${PR_LABEL}"
+          echo "PR_TITLE: ${PR_TITLE}"
+          #
+          #
+          echo "=============================== get dest branch from labels ======== "
+          WANT_MERGE_BRANCH_LIST=""
+          INITIAL_LABEL=""
+          if ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.destBranch != '' }}; then
+                WANT_MERGE_BRANCH_LIST=${{ github.event.inputs.destBranch }}
+          else
+                for LABEL in ${PR_LABEL} ; do
+                    echo "checking label $LABEL "
+                    PREFIX="${{ env.PR_LABEL_PREFIX_CHERRYPICK }}"
+                    if ! grep -E "^${PREFIX}" <<< "${LABEL}" &>/dev/null; then
+                        INITIAL_LABEL+="${LABEL},"
+                        continue
+                    fi
+                    BRANCH_NAME=` sed 's?'"${PREFIX}"'??' <<< "$LABEL" `
+                    WANT_MERGE_BRANCH_LIST+=" $BRANCH_NAME "
+                done
+          fi
+          [ -z "$WANT_MERGE_BRANCH_LIST" ] && echo "no branch to cherry pick" && exit 0
+          echo "cherry pick to $WANT_MERGE_BRANCH_LIST "
+          INITIAL_LABEL="${INITIAL_LABEL%,}"
+          echo "INITIAL_LABEL: ${INITIAL_LABEL}"
+          #
+          #
+          echo "============ begin to cherry pick ============ "
+          FINAL_FAILURE=false
+          git branch
+          git config  user.email "tao.yang@daocloud.io"
+          git config  user.name "robot"
+          gh label create ${{ env.CHERRYPICK_LABEL }} || true
+          for BRANCH in $WANT_MERGE_BRANCH_LIST ; do
+              echo "************** cherry for branch ${BRANCH}"
+              if ! git ls-remote --exit-code --heads origin ${BRANCH} ; then
+                  # todo: create issue
+                  echo "error, branch $BRANCH does not exist"
+                  gh issue create  \
+                      --body "reason: the branch $BRANCH does not exist. PR <${PR_URL}> ,  action <${ACTION_URL}> " \
+                      --title "failed to auto cherry pick PR ${PR_NUMBER} to branch ${BRANCH}" \
+                      --label "${{ env.CHERRYPICK_LABEL }}" \
+                      --assignee "${PR_AUTHOR},${{ env.DEFAULT_REVIEWER }}"
+                  if (($?!=0)) ; then
+                      echo "!!!! error, failed to create issue"
+                      FINAL_FAILURE=true
+                  fi
+                  continue
+              fi
+              git fetch origin ${BRANCH}:${BRANCH} || true
+              if ! git checkout ${BRANCH} ; then
+                  echo "error, failed to checkout to branch $BRANCH"
+                  gh issue create  \
+                      --body "reason: failed to get the branch $BRANCH. PR <${PR_URL}> ,  action <${ACTION_URL}> " \
+                      --title "failed to auto cherry pick PR ${PR_NUMBER} to branch ${BRANCH}" \
+                      --label "${{ env.CHERRYPICK_LABEL }}" \
+                      --assignee "${PR_AUTHOR},${{ env.DEFAULT_REVIEWER }}"
+                  if (($?!=0)) ; then
+                      echo "!!!! error, failed to create issue"
+                      FINAL_FAILURE=true
+                  fi
+                  continue
+              fi
+              PR_BRANCH=robot/cherrypick/pr${PR_NUMBER}/${BRANCH}
+              git checkout -b ${PR_BRANCH}
+              git branch --show-current
+              FAIL=false
+              UPDATE=false
+              ERROR_MESSAGE=""
+              for COMMIT in $PR_COMMITS; do
+                    if ! ERROR_MESSAGE=`git cherry-pick -m 1 $COMMIT 2>&1` ; then
+                          echo ">>>>>>>>>>>> fail when cherry pick $COMMIT to branch $BRANCH "
+                          echo "$ERROR_MESSAGE"
+                          echo "---- failuire detail"
+                          git status
+                          git diff
+                          echo "<<<<<<<<<<<<<"
+                          if git diff --exit-code --quiet ; then
+                              echo "no changes happen, ignore cherry pick $COMMIT "
+                              git cherry-pick --abort || true
+                              git reset --hard HEAD || true
+                              continue
+                          else
+                              FAIL=true
+                              echo "error, failed to cherry pick $COMMIT "
+                              git cherry-pick --abort || true
+                              git reset --hard HEAD || true
+                              break
+                          fi
+                    else
+                        UPDATE=true
+                        echo "succeed to cherry pick $COMMIT to branch $BRANCH "
+                    fi
+              done
+              if [ "$FAIL" == "true" ] ; then
+                  echo "failed to cherry pick to branch $BRANCH "
+                  FINAL_FAILURE=true
+                  echo -e "commits $PR_COMMITS of ${PR_AUTHOR} conflict when merging to branch $BRANCH, please manually cherry pick it by yourself. \n PR <${PR_URL}> ,  action <${ACTION_URL}>  \n\n  \`\`\`\n${ERROR_MESSAGE}\n\`\`\` " | \
+                       gh issue create  \
+                        --title "failed to cherry pick PR ${PR_NUMBER} from ${PR_AUTHOR}, to branch ${BRANCH}" \
+                        --label "${{ env.CHERRYPICK_LABEL }}" \
+                        --assignee "${PR_AUTHOR},${{ env.DEFAULT_REVIEWER }}" \
+                        --body-file -
+              fi
+              if [ "$UPDATE" == "true" ] ; then
+                  echo "succeeded to cherry pick to branch $BRANCH "
+                  # create a pr
+                  git commit -s -S --amend --no-edit
+                  git push origin ${PR_BRANCH}:${PR_BRANCH} -f
+                  gh pr create --title "${PR_TITLE}" \
+                      --assignee "${PR_AUTHOR},${{ env.DEFAULT_REVIEWER }}" \
+                      --label "${{ env.CHERRYPICK_LABEL }},${INITIAL_LABEL}" \
+                      --body "robot cherry pick PR <${PR_URL}> from ${PR_AUTHOR},to branch ${BRANCH},  action <${ACTION_URL}>  , commits $PR_COMMITS " \
+                      --base ${BRANCH}
+              else
+                  echo "no changes happened for commits $PR_COMMITS, ignore create pr"
+              fi
+          done
+          echo "=========== check result ============"
+          if [ "$FINAL_FAILURE" == "true" ] ; then
+              # if failed to create issue or pr, fails
+              echo "error, failuire happened"
+          else
+              echo "all done"
+          fi
