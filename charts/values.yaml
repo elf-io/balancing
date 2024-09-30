@@ -135,7 +135,7 @@ elfAgent:
 
   httpServer:
     ## @param elfAgent.httpServer.port the http Port for elfAgent, for health checking
-    port: 5710
+    port: 5810
 
     startupProbe:
       ## @param elfAgent.httpServer.startupProbe.failureThreshold the failure threshold of startup probe for elfAgent health checking
@@ -160,7 +160,7 @@ elfAgent:
     enabled: false
 
     ## @param elfAgent.prometheus.port the metrics port of template agent
-    port: 5711
+    port: 5811
 
     serviceMonitor:
       ## @param elfAgent.prometheus.serviceMonitor.install install serviceMonitor for template agent. This requires the prometheus CRDs to be available
@@ -205,7 +205,7 @@ elfAgent:
     ## @param elfAgent.debug.logLevel the log level of template agent [debug, info, warn, error, fatal, panic]
     logLevel: "info"
     ## @param elfAgent.debug.gopsPort the gops port of template agent
-    gopsPort: 5712
+    gopsPort: 5812
 
 ## @section elfController parameters
 ##
@@ -220,7 +220,7 @@ elfController:
   cmdBinName: "/usr/bin/controller"
 
   ## @param elfController.hostnetwork enable hostnetwork mode of elfController pod. Notice, if no CNI available before template installation, must enable this
-  hostnetwork: false
+  hostnetwork: true
 
   image:
     ## @param elfController.image.registry the image registry of elfController
@@ -316,7 +316,7 @@ elfController:
 
   httpServer:
     ## @param elfController.port the http Port for elfController, for health checking and http service
-    port: 5720
+    port: 5820
 
     startupProbe:
       ## @param elfController.httpServer.startupProbe.failureThreshold the failure threshold of startup probe for elfController health checking
@@ -340,14 +340,14 @@ elfController:
       periodSeconds: 10
 
   ## @param elfController.webhookPort the http port for elfController webhook
-  webhookPort: 5722
+  webhookPort: 5822
 
   prometheus:
     ## @param elfController.prometheus.enabled enable template Controller to collect metrics
     enabled: false
 
     ## @param elfController.prometheus.port the metrics port of template Controller
-    port: 5721
+    port: 5821
 
     serviceMonitor:
       ## @param elfController.prometheus.serviceMonitor.install install serviceMonitor for template agent. This requires the prometheus CRDs to be available
@@ -393,7 +393,7 @@ elfController:
     logLevel: "info"
 
     ## @param elfController.debug.gopsPort the gops port of template Controller
-    gopsPort: 5724
+    gopsPort: 5824
 
   ## TLS configuration for webhook
   tls:
@@ -404,7 +404,7 @@ elfController:
     method: auto
 
     ## @param elfController.tls.secretName the secret name for storing TLS certificates
-    secretName: "template-controller-server-certs"
+    secretName: "elf-controller-server-certs"
 
     ## for certmanager method
     certmanager:

@@ -24,6 +24,10 @@ RUN  make GOARCH=${TARGETARCH}   \
         RACE=${RACE} NOSTRIP=${NOSTRIP} NOOPT=${NOOPT} \
         DESTDIR_BIN=/tmp/install/${TARGETOS}/${TARGETARCH}/bin \
         build_agent_bin
+RUN  make GOARCH=${TARGETARCH}   \
+        RACE=${RACE} NOSTRIP=${NOSTRIP} NOOPT=${NOOPT} \
+        DESTDIR_BIN=/tmp/install/${TARGETOS}/${TARGETARCH}/bin \
+        build_inspect_bin
 
 
 

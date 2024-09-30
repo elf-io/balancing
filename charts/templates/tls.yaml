@@ -12,13 +12,12 @@ metadata:
     {{- end }}
 webhooks:
   - admissionReviewVersions:
-      - v1
+      - v1beta1
     clientConfig:
       service:
         name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
         namespace: {{ .Release.Namespace }}
-        # ====modify==== the mutating route path : "/mutate-" + strings.ReplaceAll(gvk.Group, ".", "-") + "-" + gvk.Version + "-" + strings.ToLower(gvk.Kind)
-        path: "/mutate-elf-elf-io-v1-mybook"
+        path: "/mutate-balancing-elf-io-v1beta1-balancingpolicy"
         port: {{ .Values.elfController.webhookPort }}
       {{- if (eq .Values.elfController.tls.method "provided") }}
       caBundle: {{ .Values.elfController.tls.provided.tlsCa | required "missing tls.provided.tlsCa" }}
@@ -26,21 +25,45 @@ webhooks:
       caBundle: {{ .ca.Cert | b64enc }}
       {{- end }}
     failurePolicy: Fail
-    # ====modify====
-    name: mybook.elf.elf.io
+    name: balancingpolicy.balancing.elf.io
     rules:
       - apiGroups:
-          # ====modify====
-          - elf.elf.io
+          - balancing.elf.io
         apiVersions:
-          - v1
+          - v1beta1
         operations:
           - CREATE
           - UPDATE
           - DELETE
         resources:
-          # ====modify==== crdName
-          - mybooks
+          - balancingpolicys
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1beta1
+    clientConfig:
+      service:
+        name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
+        namespace: {{ .Release.Namespace }}
+        path: "/mutate-balancing-elf-io-v1beta1-localredirectpolicy"
+        port: {{ .Values.elfController.webhookPort }}
+      {{- if (eq .Values.elfController.tls.method "provided") }}
+      caBundle: {{ .Values.elfController.tls.provided.tlsCa | required "missing tls.provided.tlsCa" }}
+      {{- else if (eq .Values.elfController.tls.method "auto") }}
+      caBundle: {{ .ca.Cert | b64enc }}
+      {{- end }}
+    failurePolicy: Fail
+    name: localredirectpolicy.balancing.elf.io
+    rules:
+      - apiGroups:
+          - balancing.elf.io
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+          - DELETE
+        resources:
+          - localredirectpolicys
     sideEffects: None
 
 ---
@@ -59,8 +82,7 @@ webhooks:
       service:
         name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
         namespace: {{ .Release.Namespace }}
-        # ====modify==== the validate route path : "/validate-" + strings.ReplaceAll(gvk.Group, ".", "-") + "-" + gvk.Version + "-" + strings.ToLower(gvk.Kind)
-        path: "/validate-elf-elf-io-v1-mybook"
+        path: "/validate-balancing-elf-io-v1beta1-balancingpolicy"
         port: {{ .Values.elfController.webhookPort }}
       {{- if (eq .Values.elfController.tls.method "provided") }}
       caBundle: {{ .Values.elfController.tls.provided.tlsCa | required "missing tls.provided.tlsCa" }}
@@ -69,20 +91,45 @@ webhooks:
       {{- end }}
     failurePolicy: Fail
     # ====modify====
-    name: mybook.elf.elf.io
+    name: balancingpolicy.balancing.elf.io
     rules:
       - apiGroups:
-          # ====modify====
-          - elf.elf.io
+          - balancing.elf.io
         apiVersions:
-          - v1
+          - v1beta1
         operations:
           - CREATE
           - UPDATE
           - DELETE
         resources:
-          # ====modify==== crdName
-          - mybooks
+          - balancingpolicys
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
+        namespace: {{ .Release.Namespace }}
+        path: "/validate-balancing-elf-io-v1beta1-localredirectpolicy"
+        port: {{ .Values.elfController.webhookPort }}
+      {{- if (eq .Values.elfController.tls.method "provided") }}
+      caBundle: {{ .Values.elfController.tls.provided.tlsCa | required "missing tls.provided.tlsCa" }}
+      {{- else if (eq .Values.elfController.tls.method "auto") }}
+      caBundle: {{ .ca.Cert | b64enc }}
+      {{- end }}
+    failurePolicy: Fail
+    name: localredirectpolicy.balancing.elf.io
+    rules:
+      - apiGroups:
+          - balancing.elf.io
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+          - DELETE
+        resources:
+          - localredirectpolicys
     sideEffects: None
 
 {{- if eq .Values.elfController.tls.method "certmanager" -}}

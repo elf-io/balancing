@@ -23,8 +23,7 @@ endef
 build_all_bin:
 	make build_controller_bin
 	make build_agent_bin
-
-
+	make build_inspect_bin
 
 .PHONY: build_controller_bin
 build_controller_bin: CMD_BIN_DIR := $(ROOT_DIR)/cmd/controller
@@ -35,6 +34,11 @@ build_controller_bin:
 .PHONY: build_agent_bin
 build_agent_bin: CMD_BIN_DIR := $(ROOT_DIR)/cmd/agent
 build_agent_bin:
+	$(BUILD_BIN)
+
+.PHONY: build_inspect_bin
+build_inspect_bin: CMD_BIN_DIR := $(ROOT_DIR)/cmd/inspect
+build_inspect_bin:
 	$(BUILD_BIN)
 
 # ------------

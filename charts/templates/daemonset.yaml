@@ -165,6 +165,8 @@ spec:
             - name: config-path
               mountPath: /tmp/config-map
               readOnly: true
+            - name: proc
+              mountPath: /host/proc
             {{- if .Values.elfAgent.extraVolumes }}
             {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.extraVolumeMounts "context" $ ) | nindent 12 }}
             {{- end }}
@@ -174,6 +176,10 @@ spec:
           configMap:
             defaultMode: 0400
             name: {{ .Values.global.configName }}
+        # for ebpf to read pid cgroup
+        - name: proc
+          hostPath:
+            path: /proc
       {{- if .Values.elfAgent.extraVolumeMounts }}
       {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.extraVolumeMounts "context" $ ) | nindent 6 }}
       {{- end }}
