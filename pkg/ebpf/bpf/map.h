@@ -266,6 +266,6 @@ struct {
         __type(value, __u32);  // The value stored can be of any size , however, all array elements are aligned to 8 bytes
         __uint(pinning, 1);
         __uint(max_entries, 10);
-} configure_map SEC(".maps");
+} map_configure SEC(".maps");
 
 #endif /* __MAP_H__ */

@@ -359,7 +359,7 @@ static __always_inline int get_configure(__u32 *debug_level , __u32 *ipv4_enable
     char fmt_err[] = "elb cgroup: error, ipv4 and ipv6 are disabled at the meaning time" ;
 
     map_index = INDEX_DEBUG_LEVEL ;
-    ptr = bpf_map_lookup_elem(&configure_map, &map_index);
+    ptr = bpf_map_lookup_elem(&map_configure, &map_index);
     if (!ptr)  {
          bpf_trace_printk(fmt, sizeof(fmt) );
          return 1;
@@ -367,7 +367,7 @@ static __always_inline int get_configure(__u32 *debug_level , __u32 *ipv4_enable
     *debug_level = *ptr;
 
     map_index=INDEX_ENABLE_IPV4;
-    ptr = bpf_map_lookup_elem(&configure_map, &map_index);
+    ptr = bpf_map_lookup_elem(&map_configure, &map_index);
     if (!ptr)  {
          bpf_trace_printk(fmt, sizeof(fmt) );
          return 1;
@@ -375,7 +375,7 @@ static __always_inline int get_configure(__u32 *debug_level , __u32 *ipv4_enable
     *ipv4_enabled = *ptr;
 
     map_index=INDEX_ENABLE_IPV6;
-    ptr = bpf_map_lookup_elem(&configure_map, &map_index);
+    ptr = bpf_map_lookup_elem(&map_configure, &map_index);
     if (!ptr)  {
          bpf_trace_printk(fmt, sizeof(fmt) );
          return 1;
