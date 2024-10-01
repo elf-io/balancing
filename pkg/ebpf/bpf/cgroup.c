@@ -434,7 +434,7 @@ int sock4_sendmsg(struct bpf_sock_addr *ctx)
     //debugf(DEBUG_VERSBOSE , "sendmsg4: dst_ip=%pI4 dst_port=%d\n" ,&dst_ip, bpf_htons(dst_port) );
 
     // for UDP
-	err = execute_nat(ctx, *debug_val_ptr , debug_level );
+	err = execute_nat(ctx , debug_level );
 
 	return SYS_PROCEED;
 }
