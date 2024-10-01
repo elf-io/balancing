@@ -401,7 +401,7 @@ int sock4_connect(struct bpf_sock_addr *ctx) {
     if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled)!=0 ) {
         return SYS_PROCEED;
     }
-    if ipv4_enabled == 0 {
+    if (ipv4_enabled == 0) {
         return SYS_PROCEED;
     }
 
@@ -427,7 +427,7 @@ int sock4_sendmsg(struct bpf_sock_addr *ctx)
     if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled)!=0 ) {
         return SYS_PROCEED;
     }
-    if ipv4_enabled == 0 {
+    if (ipv4_enabled == 0) {
         return SYS_PROCEED;
     }
 
@@ -451,7 +451,7 @@ int sock4_recvmsg(struct bpf_sock_addr *ctx)
     if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled)!=0 ) {
         return SYS_PROCEED;
     }
-    if ipv4_enabled == 0 {
+    if (ipv4_enabled == 0) {
         return SYS_PROCEED;
     }
 
@@ -471,7 +471,7 @@ int sock4_getpeername(struct bpf_sock_addr *ctx)
     if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled)!=0 ) {
         return SYS_PROCEED;
     }
-    if ipv4_enabled == 0 {
+    if (ipv4_enabled == 0) {
         return SYS_PROCEED;
     }
 
