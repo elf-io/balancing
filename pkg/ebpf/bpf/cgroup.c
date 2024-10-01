@@ -359,24 +359,24 @@ static __always_inline int get_configure(__u32 *debug_level , __u32 *ipv4_enable
     char fmt_err[] = "elb cgroup: error, ipv4 and ipv6 are disabled at the meaning time" ;
 
     map_index = INDEX_DEBUG_LEVEL ;
-    ptr = bpf_map_lookup_elem(&debug_map, &map_index);
-    if !ptr  {
+    ptr = bpf_map_lookup_elem(&configure_map, &map_index);
+    if (!ptr)  {
          bpf_trace_printk(fmt, sizeof(fmt) );
          return 1;
     }
     *debug_level = *ptr;
 
     map_index=INDEX_ENABLE_IPV4;
-    ptr = bpf_map_lookup_elem(&debug_map, &map_index);
-    if !ptr  {
+    ptr = bpf_map_lookup_elem(&configure_map, &map_index);
+    if (!ptr)  {
          bpf_trace_printk(fmt, sizeof(fmt) );
          return 1;
     }
     *ipv4_enabled = *ptr;
 
     map_index=INDEX_ENABLE_IPV6;
-    ptr = bpf_map_lookup_elem(&debug_map, &map_index);
-    if !ptr  {
+    ptr = bpf_map_lookup_elem(&configure_map, &map_index);
+    if (!ptr)  {
          bpf_trace_printk(fmt, sizeof(fmt) );
          return 1;
     }
@@ -398,7 +398,7 @@ int sock4_connect(struct bpf_sock_addr *ctx) {
     __u32 debug_level ;
     __u32 ipv4_enabled ;
     __u32 ipv6_enabled ;
-    if get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled) {
+    if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled)!=0 ) {
         return SYS_PROCEED;
     }
     if ipv4_enabled == 0 {
@@ -424,7 +424,7 @@ int sock4_sendmsg(struct bpf_sock_addr *ctx)
     __u32 debug_level ;
     __u32 ipv4_enabled ;
     __u32 ipv6_enabled ;
-    if get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled) {
+    if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled)!=0 ) {
         return SYS_PROCEED;
     }
     if ipv4_enabled == 0 {
@@ -448,7 +448,7 @@ int sock4_recvmsg(struct bpf_sock_addr *ctx)
     __u32 debug_level ;
     __u32 ipv4_enabled ;
     __u32 ipv6_enabled ;
-    if get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled) {
+    if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled)!=0 ) {
         return SYS_PROCEED;
     }
     if ipv4_enabled == 0 {
@@ -468,7 +468,7 @@ int sock4_getpeername(struct bpf_sock_addr *ctx)
     __u32 debug_level ;
     __u32 ipv4_enabled ;
     __u32 ipv6_enabled ;
-    if get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled) {
+    if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled)!=0 ) {
         return SYS_PROCEED;
     }
     if ipv4_enabled == 0 {
