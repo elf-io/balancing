@@ -11,15 +11,11 @@ import (
 	"github.com/elf-io/balancing/pkg/nodeId"
 	"github.com/elf-io/balancing/pkg/podBank"
 	"github.com/elf-io/balancing/pkg/types"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/tools/clientcmd/api"
 	"os"
 	"path/filepath"
-	ctrl "sigs.k8s.io/controller-runtime"
-	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"time"
 )
 
@@ -185,6 +181,7 @@ func RunReconciles() {
 
 }
 
+/*
 func SetupController() {
 
 	// controller for CRD
@@ -213,3 +210,4 @@ func SetupController() {
 	}
 
 }
+*/
