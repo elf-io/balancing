@@ -122,6 +122,15 @@ func (s *EbpfProgramStruct) UpdateMapAffinity(keyList []bpf_cgroupMapkeyAffinity
 	return nil
 }
 
+func (s *EbpfProgramStruct) UpdateMapConfigure(index uint32, value uint32) error {
+
+	e := s.BpfObjCgroup.MapConfigure.Put(index, value)
+	if e != nil {
+		return fmt.Errorf("failed to Put: %+v", e)
+	}
+	return nil
+}
+
 // ------------------------- delete ----------------------------------
 
 func (s *EbpfProgramStruct) DeleteMapService(keyList []bpf_cgroupMapkeyService) error {

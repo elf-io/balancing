@@ -207,3 +207,50 @@ func (t MapEventValue) String() string {
 		t.CgroupId, t.IsIpv4, t.IsSuccess, GetNatTypeStr(t.NatType), GetNatModeStr(t.NatMode),
 		GetIpStr(t.OriginalDestV4Ip), GetIpv6Str(t.OriginalDestV6ipHigh, t.OriginalDestV6ipLow), t.OriginalDestPort, GetIpStr(t.NatV4Ip), GetIpv6Str(t.NatV6ipHigh, t.NatV6ipLow), t.NatPort, t.Pid, GetFailureStr(t.FailureCode))
 }
+
+// ------------------------------------------------- map configure
+
+const (
+	MapConfigureKeyIndexDebugLevel = iota
+	MapConfigureKeyIndexIpv4Enabled
+	MapConfigureKeyIndexIpv6Enabled
+	MapConfigureKeyIndexEnd
+)
+
+const (
+	// for IndexDebugLevel
+	MapConfigureValueDebugLevelVerbose = 0
+	MapConfigureValueDebugLevelInfo    = 1
+	MapConfigureValueDebugLevelError   = 2
+	// for IndexIpv4Enabled and Ipv6Enabled
+	MapConfigureValueDisabled = 0
+	MapConfigureValueEnabled  = 1
+)
+
+func MapConfigureStr(key, value uint32) string {
+	switch key {
+	case MapConfigureKeyIndexDebugLevel:
+		if value == MapConfigureValueDebugLevelVerbose {
+			return "debugLevel: versbose"
+		} else if value == MapConfigureValueDebugLevelInfo {
+			return "debugLevel: info"
+		} else if value == MapConfigureValueDebugLevelError {
+			return "debugLevel: error"
+		} else {
+			return "debugLevel: uknown"
+		}
+	case MapConfigureKeyIndexIpv4Enabled:
+		if value == 0 {
+			return "Ipv4Enabled: disabled"
+		} else {
+			return "Ipv4Enabled: enabled"
+		}
+	case MapConfigureKeyIndexIpv6Enabled:
+		if value == 0 {
+			return "Ipv6Enabled: disabled"
+		} else {
+			return "Ipv6Enabled: enabled"
+		}
+	}
+	return "unknowKey: uknowValue"
+}

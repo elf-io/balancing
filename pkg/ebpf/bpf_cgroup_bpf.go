@@ -128,6 +128,7 @@ type bpf_cgroupProgramSpecs struct {
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type bpf_cgroupMapSpecs struct {
+	MapConfigure   *ebpf.MapSpec `ebpf:"map_configure"`
 	MapAffinity    *ebpf.MapSpec `ebpf:"map_affinity"`
 	MapBackend     *ebpf.MapSpec `ebpf:"map_backend"`
 	MapEvent       *ebpf.MapSpec `ebpf:"map_event"`
@@ -156,6 +157,7 @@ func (o *bpf_cgroupObjects) Close() error {
 //
 // It can be passed to loadBpf_cgroupObjects or ebpf.CollectionSpec.LoadAndAssign.
 type bpf_cgroupMaps struct {
+	MapConfigure   *ebpf.Map `ebpf:"map_configure"`
 	MapAffinity    *ebpf.Map `ebpf:"map_affinity"`
 	MapBackend     *ebpf.Map `ebpf:"map_backend"`
 	MapEvent       *ebpf.Map `ebpf:"map_event"`
@@ -167,6 +169,7 @@ type bpf_cgroupMaps struct {
 
 func (m *bpf_cgroupMaps) Close() error {
 	return _Bpf_cgroupClose(
+		m.MapConfigure,
 		m.MapAffinity,
 		m.MapBackend,
 		m.MapEvent,

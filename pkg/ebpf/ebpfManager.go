@@ -32,6 +32,7 @@ type EbpfMaps struct {
 	MapNodeIp      *ebpf.Map
 	MapNodeEntryIp *ebpf.Map
 	MapService     *ebpf.Map
+	MapConfigure   *ebpf.Map
 }
 
 type EbpfProgramStruct struct {
@@ -62,6 +63,7 @@ type EbpfProgram interface {
 	PrintMapBackend() error
 	PrintMapAffinity() error
 	PrintMapNatRecord() error
+	PrintMapConfigure() error
 
 	CleanMapService() (int, error)
 	CleanMapNodeIp() (int, error)
@@ -76,6 +78,7 @@ type EbpfProgram interface {
 	UpdateMapNodeEntryIp([]uint32, []bpf_cgroupMapvalueNodeEntryIp) error
 	UpdateMapAffinity([]bpf_cgroupMapkeyAffinity, []bpf_cgroupMapvalueAffinity) error
 	UpdateMapNatRecord([]bpf_cgroupMapkeyNatRecord, []bpf_cgroupMapvalueNatRecord) error
+	UpdateMapConfigure(uint32, uint32) error
 
 	DeleteMapNatRecord([]bpf_cgroupMapkeyNatRecord) error
 	DeleteMapAffinity([]bpf_cgroupMapkeyAffinity) error
@@ -185,6 +188,13 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 
 	go s.daemonGetEvent()
 
+	s.l.Sugar().Infof("ebpf debug level: verbose")
+	s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelVerbose)
+	s.l.Sugar().Infof("ebpf ipv4 enabled: true")
+	s.UpdateMapConfigure(MapConfigureKeyIndexIpv4Enabled, MapConfigureValueEnabled)
+	s.l.Sugar().Infof("ebpf ipv6 enabled: false")
+	s.UpdateMapConfigure(MapConfigureKeyIndexIpv6Enabled, MapConfigureValueDisabled)
+
 	return nil
 }
 
@@ -251,6 +261,13 @@ func (s *EbpfProgramStruct) LoadAllEbpfMap(mapPinDir string) error {
 
 	f := filepath.Join(mapdir, "map_affinity")
 	s.EbpfMaps.MapAffinity, err = ebpf.LoadPinnedMap(f, &ebpf.LoadPinOptions{})
+	if err != nil {
+		s.UnloadAllEbpfMap()
+		return fmt.Errorf("failed to load map %s\n", f)
+	}
+
+	f = filepath.Join(mapdir, "map_configure")
+	s.EbpfMaps.MapConfigure, err = ebpf.LoadPinnedMap(f, &ebpf.LoadPinOptions{})
 	if err != nil {
 		s.UnloadAllEbpfMap()
 		return fmt.Errorf("failed to load map %s\n", f)

@@ -321,6 +321,51 @@ func (s *EbpfProgramStruct) PrintMapNatRecord() error {
 	return nil
 }
 
+func (s *EbpfProgramStruct) PrintMapConfigure() error {
+	keys := make([]uint32, 100)
+	vals := make([]uint32, 100)
+
+	var mapPtr *ebpf.Map
+	if s.BpfObjCgroup.MapConfigure != nil {
+		mapPtr = s.BpfObjCgroup.MapConfigure
+	} else if s.EbpfMaps != nil && s.EbpfMaps.MapConfigure != nil {
+		mapPtr = s.EbpfMaps.MapConfigure
+	} else {
+		return fmt.Errorf("failed to get ebpf map")
+	}
+	name := mapPtr.String()
+
+	fmt.Printf("------------------------------\n")
+	fmt.Printf("map  %s\n", name)
+
+	var cursor ebpf.MapBatchCursor
+	count := 0
+	for {
+		c, batchErr := mapPtr.BatchLookup(&cursor, keys, vals, nil)
+		count += c
+		finished := false
+		if batchErr != nil {
+			if errors.Is(batchErr, ebpf.ErrKeyNotExist) {
+				// end
+				finished = true
+			} else {
+				return fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+			}
+		}
+		for i := 0; i < len(keys) && i < c && i < MapConfigureKeyIndexEnd; i++ {
+			fmt.Printf("%s\n", MapConfigureStr(uint32(i), uint32(vals[i])))
+		}
+		if finished {
+			break
+		}
+	}
+
+	fmt.Printf("end map %s: total items: %v \n", name, count)
+	fmt.Printf("------------------------------\n")
+	fmt.Printf("\n")
+	return nil
+}
+
 // -------------------------- event map
 
 func (s *EbpfProgramStruct) GetMapDataEvent() <-chan MapEventValue {
