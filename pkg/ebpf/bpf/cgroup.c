@@ -356,6 +356,7 @@ static __always_inline int get_configure(__u32 *debug_level , __u32 *ipv4_enable
     __u32 map_index ;
     __u32 *ptr ;
     char fmt[] = "elb cgroup: failed to get configure " ;
+    char fmt_err[] = "elb cgroup: error, ipv4 and ipv6 are disabled at the meaning time" ;
 
     map_index = INDEX_DEBUG_LEVEL ;
     ptr = bpf_map_lookup_elem(&debug_map, &map_index);
@@ -380,6 +381,10 @@ static __always_inline int get_configure(__u32 *debug_level , __u32 *ipv4_enable
          return 1;
     }
     *ipv6_enabled = *ptr;
+
+    if ( *ipv4_enabled == 0 &&  *ipv6_enabled == 0 ) {
+         bpf_trace_printk(fmt_err, sizeof(fmt_err) );
+    }
 
     return 0;
 }
