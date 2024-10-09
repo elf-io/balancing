@@ -5,7 +5,7 @@ package types
 const (
 	OrgName = "elf.io"
 
-	ApiVersion = "v1beta"
+	ApiVersion = "v1beta1"
 	ApiGroup   = "balancing." + OrgName
 
 	// use this annotation to mark an ID in the annotation of each node
