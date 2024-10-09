@@ -49,14 +49,8 @@ func (in *BalancingBackend) DeepCopyInto(out *BalancingBackend) {
 	*out = *in
 	if in.AddressEndpoint != nil {
 		in, out := &in.AddressEndpoint, &out.AddressEndpoint
-		*out = make([]*BackendEndpoint, len(*in))
-		for i := range *in {
-			if (*in)[i] != nil {
-				in, out := &(*in)[i], &(*out)[i]
-				*out = new(BackendEndpoint)
-				**out = **in
-			}
-		}
+		*out = make([]BackendEndpoint, len(*in))
+		copy(*out, *in)
 	}
 	if in.ServiceEndpoint != nil {
 		in, out := &in.ServiceEndpoint, &out.ServiceEndpoint
@@ -308,13 +302,9 @@ func (in *RedirectFrontend) DeepCopyInto(out *RedirectFrontend) {
 	*out = *in
 	if in.AddressMatcher != nil {
 		in, out := &in.AddressMatcher, &out.AddressMatcher
-		*out = new([]AddressEndpoint)
-		if **in != nil {
-			in, out := *in, *out
-			*out = make([]AddressEndpoint, len(*in))
-			for i := range *in {
-				(*in)[i].DeepCopyInto(&(*out)[i])
-			}
+		*out = make([]AddressEndpoint, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
 	if in.ServiceMatcher != nil {

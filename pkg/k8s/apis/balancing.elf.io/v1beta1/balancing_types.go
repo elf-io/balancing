@@ -87,7 +87,7 @@ type BalancingBackend struct {
 	// AddressEndpoint is a tuple {IP, port, protocol} where the traffic will be redirected.
 	//
 	// +kubebuilder:validation:OneOf
-	AddressEndpoint []*BackendEndpoint `json:"addressEndpoint,omitempty"`
+	AddressEndpoint []BackendEndpoint `json:"addressEndpoint,omitempty"`
 
 	// serviceEndpoint are pods where the traffic will be redirected.
 	//
