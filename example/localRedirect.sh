@@ -3,7 +3,7 @@
 
 cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
-kind: localredirectpolicy
+kind: LocalRedirectPolicy
 metadata:
   name: test-service
 spec:
@@ -36,7 +36,7 @@ EOF
 
 cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
-kind: localredirectpolicy
+kind: LocalRedirectPolicy
 metadata:
   name: test-addr
 spec:

@@ -2,7 +2,7 @@
 
 cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
-kind: balancingpolicy
+kind: BalancingPolicy
 metadata:
   name: test-service-podEndpoint
 spec:
@@ -36,7 +36,7 @@ EOF
 
 cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
-kind: balancingpolicy
+kind: BalancingPolicy
 metadata:
   name: test-service-nodeProxy
 spec:
@@ -70,7 +70,7 @@ EOF
 
 cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
-kind: balancingpolicy
+kind: BalancingPolicy
 metadata:
   name: test-service-nodePort
 spec:
@@ -105,7 +105,7 @@ EOF
 
 cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
-kind: balancingpolicy
+kind: BalancingPolicy
 metadata:
   name: test-service-nodeProxy
 spec:
@@ -139,7 +139,7 @@ EOF
 
 cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
-kind: localredirectpolicy
+kind: BalancingPolicy
 metadata:
   name: test-addr
 spec:
