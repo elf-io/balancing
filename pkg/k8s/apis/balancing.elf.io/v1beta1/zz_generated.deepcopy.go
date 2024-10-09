@@ -302,10 +302,8 @@ func (in *RedirectFrontend) DeepCopyInto(out *RedirectFrontend) {
 	*out = *in
 	if in.AddressMatcher != nil {
 		in, out := &in.AddressMatcher, &out.AddressMatcher
-		*out = make([]AddressEndpoint, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
-		}
+		*out = new(AddressEndpoint)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.ServiceMatcher != nil {
 		in, out := &in.ServiceMatcher, &out.ServiceMatcher

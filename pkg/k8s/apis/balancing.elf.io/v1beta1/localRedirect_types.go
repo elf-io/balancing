@@ -81,7 +81,7 @@ type RedirectFrontend struct {
 	// AddressMatcher is a tuple {IP, port, protocol} that matches traffic to be redirected.
 	//
 	// +kubebuilder:validation:OneOf
-	AddressMatcher []AddressEndpoint `json:"addressMatcher,omitempty"`
+	AddressMatcher *AddressEndpoint `json:"addressMatcher,omitempty"`
 
 	// ServiceMatcher specifies Kubernetes service and port that matches traffic to be redirected.
 	//
