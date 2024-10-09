@@ -133,6 +133,7 @@ type LocalRedirectStatus struct {
 // +kubebuilder:resource:categories={elf},path="localredirectpolicys",singular="localredirectpolicy",scope="Cluster",shortName={lr}
 // +kubebuilder:printcolumn:JSONPath=".spec.frontend.serviceMatcher.serviceName",description="serviceName",name="serviceName",type=string
 // +kubebuilder:printcolumn:JSONPath=".spec.frontend.serviceMatcher.namespace",description="namespace",name="namespace",type=string
+// +kubebuilder:printcolumn:JSONPath=".spec.frontend.addressMatcher.ip",description="addressMatcher",name="addressMatcher",type=string
 // +kubebuilder:printcolumn:JSONPath=".spec.enabled",description="enabled",name="enabled",type=boolean
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status

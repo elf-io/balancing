@@ -28,6 +28,10 @@ spec:
       jsonPath: .spec.frontend.serviceMatcher.namespace
       name: namespace
       type: string
+    - description: addressMatcher
+      jsonPath: .spec.frontend.addressMatcher.ip
+      name: addressMatcher
+      type: string
     - description: enabled
       jsonPath: .spec.enabled
       name: enabled
