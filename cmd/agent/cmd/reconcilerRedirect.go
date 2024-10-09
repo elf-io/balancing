@@ -11,12 +11,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-type reconcilerRedirect struct {
+type ReconcilerRedirect struct {
 	client client.Client
 	l      *zap.Logger
 }
 
-func (s *reconcilerRedirect) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (s *ReconcilerRedirect) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 
 	logger := s.l.With(
 		zap.String("policy", req.NamespacedName.Name),

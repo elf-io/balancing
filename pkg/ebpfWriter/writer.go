@@ -13,6 +13,8 @@ import (
 )
 
 type EbpfWriter interface {
+	CleanEbpfMapData() error
+
 	UpdateService(*zap.Logger, *corev1.Service, bool) error
 	DeleteService(*zap.Logger, *corev1.Service) error
 
@@ -57,18 +59,21 @@ func NewEbpfWriter(ebpfhandler ebpf.EbpfProgram, validityTime time.Duration, l *
 		ebpfhandler:     ebpfhandler,
 	}
 
-	// before informer, clean all map data to keep all data up to date
-	l.Sugar().Infof("clean ebpf map backend when stratup ")
-	ebpfhandler.CleanMapBackend()
-	l.Sugar().Infof("clean ebpf map service when stratup ")
-	ebpfhandler.CleanMapService()
-	l.Sugar().Infof("clean ebpf map nodeIp when stratup ")
-	ebpfhandler.CleanMapNodeIp()
-	l.Sugar().Infof("clean ebpf map nodeProxyIp when stratup ")
-	ebpfhandler.CleanMapNodeProxyIp()
-
 	go t.DeamonGC()
 	return &t
+}
+
+func (s *ebpfWriter) CleanEbpfMapData() error {
+	// before informer, clean all map data to keep all data up to date
+	s.log.Sugar().Infof("clean ebpf map backend when stratup ")
+	s.ebpfhandler.CleanMapBackend()
+	s.log.Sugar().Infof("clean ebpf map service when stratup ")
+	s.ebpfhandler.CleanMapService()
+	s.log.Sugar().Infof("clean ebpf map nodeIp when stratup ")
+	s.ebpfhandler.CleanMapNodeIp()
+	s.log.Sugar().Infof("clean ebpf map nodeProxyIp when stratup ")
+	s.ebpfhandler.CleanMapNodeProxyIp()
+	return nil
 }
 
 func (s *ebpfWriter) DeamonGC() {

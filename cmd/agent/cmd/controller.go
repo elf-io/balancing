@@ -171,6 +171,8 @@ func RunReconciles() {
 	rootLogger.Sugar().Infof("succeeded to Load ebpf Programp \n")
 	// setup ebpf writer
 	writer := ebpfWriter.NewEbpfWriter(bpfManager, InformerListInvterval, rootLogger.Named("ebpfWriter"))
+	// before informer, clean all map data to keep all data up to date
+	writer.CleanEbpfMapData()
 
 	// setup informer
 	stopWatchCh := make(chan struct{})
@@ -220,7 +222,7 @@ func SetupController() {
 
 	err = ctrl.NewControllerManagedBy(mgr).
 		For(&balancingv1beta1.BalancingPolicy{}).
-		Complete(&reconcilerBalancing{
+		Complete(&ReconcilerBalancing{
 			client: mgr.GetClient(),
 			l:      rootLogger.Named("BalancingPolicyReconciler"),
 		})
@@ -231,7 +233,7 @@ func SetupController() {
 
 	err = ctrl.NewControllerManagedBy(mgr).
 		For(&balancingv1beta1.LocalRedirectPolicy{}).
-		Complete(&reconcilerRedirect{
+		Complete(&ReconcilerRedirect{
 			client: mgr.GetClient(),
 			l:      rootLogger.Named("LocalRedirectPolicyReconciler"),
 		})
@@ -242,10 +244,11 @@ func SetupController() {
 
 	go func() {
 		if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-			rootLogger.Sugar().Fatalf("problem running manager: %v", err)
+			rootLogger.Sugar().Fatalf("problem running crd controller: %v", err)
 		}
-		rootLogger.Info("finish controller")
+		rootLogger.Warn("crd controller exits")
 	}()
+
 	waitForCacheSync := mgr.GetCache().WaitForCacheSync(context.Background())
 	if !waitForCacheSync {
 		rootLogger.Fatal("failed to wait for syncing controller-runtime cache")

@@ -11,12 +11,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-type reconcilerBalancing struct {
+type ReconcilerBalancing struct {
 	client client.Client
 	l      *zap.Logger
 }
 
-func (s *reconcilerBalancing) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (s *ReconcilerBalancing) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 
 	logger := s.l.With(
 		zap.String("policy", req.NamespacedName.Name),
