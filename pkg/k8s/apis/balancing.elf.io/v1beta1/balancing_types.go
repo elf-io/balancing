@@ -125,7 +125,6 @@ type BalancingStatus struct {
 // https://github.com/kubernetes-sigs/controller-tools/blob/main/pkg/crd/markers/crd.go#L195
 //
 // +kubebuilder:resource:categories={elf},path="balancingpolicys",singular="balancingpolicy",scope="Cluster",shortName={bl}
-// +kubebuilder:printcolumn:JSONPath=".spec.frontend.serviceMatcher.namespace/.spec.frontend.serviceMatcher.serviceName",description="service",name="serviceMatcher",type=string
 // +kubebuilder:printcolumn:JSONPath=".spec.frontend.serviceMatcher.serviceName",description="serviceName",name="serviceName",type=string
 // +kubebuilder:printcolumn:JSONPath=".spec.frontend.serviceMatcher.namespace",description="namespace",name="namespace",type=string
 // +kubebuilder:printcolumn:JSONPath=".spec.frontend.addressMatcher.ip",description="addressMatcher",name="addressMatcher",type=string
