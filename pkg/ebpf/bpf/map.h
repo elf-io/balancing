@@ -130,7 +130,7 @@ struct {
   __uint(max_entries, DEFAULT_MAX_EBPF_MAP_ENTRIES);
   __uint(pinning, 1); /* 这个配合 golang 中的 pinPath，完成 路径 pin */
   //__uint(map_flags, 0);
-} map_node_entry_ip SEC(".maps");
+} map_node_proxy_ip SEC(".maps");
 
 
 //======================================= map ： 存储 亲和 记录

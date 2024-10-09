@@ -321,7 +321,7 @@ func (s *EbpfProgramStruct) LoadAllEbpfMap(mapPinDir string) error {
 		return fmt.Errorf("failed to load map %s\n", f)
 	}
 
-	f = filepath.Join(mapdir, "map_node_entry_ip")
+	f = filepath.Join(mapdir, "map_node_proxy_ip")
 	s.EbpfMaps.MapNodeProxyIp, err = ebpf.LoadPinnedMap(f, &ebpf.LoadPinOptions{})
 	if err != nil {
 		s.UnloadAllEbpfMap()

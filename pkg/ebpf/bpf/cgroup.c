@@ -292,7 +292,7 @@ static __always_inline int execute_nat(struct bpf_sock_addr *ctx , __u32 debug_l
             evt.nat_type = NAT_TYPE_BALANCING ;
             if ( svcval.balancing_flags & NAT_FLAG_ACCESS_NODEPORT_BALANCING ) {
                 __u32 node_id = backendValue->node_id ;
-                __u32 *node_ip = bpf_map_lookup_elem( &map_node_entry_ip , &node_id);
+                __u32 *node_ip = bpf_map_lookup_elem( &map_node_proxy_ip , &node_id);
                 if (!node_ip) {
                     debugf(DEBUG_ERROR, "failed to find node entry ip for %pI4:%d\n" , &dst_ip  , dst_port   );
                     evt.failure_code = FAILURE_CODE_AGENT__FIND_NODE_ENTRY_IP_MAP_FAILURE ;
