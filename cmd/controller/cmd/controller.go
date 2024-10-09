@@ -3,10 +3,11 @@ package cmd
 import (
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
 	"github.com/elf-io/balancing/pkg/types"
-	"go.uber.org/zap"
+	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	controllerruntimelog "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 var scheme = runtime.NewScheme()
@@ -18,7 +19,7 @@ func init() {
 // for CRD
 func SetupController() {
 
-	ctrl.SetLogger(zap.New())
+	ctrl.SetLogger(logr.New(controllerruntimelog.NullLogSink{}))
 
 	// controller for CRD
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
