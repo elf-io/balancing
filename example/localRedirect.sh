@@ -68,3 +68,4 @@ EOF
 kubectl get localredirectpolicy
 
 
+
