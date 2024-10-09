@@ -1,12 +1,13 @@
 package cmd
 
 import (
+	"fmt"
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
 	"github.com/elf-io/balancing/pkg/types"
-	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	controllerzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 var scheme = runtime.NewScheme()
@@ -19,14 +20,14 @@ func init() {
 func SetupController() {
 
 	// ctrl.SetLogger(logr.New(controllerruntimelog.NullLogSink{}))
-	ctrl.SetLogger(zap.New())
+	ctrl.SetLogger(controllerzap.New())
 
 	// controller for CRD
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: scheme,
 		// Readiness probe endpoint name, defaults to "readyz"
 		// Liveness probe endpoint name, defaults to "healthz"
-		HealthProbeBindAddress:  "0.0.0.0:" + types.ControllerConfig.HttpPort,
+		HealthProbeBindAddress:  fmt.Sprintf("0.0.0.0:%d", types.ControllerConfig.HttpPort),
 		LeaderElection:          true,
 		LeaderElectionID:        "balacning-leader",
 		LeaderElectionNamespace: types.ControllerConfig.PodNamespace,
