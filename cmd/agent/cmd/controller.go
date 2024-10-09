@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpf"
 	"github.com/elf-io/balancing/pkg/ebpfEvent"
@@ -235,9 +236,15 @@ func SetupController() {
 	}
 	rootLogger.Info("setup controller for LocalRedirectPolicy")
 
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		rootLogger.Sugar().Fatalf("problem running manager: %v", err)
+	go func() {
+		if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+			rootLogger.Sugar().Fatalf("problem running manager: %v", err)
+		}
+		rootLogger.Info("finish controller")
+	}()
+	waitForCacheSync := mgr.GetCache().WaitForCacheSync(context.Background())
+	if !waitForCacheSync {
+		rootLogger.Fatal("failed to wait for syncing controller-runtime cache")
 	}
-	rootLogger.Info("finish controller")
 
 }
