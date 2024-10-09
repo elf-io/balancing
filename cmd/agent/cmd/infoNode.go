@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"github.com/google/go-cmp/cmp"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	"github.com/elf-io/balancing/pkg/nodeId"
 	"github.com/elf-io/balancing/pkg/types"
+	"github.com/google/go-cmp/cmp"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	kubeinformers "k8s.io/client-go/informers"
@@ -36,7 +36,7 @@ func (s *NodeReconciler) HandlerAdd(obj interface{}) {
 	return
 }
 
-func checkNodeEntryIPChanged(oldNode, newNode *corev1.Node, entryKey string) bool {
+func checkNodeProxyIPChanged(oldNode, newNode *corev1.Node, entryKey string) bool {
 	oldEntryIP, _ := oldNode.ObjectMeta.Annotations[entryKey]
 	newEntryIP, _ := newNode.ObjectMeta.Annotations[entryKey]
 	return oldEntryIP == newEntryIP
@@ -72,10 +72,10 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	if !reflect.DeepEqual(oldNode.Status.Addresses, newNode.Status.Addresses) {
 		onlyUpdateTime = false
 	}
-	if checkNodeEntryIPChanged(oldNode, newNode, types.NodeAnnotaitonNodeEntryIPv4) {
+	if checkNodeProxyIPChanged(oldNode, newNode, types.NodeAnnotaitonNodeProxyIPv4) {
 		onlyUpdateTime = false
 	}
-	if checkNodeEntryIPChanged(oldNode, newNode, types.NodeAnnotaitonNodeEntryIPv6) {
+	if checkNodeProxyIPChanged(oldNode, newNode, types.NodeAnnotaitonNodeProxyIPv6) {
 		onlyUpdateTime = false
 	}
 	s.writer.UpdateNode(logger, newNode, onlyUpdateTime)

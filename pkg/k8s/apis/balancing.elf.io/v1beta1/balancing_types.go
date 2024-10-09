@@ -20,7 +20,7 @@ type RedirectMode string
 const (
 	RedirectModePodEndpoint = RedirectMode("podEndpoint")
 	RedirectModeNodePort    = RedirectMode("nodePort")
-	RedirectModeNodeEntry   = RedirectMode("nodeEntry")
+	RedirectModeNodeProxy   = RedirectMode("nodeProxy")
 )
 
 type ServiceEndpoint struct {
@@ -40,7 +40,7 @@ type ServiceEndpoint struct {
 
 	// RedirectMode defines the destination IP
 	//
-	// +kubebuilder:validation:Enum=podEndpoint;nodeEntry;nodePort
+	// +kubebuilder:validation:Enum=podEndpoint;nodeProxy;nodePort
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=podEndpoint
 	RedirectMode RedirectMode `json:"redirectMode"`

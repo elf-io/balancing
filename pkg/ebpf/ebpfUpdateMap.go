@@ -65,7 +65,7 @@ func (s *EbpfProgramStruct) UpdateMapNodeIp(keyList []bpf_cgroupMapkeyNodeIp, va
 	return nil
 }
 
-func (s *EbpfProgramStruct) UpdateMapNodeEntryIp(keyList []uint32, valueList []bpf_cgroupMapvalueNodeEntryIp) error {
+func (s *EbpfProgramStruct) UpdateMapNodeProxyIp(keyList []uint32, valueList []bpf_cgroupMapvalueNodeProxyIp) error {
 	if keyList == nil || valueList == nil || len(keyList) == 0 || len(valueList) == 0 {
 		return fmt.Errorf("empty parameter")
 	}
@@ -73,7 +73,7 @@ func (s *EbpfProgramStruct) UpdateMapNodeEntryIp(keyList []uint32, valueList []b
 		return fmt.Errorf("invalid parameter")
 	}
 
-	c, e := s.BpfObjCgroup.MapNodeEntryIp.BatchUpdate(keyList, valueList, &ebpf.BatchOptions{})
+	c, e := s.BpfObjCgroup.MapNodeProxyIp.BatchUpdate(keyList, valueList, &ebpf.BatchOptions{})
 	if e != nil {
 		return fmt.Errorf("failed to BatchUpdate: %+v", e)
 	}
@@ -175,11 +175,11 @@ func (s *EbpfProgramStruct) DeleteMapNodeIp(keyList []bpf_cgroupMapkeyNodeIp) er
 	return nil
 }
 
-func (s *EbpfProgramStruct) DeleteMapNodeEntryIp(keyList []uint32) error {
+func (s *EbpfProgramStruct) DeleteMapNodeProxyIp(keyList []uint32) error {
 	if keyList == nil || len(keyList) == 0 {
 		return nil
 	}
-	c, e := s.BpfObjCgroup.MapNodeEntryIp.BatchDelete(keyList, &ebpf.BatchOptions{})
+	c, e := s.BpfObjCgroup.MapNodeProxyIp.BatchDelete(keyList, &ebpf.BatchOptions{})
 	if e != nil {
 		return fmt.Errorf("failed to BatchDelete: %+v", e)
 	}
@@ -351,15 +351,15 @@ func (s *EbpfProgramStruct) CleanMapNodeIp() (int, error) {
 	return count, nil
 }
 
-func (s *EbpfProgramStruct) CleanMapNodeEntryIp() (int, error) {
+func (s *EbpfProgramStruct) CleanMapNodeProxyIp() (int, error) {
 	keys := make([]uint32, 100)
-	vals := make([]bpf_cgroupMapvalueNodeEntryIp, 100)
+	vals := make([]bpf_cgroupMapvalueNodeProxyIp, 100)
 
 	var mapPtr *ebpf.Map
-	if s.BpfObjCgroup.MapNodeEntryIp != nil {
-		mapPtr = s.BpfObjCgroup.MapNodeEntryIp
-	} else if s.EbpfMaps != nil && s.EbpfMaps.MapNodeEntryIp != nil {
-		mapPtr = s.EbpfMaps.MapNodeEntryIp
+	if s.BpfObjCgroup.MapNodeProxyIp != nil {
+		mapPtr = s.BpfObjCgroup.MapNodeProxyIp
+	} else if s.EbpfMaps != nil && s.EbpfMaps.MapNodeProxyIp != nil {
+		mapPtr = s.EbpfMaps.MapNodeProxyIp
 	} else {
 		return 0, fmt.Errorf("failed to get ebpf map")
 	}

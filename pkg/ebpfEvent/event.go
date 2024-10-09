@@ -76,6 +76,8 @@ func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
 				stamp := time.Now().UTC()
 				eventStr += fmt.Sprintf("TimeStamp=%s ", stamp.Format("2006-01-02T15:04:05Z"))
 
+				// todo:  based on the destion ip, check its belonged service name, balancing policy and redirect policy
+
 				s.l.Sugar().Infof("ebpf event: %s", eventStr)
 			}
 		}

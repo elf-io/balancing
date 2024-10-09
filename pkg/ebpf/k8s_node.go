@@ -103,21 +103,21 @@ OUTER_NEW:
 	return nil
 }
 
-// map the key and value of the nodeEntryIp map
-type nodeEntryIpMapData struct {
+// map the key and value of the nodeProxyIp map
+type nodeProxyIpMapData struct {
 	key *uint32
-	val *bpf_cgroupMapvalueNodeEntryIp
+	val *bpf_cgroupMapvalueNodeProxyIp
 }
 
-func (s *EbpfProgramStruct) applyEpfMapDataNodeEntryIpV4(l *zap.Logger, oldNode *corev1.Node, newNode *corev1.Node) error {
+func (s *EbpfProgramStruct) applyEpfMapDataNodeProxyIpV4(l *zap.Logger, oldNode *corev1.Node, newNode *corev1.Node) error {
 
-	l.Sugar().Debugf("applyEpfMapDataNodeEntryIpV4 1 ")
+	l.Sugar().Debugf("applyEpfMapDataNodeProxyIpV4 1 ")
 
 	if newNode == nil && oldNode == nil {
 		return fmt.Errorf("empty node obj")
 	}
 
-	l.Sugar().Debugf("applyEpfMapDataNodeEntryIpV4 2 ")
+	l.Sugar().Debugf("applyEpfMapDataNodeProxyIpV4 2 ")
 
 	// each node just has only one key
 	if newNode == nil && oldNode != nil {
@@ -128,20 +128,20 @@ func (s *EbpfProgramStruct) applyEpfMapDataNodeEntryIpV4(l *zap.Logger, oldNode 
 			return fmt.Errorf("failed to find the nodeIP for node %s when deleting ebpf data: %v", oldNode.Name, err)
 		}
 
-		l.Sugar().Infof("ebpf map of the nodeEntryIP deletes: key=%d ", nodeId)
-		err = s.DeleteMapNodeEntryIp([]uint32{nodeId})
+		l.Sugar().Infof("ebpf map of the nodeProxyIP deletes: key=%d ", nodeId)
+		err = s.DeleteMapNodeProxyIp([]uint32{nodeId})
 		if err != nil {
-			l.Sugar().Errorf("failed to update nodeEntryIP map: %v", err)
-			return fmt.Errorf("failed to update nodeEntryIP map: %v", err)
+			l.Sugar().Errorf("failed to update nodeProxyIP map: %v", err)
+			return fmt.Errorf("failed to update nodeProxyIP map: %v", err)
 		}
-		l.Sugar().Infof("succeeded to update 1 items in nodeEntryIP map: ")
+		l.Sugar().Infof("succeeded to update 1 items in nodeProxyIP map: ")
 		return nil
 	}
 
-	l.Sugar().Debugf("applyEpfMapDataNodeEntryIpV4 3 ")
+	l.Sugar().Debugf("applyEpfMapDataNodeProxyIpV4 3 ")
 
 	// update or create
-	entryIp, _ := newNode.ObjectMeta.Annotations[types.NodeAnnotaitonNodeEntryIPv4]
+	entryIp, _ := newNode.ObjectMeta.Annotations[types.NodeAnnotaitonNodeProxyIPv4]
 	if len(entryIp) != 0 && net.ParseIP(entryIp).To4() == nil {
 		l.Sugar().Errorf("the v4 entryIp %s defined by the use is invalid, use the internal ip of the node %s ", entryIp, newNode.Name)
 		entryIp = ""
@@ -161,32 +161,32 @@ func (s *EbpfProgramStruct) applyEpfMapDataNodeEntryIpV4(l *zap.Logger, oldNode 
 		}
 	}
 
-	l.Sugar().Debugf("applyEpfMapDataNodeEntryIpV4 4 %s", entryIp)
+	l.Sugar().Debugf("applyEpfMapDataNodeProxyIpV4 4 %s", entryIp)
 
 	nodeId, err := nodeId.NodeIdManagerHander.GetNodeId(newNode.Name)
-	l.Sugar().Debugf("applyEpfMapDataNodeEntryIpV4 5 ")
+	l.Sugar().Debugf("applyEpfMapDataNodeProxyIpV4 5 ")
 
 	if err != nil {
 		l.Sugar().Errorf("failed to find the nodeIP for node %s when updating ebpf data: %v", oldNode.Name, err)
 		return fmt.Errorf("failed to find the nodeIP for node %s when updating ebpf data: %v", oldNode.Name, err)
 	}
-	l.Sugar().Debugf("applyEpfMapDataNodeEntryIpV4 6 ")
-	r := bpf_cgroupMapvalueNodeEntryIp{
+	l.Sugar().Debugf("applyEpfMapDataNodeProxyIpV4 6 ")
+	r := bpf_cgroupMapvalueNodeProxyIp{
 		IpAddr: binary.LittleEndian.Uint32(net.ParseIP(entryIp).To4()),
 	}
-	l.Sugar().Debugf("applyEpfMapDataNodeEntryIpV4 7 ")
+	l.Sugar().Debugf("applyEpfMapDataNodeProxyIpV4 7 ")
 
-	l.Sugar().Infof("ebpf map of the nodeEntryIP updates: key=%d , value=%s ", nodeId, r.String())
+	l.Sugar().Infof("ebpf map of the nodeProxyIP updates: key=%d , value=%s ", nodeId, r.String())
 
-	err = s.UpdateMapNodeEntryIp([]uint32{nodeId}, []bpf_cgroupMapvalueNodeEntryIp{r})
+	err = s.UpdateMapNodeProxyIp([]uint32{nodeId}, []bpf_cgroupMapvalueNodeProxyIp{r})
 	if err != nil {
-		l.Sugar().Errorf("failed to update nodeEntryIP map: %v", err)
-		return fmt.Errorf("failed to update nodeEntryIP map: %v", err)
+		l.Sugar().Errorf("failed to update nodeProxyIP map: %v", err)
+		return fmt.Errorf("failed to update nodeProxyIP map: %v", err)
 	}
 
-	l.Sugar().Debugf("applyEpfMapDataNodeEntryIpV4 8 ")
+	l.Sugar().Debugf("applyEpfMapDataNodeProxyIpV4 8 ")
 
-	l.Sugar().Infof("succeeded to update 1 items in nodeEntryIP map ")
+	l.Sugar().Infof("succeeded to update 1 items in nodeProxyIP map ")
 	return nil
 }
 
@@ -199,8 +199,8 @@ func (s *EbpfProgramStruct) UpdateEbpfMapForNode(l *zap.Logger, oldNode *corev1.
 		if e := s.applyEpfMapDataNodeIpV4(l, oldNode, newNode); e != nil {
 			return fmt.Errorf("failed to applyEpfMapDataNodeIpV4: %v", e)
 		}
-		if e := s.applyEpfMapDataNodeEntryIpV4(l, oldNode, newNode); e != nil {
-			return fmt.Errorf("failed to applyEpfMapDataNodeEntryIpV4: %v", e)
+		if e := s.applyEpfMapDataNodeProxyIpV4(l, oldNode, newNode); e != nil {
+			return fmt.Errorf("failed to applyEpfMapDataNodeProxyIpV4: %v", e)
 		}
 	}
 
@@ -222,8 +222,8 @@ func (s *EbpfProgramStruct) DeleteEbpfMapForNode(l *zap.Logger, node *corev1.Nod
 			return fmt.Errorf("failed to applyEpfMapDataNodeIpV4: %v", e)
 		}
 
-		if e := s.applyEpfMapDataNodeEntryIpV4(l, node, nil); e != nil {
-			return fmt.Errorf("failed to applyEpfMapDataNodeEntryIpV4: %v", e)
+		if e := s.applyEpfMapDataNodeProxyIpV4(l, node, nil); e != nil {
+			return fmt.Errorf("failed to applyEpfMapDataNodeProxyIpV4: %v", e)
 		}
 	}
 

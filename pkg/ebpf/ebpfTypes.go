@@ -50,7 +50,7 @@ var FailureCodeMap = map[uint8]string{
 	0:   "",
 	1:   "AgentNoBackend",
 	2:   "AgentFindBackendFailure",
-	3:   "AgentFindNodeEntryIpFailure",
+	3:   "AgentFindNodeProxyIpFailure",
 	100: "SystemUpdateAffinityFailure",
 	101: "SystemUpdateNatRecordFailure",
 }
@@ -128,11 +128,11 @@ func (t bpf_cgroupMapkeyNodeIp) String() string {
 	return fmt.Sprintf(`{ NodeIp:%s}`, GetIpStr(t.IpAddr))
 }
 
-type bpf_cgroupMapvalueNodeEntryIp struct {
+type bpf_cgroupMapvalueNodeProxyIp struct {
 	IpAddr uint32
 }
 
-func (t bpf_cgroupMapvalueNodeEntryIp) String() string {
+func (t bpf_cgroupMapvalueNodeProxyIp) String() string {
 	return fmt.Sprintf(`{ NodeIp:%s}`, GetIpStr(t.IpAddr))
 }
 

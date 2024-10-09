@@ -186,15 +186,15 @@ func (s *EbpfProgramStruct) PrintMapNodeIp() error {
 	return nil
 }
 
-func (s *EbpfProgramStruct) PrintMapNodeEntryIp() error {
+func (s *EbpfProgramStruct) PrintMapNodeProxyIp() error {
 	keys := make([]uint32, 100)
-	vals := make([]bpf_cgroupMapvalueNodeEntryIp, 100)
+	vals := make([]bpf_cgroupMapvalueNodeProxyIp, 100)
 
 	var mapPtr *ebpf.Map
-	if s.BpfObjCgroup.MapNodeEntryIp != nil {
-		mapPtr = s.BpfObjCgroup.MapNodeEntryIp
-	} else if s.EbpfMaps != nil && s.EbpfMaps.MapNodeEntryIp != nil {
-		mapPtr = s.EbpfMaps.MapNodeEntryIp
+	if s.BpfObjCgroup.MapNodeProxyIp != nil {
+		mapPtr = s.BpfObjCgroup.MapNodeProxyIp
+	} else if s.EbpfMaps != nil && s.EbpfMaps.MapNodeProxyIp != nil {
+		mapPtr = s.EbpfMaps.MapNodeProxyIp
 	} else {
 		return fmt.Errorf("failed to get ebpf map")
 	}

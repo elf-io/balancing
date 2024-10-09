@@ -31,7 +31,7 @@ type EbpfMaps struct {
 	MapEvent       *ebpf.Map
 	MapNatRecord   *ebpf.Map
 	MapNodeIp      *ebpf.Map
-	MapNodeEntryIp *ebpf.Map
+	MapNodeProxyIp *ebpf.Map
 	MapService     *ebpf.Map
 	MapConfigure   *ebpf.Map
 }
@@ -60,7 +60,7 @@ type EbpfProgram interface {
 	// for debug cli
 	PrintMapService() error
 	PrintMapNodeIp() error
-	PrintMapNodeEntryIp() error
+	PrintMapNodeProxyIp() error
 	PrintMapBackend() error
 	PrintMapAffinity() error
 	PrintMapNatRecord() error
@@ -68,7 +68,7 @@ type EbpfProgram interface {
 
 	CleanMapService() (int, error)
 	CleanMapNodeIp() (int, error)
-	CleanMapNodeEntryIp() (int, error)
+	CleanMapNodeProxyIp() (int, error)
 	CleanMapBackend() (int, error)
 	CleanMapAffinity() (int, error)
 	CleanMapNatRecord() (int, error)
@@ -76,7 +76,7 @@ type EbpfProgram interface {
 	UpdateMapService([]bpf_cgroupMapkeyService, []bpf_cgroupMapvalueService) error
 	UpdateMapBackend([]bpf_cgroupMapkeyBackend, []bpf_cgroupMapvalueBackend) error
 	UpdateMapNodeIp([]bpf_cgroupMapkeyNodeIp, []uint32) error
-	UpdateMapNodeEntryIp([]uint32, []bpf_cgroupMapvalueNodeEntryIp) error
+	UpdateMapNodeProxyIp([]uint32, []bpf_cgroupMapvalueNodeProxyIp) error
 	UpdateMapAffinity([]bpf_cgroupMapkeyAffinity, []bpf_cgroupMapvalueAffinity) error
 	UpdateMapNatRecord([]bpf_cgroupMapkeyNatRecord, []bpf_cgroupMapvalueNatRecord) error
 	UpdateMapConfigure(uint32, uint32) error
@@ -84,7 +84,7 @@ type EbpfProgram interface {
 	DeleteMapNatRecord([]bpf_cgroupMapkeyNatRecord) error
 	DeleteMapAffinity([]bpf_cgroupMapkeyAffinity) error
 	DeleteMapNodeIp([]bpf_cgroupMapkeyNodeIp) error
-	DeleteMapNodeEntryIp([]uint32) error
+	DeleteMapNodeProxyIp([]uint32) error
 	DeleteMapService([]bpf_cgroupMapkeyService) error
 	DeleteMapBackend([]bpf_cgroupMapkeyBackend) error
 
@@ -242,9 +242,9 @@ func (s *EbpfProgramStruct) UnloadProgramp() error {
 		s.BpfObjCgroup.bpf_cgroupMaps.MapNodeIp.Unpin()
 		s.BpfObjCgroup.bpf_cgroupMaps.MapNodeIp.Close()
 	}
-	if s.BpfObjCgroup.bpf_cgroupMaps.MapNodeEntryIp != nil {
-		s.BpfObjCgroup.bpf_cgroupMaps.MapNodeEntryIp.Unpin()
-		s.BpfObjCgroup.bpf_cgroupMaps.MapNodeEntryIp.Close()
+	if s.BpfObjCgroup.bpf_cgroupMaps.MapNodeProxyIp != nil {
+		s.BpfObjCgroup.bpf_cgroupMaps.MapNodeProxyIp.Unpin()
+		s.BpfObjCgroup.bpf_cgroupMaps.MapNodeProxyIp.Close()
 	}
 	if s.BpfObjCgroup.bpf_cgroupMaps.MapNatRecord != nil {
 		s.BpfObjCgroup.bpf_cgroupMaps.MapNatRecord.Unpin()
@@ -322,7 +322,7 @@ func (s *EbpfProgramStruct) LoadAllEbpfMap(mapPinDir string) error {
 	}
 
 	f = filepath.Join(mapdir, "map_node_entry_ip")
-	s.EbpfMaps.MapNodeEntryIp, err = ebpf.LoadPinnedMap(f, &ebpf.LoadPinOptions{})
+	s.EbpfMaps.MapNodeProxyIp, err = ebpf.LoadPinnedMap(f, &ebpf.LoadPinOptions{})
 	if err != nil {
 		s.UnloadAllEbpfMap()
 		return fmt.Errorf("failed to load map %s\n", f)
@@ -358,8 +358,8 @@ func (s *EbpfProgramStruct) UnloadAllEbpfMap() {
 	if s.EbpfMaps.MapNodeIp != nil {
 		s.EbpfMaps.MapNodeIp.Close()
 	}
-	if s.EbpfMaps.MapNodeEntryIp != nil {
-		s.EbpfMaps.MapNodeEntryIp.Close()
+	if s.EbpfMaps.MapNodeProxyIp != nil {
+		s.EbpfMaps.MapNodeProxyIp.Close()
 	}
 	if s.EbpfMaps.MapService != nil {
 		s.EbpfMaps.MapService.Close()

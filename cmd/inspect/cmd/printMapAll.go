@@ -26,7 +26,7 @@ var CmdPrintMapAll = &cobra.Command{
 		bpf.PrintMapService()
 		bpf.PrintMapBackend()
 		bpf.PrintMapNodeIp()
-		bpf.PrintMapNodeEntryIp()
+		bpf.PrintMapNodeProxyIp()
 		bpf.PrintMapConfigure()
 		fmt.Printf("\n")
 	},

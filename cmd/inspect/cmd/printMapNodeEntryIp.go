@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"github.com/elf-io/balancing/pkg/ebpf"
+	"github.com/spf13/cobra"
 	"os"
 )
 
-var CmdPrintMapNodeEntryIp = &cobra.Command{
-	Use:   "nodeEntryIp",
-	Short: "print the ebpf map of nodeEntryIp ",
+var CmdPrintMapNodeProxyIp = &cobra.Command{
+	Use:   "nodeProxyIp",
+	Short: "print the ebpf map of nodeProxyIp ",
 	Args:  cobra.RangeArgs(0, 0),
 	Run: func(cmd *cobra.Command, args []string) {
 		bpf := ebpf.NewEbpfProgramMananger(nil)
@@ -20,12 +20,12 @@ var CmdPrintMapNodeEntryIp = &cobra.Command{
 		defer bpf.UnloadAllEbpfMap()
 
 		fmt.Printf("\n")
-		fmt.Printf("print the ebpf map of nodeEntryIp:\n")
-		bpf.PrintMapNodeEntryIp()
+		fmt.Printf("print the ebpf map of nodeProxyIp:\n")
+		bpf.PrintMapNodeProxyIp()
 		fmt.Printf("\n")
 	},
 }
 
 func init() {
-	CmdPrintMap.AddCommand(CmdPrintMapNodeEntryIp)
+	CmdPrintMap.AddCommand(CmdPrintMapNodeProxyIp)
 }

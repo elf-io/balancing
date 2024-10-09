@@ -133,7 +133,7 @@ type bpf_cgroupMapSpecs struct {
 	MapBackend     *ebpf.MapSpec `ebpf:"map_backend"`
 	MapEvent       *ebpf.MapSpec `ebpf:"map_event"`
 	MapNatRecord   *ebpf.MapSpec `ebpf:"map_nat_record"`
-	MapNodeEntryIp *ebpf.MapSpec `ebpf:"map_node_entry_ip"`
+	MapNodeProxyIp *ebpf.MapSpec `ebpf:"map_node_entry_ip"`
 	MapNodeIp      *ebpf.MapSpec `ebpf:"map_node_ip"`
 	MapService     *ebpf.MapSpec `ebpf:"map_service"`
 }
@@ -162,7 +162,7 @@ type bpf_cgroupMaps struct {
 	MapBackend     *ebpf.Map `ebpf:"map_backend"`
 	MapEvent       *ebpf.Map `ebpf:"map_event"`
 	MapNatRecord   *ebpf.Map `ebpf:"map_nat_record"`
-	MapNodeEntryIp *ebpf.Map `ebpf:"map_node_entry_ip"`
+	MapNodeProxyIp *ebpf.Map `ebpf:"map_node_entry_ip"`
 	MapNodeIp      *ebpf.Map `ebpf:"map_node_ip"`
 	MapService     *ebpf.Map `ebpf:"map_service"`
 }
@@ -174,7 +174,7 @@ func (m *bpf_cgroupMaps) Close() error {
 		m.MapBackend,
 		m.MapEvent,
 		m.MapNatRecord,
-		m.MapNodeEntryIp,
+		m.MapNodeProxyIp,
 		m.MapNodeIp,
 		m.MapService,
 	)

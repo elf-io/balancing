@@ -115,7 +115,7 @@ spec:
                         description: RedirectMode defines the destination IP
                         enum:
                         - podEndpoint
-                        - nodeEntry
+                        - nodeProxy
                         - nodePort
                         type: string
                       serviceName:

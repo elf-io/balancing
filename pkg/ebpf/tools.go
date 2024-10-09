@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-func checkMount(mountPath string, mountType string) (bool, error) {
+func checkMount(mPath string, mountType string) (bool, error) {
 	// ms, err := os.ReadFile(HostMountInfoPath)
 	// if err != nil {
 	// 	return false, fmt.Errorf("failed to read mount file: %v", err)
@@ -35,7 +35,7 @@ func checkMount(mountPath string, mountType string) (bool, error) {
 		mountsPath = path.Join(types.HostProcMountDir, mountsPath)
 	}
 
-	fmt.Printf("mountsPath: %s \n", mountsPath)
+	// fmt.Printf("mountsPath: %s ,  %s:%s\n", mountsPath, mPath, mountType)
 
 	f, err := os.Open(mountsPath)
 	if err != nil {
@@ -47,9 +47,9 @@ func checkMount(mountPath string, mountType string) (bool, error) {
 	for scanner.Scan() {
 		// example fields: cgroup2 /sys/fs/cgroup/unified cgroup2 rw,nosuid,nodev,noexec,relatime 0 0
 		mountLine := scanner.Text()
-		fmt.Printf("%s \n", mountLine)
+		// fmt.Printf("%s \n", mountLine)
 		fields := strings.Split(mountLine, " ")
-		if len(fields) >= 3 && fields[2] == mountType && strings.Compare(fields[1], mountPath) == 0 {
+		if len(fields) >= 3 && fields[2] == mountType && strings.Compare(fields[1], mPath) == 0 {
 			return true, nil
 		}
 	}
