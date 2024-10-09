@@ -47,7 +47,7 @@ func checkMount(mountPath string, mountType string) (bool, error) {
 	for scanner.Scan() {
 		// example fields: cgroup2 /sys/fs/cgroup/unified cgroup2 rw,nosuid,nodev,noexec,relatime 0 0
 		mountLine := scanner.Text()
-		fmt.Printf("%s", mountLine)
+		fmt.Printf("%s \n", mountLine)
 		fields := strings.Split(mountLine, " ")
 		if len(fields) >= 3 && fields[2] == mountType && strings.Compare(fields[1], mountPath) == 0 {
 			return true, nil
