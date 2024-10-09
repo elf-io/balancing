@@ -20,10 +20,6 @@ spec:
   scope: Cluster
   versions:
   - additionalPrinterColumns:
-    - description: service
-      jsonPath: .spec.frontend.serviceMatcher.namespace/.spec.frontend.serviceMatcher.serviceName
-      name: serviceMatcher
-      type: string
     - description: serviceName
       jsonPath: .spec.frontend.serviceMatcher.serviceName
       name: serviceName
