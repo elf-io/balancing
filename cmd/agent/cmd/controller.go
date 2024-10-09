@@ -177,6 +177,9 @@ func RunReconciles() {
 	NewServiceInformer(Client, stopWatchCh, writer)
 	NewEndpointSliceInformer(Client, stopWatchCh, writer)
 
+	// crd reconcile
+	SetupController()
+
 	//
 	ebpfEvent := ebpfEvent.NewEbpfEvent(rootLogger.Named("ebpfEvent"), bpfManager)
 	ebpfEvent.WatchEbpfEvent(stopWatchCh)
@@ -196,11 +199,14 @@ func init() {
 func SetupController() {
 
 	// controller for CRD
+	rootLogger.Info("setup crd controller ")
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: scheme,
+		// todo: metric server
 		Metrics: metricsserver.Options{
 			BindAddress: "0",
 		},
+		// todo: HealthProbe
 		HealthProbeBindAddress: fmt.Sprintf("0.0.0.0:%d", types.AgentConfig.HttpPort),
 	})
 	if err != nil {
@@ -216,6 +222,7 @@ func SetupController() {
 	if err != nil {
 		rootLogger.Sugar().Fatalf("unable to NewControllerManagedBy for BalancingPolicy: %v", err)
 	}
+	rootLogger.Info("setup controller for BalancingPolicy")
 
 	err = ctrl.NewControllerManagedBy(mgr).
 		For(&balancingv1beta1.LocalRedirectPolicy{}).
@@ -226,8 +233,11 @@ func SetupController() {
 	if err != nil {
 		rootLogger.Sugar().Fatalf("unable to NewControllerManagedBy for LocalRedirectPolicy : %v", err)
 	}
+	rootLogger.Info("setup controller for LocalRedirectPolicy")
 
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		rootLogger.Sugar().Fatalf("problem running manager: %v", err)
 	}
+	rootLogger.Info("finish controller")
+
 }
