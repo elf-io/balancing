@@ -11,6 +11,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	discovery "k8s.io/api/discovery/v1"
 	"path/filepath"
+	"strings"
 
 	// "github.com/cilium/ebpf/ringbuf"
 	"github.com/cilium/ebpf/rlimit"
@@ -188,12 +189,31 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 
 	go s.daemonGetEvent()
 
-	s.l.Sugar().Infof("ebpf debug level: verbose")
-	s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelVerbose)
-	s.l.Sugar().Infof("ebpf ipv4 enabled: true")
-	s.UpdateMapConfigure(MapConfigureKeyIndexIpv4Enabled, MapConfigureValueEnabled)
-	s.l.Sugar().Infof("ebpf ipv6 enabled: false")
-	s.UpdateMapConfigure(MapConfigureKeyIndexIpv6Enabled, MapConfigureValueDisabled)
+	// set configuration
+	if strings.ToLower(types.AgentConfig.EbpfLogLevel) == types.LogLevelEbpfDebug {
+		s.l.Sugar().Infof("ebpf debug level: verbose")
+		s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelVerbose)
+	} else if strings.ToLower(types.AgentConfig.EbpfLogLevel) == types.LogLevelEbpfInfo {
+		s.l.Sugar().Infof("ebpf debug level: info")
+		s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelInfo)
+	} else {
+		s.l.Sugar().Infof("ebpf debug level: error")
+		s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelError)
+	}
+	if types.AgentConfig.Configmap.EnableIPv4 {
+		s.l.Sugar().Infof("ebpf ipv4 enabled: true")
+		s.UpdateMapConfigure(MapConfigureKeyIndexIpv4Enabled, MapConfigureValueEnabled)
+	} else {
+		s.l.Sugar().Infof("ebpf ipv4 enabled: false")
+		s.UpdateMapConfigure(MapConfigureKeyIndexIpv4Enabled, MapConfigureValueDisabled)
+	}
+	if types.AgentConfig.Configmap.EnableIPv6 {
+		s.l.Sugar().Infof("ebpf ipv6 enabled: true")
+		s.UpdateMapConfigure(MapConfigureKeyIndexIpv6Enabled, MapConfigureValueEnabled)
+	} else {
+		s.l.Sugar().Infof("ebpf ipv6 enabled: false")
+		s.UpdateMapConfigure(MapConfigureKeyIndexIpv6Enabled, MapConfigureValueDisabled)
+	}
 
 	return nil
 }

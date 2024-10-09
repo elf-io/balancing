@@ -8,14 +8,19 @@ import (
 	"github.com/elf-io/balancing/pkg/ebpf"
 	"github.com/elf-io/balancing/pkg/ebpfEvent"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
+	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
 	"github.com/elf-io/balancing/pkg/nodeId"
 	"github.com/elf-io/balancing/pkg/podBank"
 	"github.com/elf-io/balancing/pkg/types"
+	"k8s.io/apimachinery/pkg/runtime"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
 	"path/filepath"
+	ctrl "sigs.k8s.io/controller-runtime"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"time"
 )
 
@@ -181,33 +186,48 @@ func RunReconciles() {
 
 }
 
-/*
+var scheme = runtime.NewScheme()
+
+func init() {
+	utilruntime.Must(balancingv1beta1.AddToScheme(scheme))
+}
+
+// for CRD
 func SetupController() {
 
 	// controller for CRD
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+		Scheme: scheme,
 		Metrics: metricsserver.Options{
 			BindAddress: "0",
 		},
-		HealthProbeBindAddress: "0",
+		HealthProbeBindAddress: "0.0.0.0:" + types.AgentConfig.HttpPort,
 	})
 	if err != nil {
-		rootLogger.Sugar().Fatalf("unable to NewManager")
-	}
-	if err := api.AddToScheme(mgr.GetScheme()); err != nil {
-		rootLogger.Sugar().Fatalf("unable to add scheme")
-	}
-	err = ctrl.NewControllerManagedBy(mgr).
-		For(&api.ChaosPod{}).
-		Owns(&corev1.Pod{}).
-		Complete(&reconciler{
-			Client: mgr.GetClient(),
-			scheme: mgr.GetScheme(),
-		})
-	if err != nil {
-		setupLog.Error(err, "unable to create controller")
-		os.Exit(1)
+		rootLogger.Sugar().Fatalf("unable to NewManager: %v", err)
 	}
 
+	err = ctrl.NewControllerManagedBy(mgr).
+		For(&balancingv1beta1.BalancingPolicy{}).
+		Complete(&reconcilerBalancing{
+			client: mgr.GetClient(),
+			l:      rootLogger.Named("BalancingPolicyReconciler"),
+		})
+	if err != nil {
+		rootLogger.Sugar().Fatalf("unable to NewControllerManagedBy for BalancingPolicy: %v", err)
+	}
+
+	err = ctrl.NewControllerManagedBy(mgr).
+		For(&balancingv1beta1.LocalRedirectPolicy{}).
+		Complete(&reconcilerRedirect{
+			client: mgr.GetClient(),
+			l:      rootLogger.Named("LocalRedirectPolicyReconciler"),
+		})
+	if err != nil {
+		rootLogger.Sugar().Fatalf("unable to NewControllerManagedBy for LocalRedirectPolicy : %v", err)
+	}
+
+	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+		rootLogger.Sugar().Fatalf("problem running manager: %v", err)
+	}
 }
-*/
