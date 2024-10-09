@@ -3,6 +3,7 @@ package cmd
 import (
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
 	"github.com/elf-io/balancing/pkg/types"
+	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -16,6 +17,8 @@ func init() {
 
 // for CRD
 func SetupController() {
+
+	ctrl.SetLogger(zap.New())
 
 	// controller for CRD
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{

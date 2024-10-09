@@ -13,6 +13,7 @@ import (
 	"github.com/elf-io/balancing/pkg/nodeId"
 	"github.com/elf-io/balancing/pkg/podBank"
 	"github.com/elf-io/balancing/pkg/types"
+	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -198,6 +199,8 @@ func init() {
 
 // for CRD
 func SetupController() {
+
+	ctrl.SetLogger(zap.New())
 
 	// controller for CRD
 	rootLogger.Info("setup crd controller ")
