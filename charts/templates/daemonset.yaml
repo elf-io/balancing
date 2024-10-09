@@ -170,7 +170,7 @@ spec:
             - name: ebpf-map
               mountPath: /sys/fs
             - name: cgroup-fs
-              mountPath: /var/run/elf
+              mountPath: /run/elf
             {{- if .Values.elfAgent.extraVolumes }}
             {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.extraVolumeMounts "context" $ ) | nindent 12 }}
             {{- end }}

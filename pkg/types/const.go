@@ -21,7 +21,7 @@ const (
 
 	BpfFSPath    = "/sys/fs/bpf"
 	MapsPinpath  = BpfFSPath + "/elf"
-	CgroupV2Path = "/var/run/elf"
+	CgroupV2Path = "/run/elf"
 
 	LogLevelEbpfDebug = "verbose"
 	LogLevelEbpfInfo  = "info"
