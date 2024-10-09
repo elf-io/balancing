@@ -19,7 +19,7 @@ type reconcilerBalancing struct {
 func (s *reconcilerBalancing) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 
 	logger := s.l.With(
-		zap.String("policy", req.NamespacedName),
+		zap.String("policy", req.NamespacedName.Name),
 	)
 	res := reconcile.Result{}
 
@@ -27,15 +27,15 @@ func (s *reconcilerBalancing) Reconcile(ctx context.Context, req ctrl.Request) (
 	rs := &balancing.BalancingPolicy{}
 	err := s.client.Get(ctx, req.NamespacedName, rs)
 	if errors.IsNotFound(err) {
-		logger.Sugar().Debugf("policy %s has been deleted", req.NamespacedName)
+		logger.Sugar().Debugf("policy %v has been deleted", req.NamespacedName)
 		// ..... delete ebpf map
 		return res, nil
 	} else if err != nil {
-		logger.Sugar().Debugf("could not fetch %s: %+v", req.NamespacedName, err)
+		logger.Sugar().Debugf("could not fetch %v: %+v", req.NamespacedName, err)
 		return res, fmt.Errorf("could not fetch: %+v", err)
 	}
 
-	logger.Sugar().Debugf("reconcile: balancing policy %s", req.NamespacedName)
+	logger.Sugar().Debugf("reconcile: balancing policy %v", req.NamespacedName)
 	// ........... update the ebpf data
 
 	return res, nil

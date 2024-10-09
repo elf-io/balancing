@@ -19,7 +19,7 @@ type reconcilerRedirect struct {
 func (s *reconcilerRedirect) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 
 	logger := s.l.With(
-		zap.String("policy", req.NamespacedName),
+		zap.String("policy", req.NamespacedName.Name),
 	)
 	res := reconcile.Result{}
 
@@ -27,11 +27,11 @@ func (s *reconcilerRedirect) Reconcile(ctx context.Context, req ctrl.Request) (c
 	rs := &balancing.LocalRedirectPolicy{}
 	err := s.client.Get(ctx, req.NamespacedName, rs)
 	if errors.IsNotFound(err) {
-		logger.Sugar().Debugf("policy %s has been deleted", req.NamespacedName)
+		logger.Sugar().Debugf("policy %v has been deleted", req.NamespacedName)
 		// ..... delete ebpf map
 		return res, nil
 	} else if err != nil {
-		logger.Sugar().Debugf("could not fetch %s: %+v", req.NamespacedName, err)
+		logger.Sugar().Debugf("could not fetch %v: %+v", req.NamespacedName, err)
 		return res, fmt.Errorf("could not fetch: %+v", err)
 	}
 
