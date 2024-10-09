@@ -1,5 +1,8 @@
 # balancingpolicy: redirect the request to the endpoint in the cluster
 
+kubectl get BalancingPolicy  | awk '{print $1}' | sed '1 d' | xargs -n 1 -i kubectl delete BalancingPolicy {}
+
+
 cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
