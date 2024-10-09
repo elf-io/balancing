@@ -256,7 +256,6 @@ spec:
             type: object
         required:
         - metadata
-        - status
         type: object
     served: true
     storage: true

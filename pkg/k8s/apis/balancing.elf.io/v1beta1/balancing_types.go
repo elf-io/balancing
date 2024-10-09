@@ -108,7 +108,7 @@ type BalancingPolicy struct {
 	metav1.ObjectMeta `json:"metadata"`
 
 	Spec   BalancingSpec   `json:"spec,omitempty"`
-	Status BalancingStatus `json:"status"`
+	Status BalancingStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true

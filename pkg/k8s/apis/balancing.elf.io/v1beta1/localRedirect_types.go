@@ -143,7 +143,7 @@ type LocalRedirectPolicy struct {
 	metav1.ObjectMeta `json:"metadata"`
 
 	Spec   LocalRedirectSpec   `json:"spec,omitempty"`
-	Status LocalRedirectStatus `json:"status"`
+	Status LocalRedirectStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true

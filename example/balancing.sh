@@ -4,7 +4,7 @@ cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
-  name: test-service-podEndpoint
+  name: test-service-podendpoint
 spec:
   enabled: true
   frontend:
@@ -38,7 +38,7 @@ cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
-  name: test-service-nodeProxy
+  name: test-service-nodeproxy
 spec:
   enabled: true
   frontend:
@@ -72,7 +72,7 @@ cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
-  name: test-service-nodePort
+  name: test-service-nodeport
 spec:
   enabled: true
   frontend:
@@ -102,39 +102,6 @@ spec:
 EOF
 
 
-
-cat <<EOF | kubectl apply -f -
-apiVersion: balancing.elf.io/v1beta1
-kind: BalancingPolicy
-metadata:
-  name: test-service-nodeProxy
-spec:
-  enabled: true
-  frontend:
-    serviceMatcher:
-      serviceName: http-server-v4
-      namespace: default
-      toPorts:
-        - port: "8080"
-          protocol: TCP
-          name: p1
-        - port: "80"
-          protocol: TCP
-          name: p2
-  backend:
-    serviceEndpoint:
-      serviceName: http-server-v4
-      namespace: default
-      # podEndpoint;nodeProxy;nodePort
-      redirectMode: nodeProxy
-      toPorts:
-      - port: "80"
-        protocol: TCP
-        name: p1
-      - port: "80"
-        protocol: TCP
-        name: p2
-EOF
 
 
 cat <<EOF | kubectl apply -f -
