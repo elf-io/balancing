@@ -201,7 +201,7 @@ func SetupController() {
 		Metrics: metricsserver.Options{
 			BindAddress: "0",
 		},
-		HealthProbeBindAddress: "0.0.0.0:" + types.AgentConfig.HttpPort,
+		HealthProbeBindAddress: fmt.Sprintf("0.0.0.0:%d", types.AgentConfig.HttpPort),
 	})
 	if err != nil {
 		rootLogger.Sugar().Fatalf("unable to NewManager: %v", err)
