@@ -125,15 +125,19 @@ spec:
     addressEndpoint:
       - ip: "1.1.1.1"
         toPorts: 9080
+        protocol: TCP
         name: p1
       - ip: "1.1.1.2"
         toPorts: 9080
+        protocol: TCP
         name: p1
       - ip: "1.1.2.1"
-        toPorts: 9081
+        toPorts: 9080
+        protocol: TCP
         name: p2
       - ip: "1.1.2.2"
-        toPorts: 9081
+        toPorts: 9080
+        protocol: TCP
         name: p2
 EOF
 
