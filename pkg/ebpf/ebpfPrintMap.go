@@ -74,20 +74,23 @@ func (s *EbpfProgramStruct) PrintMapService() error {
 	}
 
 	// Print categorized data
-	fmt.Println("LocalRedirect Entries:")
-	for i := 0; i < len(allKeysRedirect); i++ {
-		fmt.Printf("%v : key=%s, value=%s\n", i, allKeysRedirect[i], allValsRedirect[i])
-	}
-
 	fmt.Println("")
-	fmt.Println("Service Entries:")
+	fmt.Println("Service Entries: %d", len(allKeysService))
 	for i := 0; i < len(allKeysService); i++ {
-		fmt.Printf("%v : key=%s, value=%s\n", i, allKeysService[i], allValsService[i])
+		fmt.Printf("[%v]: key=%s, \n", i, allKeysService[i])
+		fmt.Printf("      value=%s\n", allValsService[i])
 	}
 
-	fmt.Println("Balancing Entries:")
+	fmt.Println("LocalRedirect Entries: %d", len(allKeysRedirect))
+	for i := 0; i < len(allKeysRedirect); i++ {
+		fmt.Printf("[%v]: key=%s\n", i, allKeysRedirect[i])
+		fmt.Printf("      value=%s\n", allValsRedirect[i])
+	}
+
+	fmt.Println("Balancing Entries: %d", len(allKeysBalancing))
 	for i := 0; i < len(allKeysBalancing); i++ {
-		fmt.Printf("%v : key=%s, value=%s\n", i, allKeysBalancing[i], allValsBalancing[i])
+		fmt.Printf("[%v]: key=%s\n", i, allKeysBalancing[i])
+		fmt.Printf("      value=%s\n", allValsBalancing[i])
 	}
 
 	fmt.Println("")
@@ -159,20 +162,23 @@ func (s *EbpfProgramStruct) PrintMapBackend() error {
 	}
 
 	// Print categorized data
-	fmt.Println("LocalRedirect Entries:")
-	for i := 0; i < len(allKeysRedirect); i++ {
-		fmt.Printf("%v : key=%s, value=%s\n", i, allKeysRedirect[i], allValsRedirect[i])
-	}
-
 	fmt.Println("")
-	fmt.Println("Service Entries:")
+	fmt.Println("Service Entries: %d", len(allKeysService))
 	for i := 0; i < len(allKeysService); i++ {
-		fmt.Printf("%v : key=%s, value=%s\n", i, allKeysService[i], allValsService[i])
+		fmt.Printf("[%v]: key=%s\n", i, allKeysService[i])
+		fmt.Printf("      value=%s\n", allValsService[i])
 	}
 
-	fmt.Println("Balancing Entries:")
+	fmt.Println("LocalRedirect Entries : %d", len(allKeysRedirect))
+	for i := 0; i < len(allKeysRedirect); i++ {
+		fmt.Printf("[%v]: key=%s\n", i, allKeysRedirect[i])
+		fmt.Printf("      value=%s\n", allValsRedirect[i])
+	}
+
+	fmt.Println("Balancing Entries: %d", len(allKeysBalancing))
 	for i := 0; i < len(allKeysBalancing); i++ {
-		fmt.Printf("%v : key=%s, value=%s\n", i, allKeysBalancing[i], allValsBalancing[i])
+		fmt.Printf("[%v]: key=%s\n", i, allKeysBalancing[i])
+		fmt.Printf("      value=%s\n", allValsBalancing[i])
 	}
 
 	fmt.Println("")
@@ -213,8 +219,8 @@ func (s *EbpfProgramStruct) PrintMapNodeIp() error {
 			}
 		}
 		for i := 0; i < len(keys) && i < c; i++ {
-			fmt.Printf("%v : key=%+v\n", i, keys[i])
-			fmt.Printf("%v : value=%+v\n", i, vals[i])
+			fmt.Printf("[%v]: key=%s\n", i, keys[i])
+			fmt.Printf("      value=%+v\n", vals[i])
 		}
 		if finished {
 			break
@@ -258,8 +264,8 @@ func (s *EbpfProgramStruct) PrintMapNodeProxyIp() error {
 			}
 		}
 		for i := 0; i < len(keys) && i < c; i++ {
-			fmt.Printf("%v : key=%+v\n", i, keys[i])
-			fmt.Printf("%v : value=%+v\n", i, vals[i])
+			fmt.Printf("[%v]: key=%+v\n", i, keys[i])
+			fmt.Printf("      value=%s\n", vals[i])
 		}
 		if finished {
 			break
@@ -303,8 +309,8 @@ func (s *EbpfProgramStruct) PrintMapAffinity() error {
 			}
 		}
 		for i := 0; i < len(keys) && i < c; i++ {
-			fmt.Printf("%v : key=%+v\n", i, keys[i])
-			fmt.Printf("%v : value=%+v\n", i, vals[i])
+			fmt.Printf("[%v]: key=%s\n", i, keys[i])
+			fmt.Printf("      value=%s\n", vals[i])
 		}
 		if finished {
 			break
@@ -348,8 +354,8 @@ func (s *EbpfProgramStruct) PrintMapNatRecord() error {
 			}
 		}
 		for i := 0; i < len(keys) && i < c; i++ {
-			fmt.Printf("%v : key=%+v\n", i, keys[i])
-			fmt.Printf("%v : value=%+v\n", i, vals[i])
+			fmt.Printf("[%v]: key=%s\n", i, keys[i])
+			fmt.Printf("      value=%s\n", vals[i])
 		}
 		if finished {
 			break
