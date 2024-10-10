@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/elf-io/balancing/pkg/podBank"
+	"github.com/elf-io/balancing/pkg/ebpfWriter"
+	"github.com/elf-io/balancing/pkg/podId"
+	"github.com/elf-io/balancing/pkg/podLabel"
+	"github.com/elf-io/balancing/pkg/types"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,7 +17,8 @@ import (
 
 // -----------------------------------
 type PodReconciler struct {
-	log *zap.Logger
+	log    *zap.Logger
+	writer ebpfWriter.EbpfWriter
 }
 
 func (s *PodReconciler) HandlerAdd(obj interface{}) {
@@ -28,8 +32,13 @@ func (s *PodReconciler) HandlerAdd(obj interface{}) {
 		zap.String("pod", name),
 	)
 
-	logger.Sugar().Debugf("add id for pod %s", name)
-	podBank.PodBankHander.Update(nil, pod)
+	if pod.Spec.NodeName == types.AgentConfig.LocalNodeName {
+		podId.PodIdHander.Update(nil, pod)
+		if changed := podLabel.PodLabelHandle.UpdatePodInfo(nil, pod); changed {
+			// data changed, try to update the ebpf data
+			s.writer.UpdateRedirectByPod(logger, pod)
+		}
+	}
 
 	return
 }
@@ -50,9 +59,16 @@ func (s *PodReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		zap.String("pod", name),
 	)
 
-	if !reflect.DeepEqual(oldPod.Status.ContainerStatuses, newPod.Status.ContainerStatuses) {
-		logger.Sugar().Debugf("update id for pod %s/%s", newPod.Namespace, newPod.Name)
-		podBank.PodBankHander.Update(oldPod, newPod)
+	if newPod.Spec.NodeName == types.AgentConfig.LocalNodeName {
+		if !reflect.DeepEqual(oldPod.Status.ContainerStatuses, newPod.Status.ContainerStatuses) {
+			logger.Sugar().Debugf("update id for pod %s/%s", newPod.Namespace, newPod.Name)
+			podId.PodIdHander.Update(oldPod, newPod)
+		}
+
+		if changed := podLabel.PodLabelHandle.UpdatePodInfo(oldPod, newPod); changed {
+			// data changed, try to update the ebpf data
+			s.writer.UpdateRedirectByPod(logger, newPod)
+		}
 	}
 
 	return
@@ -69,13 +85,19 @@ func (s *PodReconciler) HandlerDelete(obj interface{}) {
 		zap.String("pod", name),
 	)
 
-	logger.Sugar().Debugf("delete id for pod %s/%s", pod.Namespace, pod.Name)
-	podBank.PodBankHander.Update(pod, nil)
+	if pod.Spec.NodeName == types.AgentConfig.LocalNodeName {
+		podId.PodIdHander.Update(pod, nil)
+
+		if changed := podLabel.PodLabelHandle.UpdatePodInfo(pod, nil); changed {
+			// data changed, try to update the ebpf data
+			s.writer.DeleteRedirectByPod(logger, pod)
+		}
+	}
 
 	return
 }
 
-func NewPodInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, localNodeName string) {
+func NewPodInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, localNodeName string, writer ebpfWriter.EbpfWriter) {
 
 	// call HandlerUpdate at an interval of 60s
 	kubeInformerFactory := kubeinformers.NewSharedInformerFactoryWithOptions(Client, InformerListInvterval, kubeinformers.WithTweakListOptions(func(options *metav1.ListOptions) {
@@ -88,7 +110,8 @@ func NewPodInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, loc
 	}
 
 	r := PodReconciler{
-		log: rootLogger.Named("PodReconciler"),
+		log:    rootLogger.Named("PodReconciler"),
+		writer: writer,
 	}
 	info.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    r.HandlerAdd,

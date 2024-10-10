@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/google/go-cmp/cmp"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	"github.com/elf-io/balancing/pkg/k8s"
+	"github.com/google/go-cmp/cmp"
 	"go.uber.org/zap"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	kubeinformers "k8s.io/client-go/informers"
@@ -32,7 +32,7 @@ func (s *EndpoingSliceReconciler) HandlerAdd(obj interface{}) {
 	)
 
 	logger.Sugar().Infof("HandlerAdd process EndpointSlice: %+v", name)
-	s.writer.UpdateEndpointSlice(logger, eds, false)
+	s.writer.UpdateServiceByEndpointSlice(logger, eds, false)
 
 	return
 }
@@ -65,7 +65,7 @@ func (s *EndpoingSliceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 
 	// s.log.Sugar().Debugf("HandlerUpdate get old EndpointSlice: %+v", oldEds)
 	logger.Sugar().Infof("HandlerUpdate process EndpointSlice: %+s", name)
-	s.writer.UpdateEndpointSlice(logger, newEds, onlyUpdateTime)
+	s.writer.UpdateServiceByEndpointSlice(logger, newEds, onlyUpdateTime)
 
 	return
 }
@@ -83,7 +83,7 @@ func (s *EndpoingSliceReconciler) HandlerDelete(obj interface{}) {
 	)
 
 	logger.Sugar().Infof("HandlerDelete process EndpointSlice: %s", name)
-	s.writer.DeleteEndpointSlice(logger, eds)
+	s.writer.DeleteServiceByEndpointSlice(logger, eds)
 
 	return
 }

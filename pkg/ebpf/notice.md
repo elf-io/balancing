@@ -26,8 +26,9 @@ nodeIP + nodePort
 
 
 (2) 支持 crd  localRedirect
-onlyLocal:  当本地 endpoint 挂了，是否 允许 正常 访问 service
-qos:   本地 所有 pod 的 connect qos 流控
+支持解析 service clusterIP （不支持 LoadbalancerIP、externalIP、nodeIP） + crd 中的 port  ， 解析为 localPod + crd 中的 toPort
+当本地所有 endpoint 挂了， 会继续以 正常的 service 去解析 
+// TODO ， qos:   本地 所有 pod 的 connect qos 流控
 
 （3）支持 crd  balancing
 自定义 浮动 ip  和 后端 endpoint ip

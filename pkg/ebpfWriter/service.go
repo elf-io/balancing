@@ -5,6 +5,7 @@ package ebpfWriter
 
 import (
 	"fmt"
+	"github.com/elf-io/balancing/pkg/ebpf"
 	"github.com/elf-io/balancing/pkg/k8s"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
@@ -12,6 +13,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
 )
+
+type SvcEndpointData struct {
+	Svc *corev1.Service
+	// one endpointslice store 100 endpoints by default
+	// index: namesapce/endpointSliceName
+	EpsliceList map[string]*discovery.EndpointSlice
+}
 
 func shallowCopyEdpSliceMap(t map[string]*discovery.EndpointSlice) map[string]*discovery.EndpointSlice {
 	m := make(map[string]*discovery.EndpointSlice)
@@ -21,7 +29,7 @@ func shallowCopyEdpSliceMap(t map[string]*discovery.EndpointSlice) map[string]*d
 	return m
 }
 
-func (s *ebpfWriter) UpdateService(l *zap.Logger, svc *corev1.Service, onlyUpdateTime bool) error {
+func (s *ebpfWriter) UpdateServiceByService(l *zap.Logger, svc *corev1.Service, onlyUpdateTime bool) error {
 
 	if svc == nil {
 		return fmt.Errorf("empty service")
@@ -37,11 +45,11 @@ func (s *ebpfWriter) UpdateService(l *zap.Logger, svc *corev1.Service, onlyUpdat
 
 	s.ebpfServiceLock.Lock()
 	defer s.ebpfServiceLock.Unlock()
-	if d, ok := s.endpointData[index]; ok {
+	if d, ok := s.serviceData[index]; ok {
 		if d.EpsliceList != nil && len(d.EpsliceList) > 0 {
 			if !onlyUpdateTime {
 				l.Sugar().Infof("cache the data, and apply new data to ebpf map for service %v", index)
-				if e := s.ebpfhandler.UpdateEbpfMapForService(l, d.Svc, svc, d.EpsliceList, d.EpsliceList); e != nil {
+				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, svc, d.EpsliceList, d.EpsliceList); e != nil {
 					l.Sugar().Errorf("failed to write ebpf map: %v", e)
 					return e
 				}
@@ -56,7 +64,7 @@ func (s *ebpfWriter) UpdateService(l *zap.Logger, svc *corev1.Service, onlyUpdat
 		}
 	} else {
 		l.Sugar().Debugf("cache the data, but no need to apply new data to ebpf map, cause miss endpointslice")
-		s.endpointData[index] = &EndpointData{
+		s.serviceData[index] = &SvcEndpointData{
 			Svc:         svc,
 			EpsliceList: make(map[string]*discovery.EndpointSlice),
 		}
@@ -65,7 +73,7 @@ func (s *ebpfWriter) UpdateService(l *zap.Logger, svc *corev1.Service, onlyUpdat
 	return nil
 }
 
-func (s *ebpfWriter) DeleteService(l *zap.Logger, svc *corev1.Service) error {
+func (s *ebpfWriter) DeleteServiceByService(l *zap.Logger, svc *corev1.Service) error {
 	if svc == nil {
 		return fmt.Errorf("empty service")
 	}
@@ -75,14 +83,14 @@ func (s *ebpfWriter) DeleteService(l *zap.Logger, svc *corev1.Service) error {
 
 	s.ebpfServiceLock.Lock()
 	defer s.ebpfServiceLock.Unlock()
-	if d, ok := s.endpointData[index]; ok {
+	if d, ok := s.serviceData[index]; ok {
 		// todo : generate a ebpf map data and apply it
 		l.Sugar().Infof("delete data from ebpf map for service: %v", index)
-		if e := s.ebpfhandler.DeleteEbpfMapForService(l, d.Svc, d.EpsliceList); e != nil {
+		if e := s.ebpfhandler.DeleteEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, d.EpsliceList); e != nil {
 			l.Sugar().Errorf("failed to write ebpf map: %v", e)
 			return e
 		}
-		delete(s.endpointData, index)
+		delete(s.serviceData, index)
 	} else {
 		l.Sugar().Debugf("no need to delete service from ebpf map, cause already removed")
 	}
@@ -91,7 +99,7 @@ func (s *ebpfWriter) DeleteService(l *zap.Logger, svc *corev1.Service) error {
 }
 
 // -------------------------------------------------------------
-func (s *ebpfWriter) UpdateEndpointSlice(l *zap.Logger, epSlice *discovery.EndpointSlice, onlyUpdateTime bool) error {
+func (s *ebpfWriter) UpdateServiceByEndpointSlice(l *zap.Logger, epSlice *discovery.EndpointSlice, onlyUpdateTime bool) error {
 
 	if epSlice == nil {
 		return fmt.Errorf("empty EndpointSlice")
@@ -107,13 +115,13 @@ func (s *ebpfWriter) UpdateEndpointSlice(l *zap.Logger, epSlice *discovery.Endpo
 
 	s.ebpfServiceLock.Lock()
 	defer s.ebpfServiceLock.Unlock()
-	if d, ok := s.endpointData[index]; ok {
+	if d, ok := s.serviceData[index]; ok {
 		if d.Svc != nil {
 			if !onlyUpdateTime {
 				l.Sugar().Infof("cache the data, and apply new data to ebpf map for the service %v", index)
 				oldEps := shallowCopyEdpSliceMap(d.EpsliceList)
 				d.EpsliceList[epindex] = epSlice
-				if e := s.ebpfhandler.UpdateEbpfMapForService(l, d.Svc, d.Svc, oldEps, d.EpsliceList); e != nil {
+				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, d.Svc, oldEps, d.EpsliceList); e != nil {
 					d.EpsliceList = oldEps
 					l.Sugar().Errorf("failed to write ebpf map: %v", e)
 					return e
@@ -128,7 +136,7 @@ func (s *ebpfWriter) UpdateEndpointSlice(l *zap.Logger, epSlice *discovery.Endpo
 		}
 	} else {
 		l.Sugar().Debugf("cache the data, but no need to apply new data to ebpf map, cause miss service")
-		s.endpointData[index] = &EndpointData{
+		s.serviceData[index] = &SvcEndpointData{
 			Svc: nil,
 			EpsliceList: map[string]*discovery.EndpointSlice{
 				epindex: epSlice,
@@ -139,7 +147,7 @@ func (s *ebpfWriter) UpdateEndpointSlice(l *zap.Logger, epSlice *discovery.Endpo
 	return nil
 }
 
-func (s *ebpfWriter) DeleteEndpointSlice(l *zap.Logger, epSlice *discovery.EndpointSlice) error {
+func (s *ebpfWriter) DeleteServiceByEndpointSlice(l *zap.Logger, epSlice *discovery.EndpointSlice) error {
 
 	if epSlice == nil {
 		return fmt.Errorf("empty service")
@@ -151,7 +159,7 @@ func (s *ebpfWriter) DeleteEndpointSlice(l *zap.Logger, epSlice *discovery.Endpo
 
 	s.ebpfServiceLock.Lock()
 	defer s.ebpfServiceLock.Unlock()
-	if d, ok := s.endpointData[index]; ok {
+	if d, ok := s.serviceData[index]; ok {
 		if d.Svc == nil {
 			// when the service event happens, the data has been removed
 			delete(d.EpsliceList, epindex)
@@ -160,7 +168,7 @@ func (s *ebpfWriter) DeleteEndpointSlice(l *zap.Logger, epSlice *discovery.Endpo
 				l.Sugar().Infof("delete data from ebpf map for EndpointSlice: %v", index)
 				oldEps := shallowCopyEdpSliceMap(d.EpsliceList)
 				delete(d.EpsliceList, epindex)
-				if e := s.ebpfhandler.UpdateEbpfMapForService(l, d.Svc, d.Svc, oldEps, d.EpsliceList); e != nil {
+				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, d.Svc, oldEps, d.EpsliceList); e != nil {
 					d.EpsliceList[epindex] = oldEp
 					l.Sugar().Errorf("failed to write ebpf map: %v", e)
 					return e
@@ -172,67 +180,5 @@ func (s *ebpfWriter) DeleteEndpointSlice(l *zap.Logger, epSlice *discovery.Endpo
 	l.Sugar().Debugf("no need to apply EndpointSlice for ebpf map, cause the data has been already removed")
 
 finish:
-	return nil
-}
-
-// ---------------------------------------------------------
-
-func (s *ebpfWriter) UpdateNode(l *zap.Logger, node *corev1.Node, onlyUpdateTime bool) error {
-
-	if node == nil {
-		return fmt.Errorf("empty node")
-	}
-	node.ObjectMeta.CreationTimestamp = metav1.Time{
-		time.Now(),
-	}
-
-	index := node.Name
-	l.Sugar().Debugf("update node %s ", index)
-
-	s.ebpfNodeLock.Lock()
-	defer s.ebpfNodeLock.Unlock()
-	if d, ok := s.nodeData[index]; ok {
-		if !onlyUpdateTime {
-			l.Sugar().Infof("cache the data, and apply new data to ebpf map for the node %v", index)
-			if e := s.ebpfhandler.UpdateEbpfMapForNode(l, d, node); e != nil {
-				l.Sugar().Errorf("failed to write ebpf map for the node %v: %v", index, e)
-				return e
-			}
-			s.nodeData[index] = node
-		} else {
-			l.Sugar().Debugf("just update lastUpdateTime")
-			d = node
-		}
-	} else {
-		l.Sugar().Infof("cache the data, and apply new data to ebpf map for the node %v", index)
-		if e := s.ebpfhandler.UpdateEbpfMapForNode(l, nil, node); e != nil {
-			l.Sugar().Errorf("failed to write ebpf map for the node %v: %v", index, e)
-			return e
-		}
-		s.nodeData[index] = node
-	}
-
-	return nil
-}
-
-func (s *ebpfWriter) DeleteNode(l *zap.Logger, node *corev1.Node) error {
-	if node == nil {
-		return fmt.Errorf("empty node")
-	}
-	index := node.Name
-	l.Sugar().Debugf("delete node %s ", index)
-
-	s.ebpfNodeLock.Lock()
-	defer s.ebpfNodeLock.Unlock()
-	if _, ok := s.nodeData[index]; ok {
-		l.Sugar().Infof("delete data from ebpf map for node: %v", index)
-		if e := s.ebpfhandler.DeleteEbpfMapForNode(l, node); e != nil {
-			l.Sugar().Errorf("failed to write ebpf map for the node %v: %v", index, e)
-			return e
-		}
-		delete(s.nodeData, index)
-	} else {
-		l.Sugar().Debugf("no need to delete node from ebpf map, cause already removed")
-	}
 	return nil
 }

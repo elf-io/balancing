@@ -14,9 +14,11 @@ spec:
       serviceName: http-server-v4
       namespace: default
       toPorts:
+        # 只能有一个 name: p1
         - port: "8080"
           protocol: TCP
           name: p1
+        # 只能有一个 name: p2
         - port: "80"
           protocol: TCP
           name: p2
@@ -25,9 +27,11 @@ spec:
       matchLabels:
         app: http-redirect
     toPorts:
+        # 只能有一个 name: p1
       - port: "80"
         protocol: TCP
         name: p1
+        # 只能有一个 name: p2
       - port: "80"
         protocol: TCP
         name: p2
@@ -46,9 +50,11 @@ spec:
     addressMatcher:
       ip: "169.254.0.90"
       toPorts:
+        # 只能有一个 name: p1
         - port: "8080"
           protocol: TCP
           name: p1
+        # 只能有一个 name: p2
         - port: "80"
           protocol: TCP
           name: p2

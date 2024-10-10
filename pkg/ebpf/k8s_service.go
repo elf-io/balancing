@@ -23,7 +23,7 @@ type backendMapData struct {
 	val *bpf_cgroupMapvalueBackend
 }
 
-func buildEbpfMapDataForV4ServiceTypeService(svc *corev1.Service, edsList map[string]*discovery.EndpointSlice) ([]*serviceMapData, []*backendMapData, error) {
+func buildEbpfMapDataForV4Service(natType uint8, svc *corev1.Service, edsList map[string]*discovery.EndpointSlice) ([]*serviceMapData, []*backendMapData, error) {
 
 	if svc == nil {
 		return nil, nil, fmt.Errorf("service is empty")
@@ -43,7 +43,7 @@ func buildEbpfMapDataForV4ServiceTypeService(svc *corev1.Service, edsList map[st
 
 		protocol := GetPortProtocol(&svcPort)
 
-		// generate data for backend map
+		// -------------------  generate data for backend map --------------------
 		// 1组 service port， 对应 一组 clusterIpPort backend + nodePort backend
 		localEp, remoteEp := ClassifyV4Endpoint(edsList)
 		allEp := []*discovery.Endpoint{}
@@ -55,7 +55,7 @@ func buildEbpfMapDataForV4ServiceTypeService(svc *corev1.Service, edsList map[st
 				SvcId:   svcV4Id,
 				Dport:   uint16(svcPort.Port),
 				Proto:   protocol,
-				NatType: NAT_TYPE_SERVICE,
+				NatType: natType,
 				Scope:   SCOPE_LOCAL_CLUSTER,
 			}
 			nodeid := uint32(0)
@@ -84,36 +84,7 @@ func buildEbpfMapDataForV4ServiceTypeService(svc *corev1.Service, edsList map[st
 			}
 		}
 
-		// ----------------- generate data of service map  ----------------
-
-		// get clusterIP, loadbalancerIP, externalIP
-		// they use the same port, So deal with them together
-		// allVip := GetServiceV4AllVip(svc)
-		// for _, vip := range allVip {
-		// 	// generate data for service map
-		// 	svcMapKey := bpf_cgroupMapkeyService{
-		// 		Address: binary.LittleEndian.Uint32(vip.To4()),
-		// 		Dport:   uint16(svcPort.Port),
-		// 		Proto:   protocol,
-		// 		NatType: NAT_TYPE_SERVICE,
-		// 		Scope:   SCOPE_LOCAL_CLUSTER,
-		// 	}
-		// 	svcMapVal := bpf_cgroupMapvalueService{
-		// 		SvcId:             svcV4Id,
-		// 		TotalBackendCount: uint32(len(allEp)),
-		// 		LocalBackendCount: uint32(len(localEp)),
-		// 		AffinitySecond:    affinityTime,
-		// 		ServiceFlags:      serviceFlags,
-		// 		BalancingFlags:    0,
-		// 		RedirectFlags:     0,
-		// 		NatMode:,
-		// 	}
-		// 	resultSvcList = append(resultSvcList, &serviceMapData{
-		// 		key: &svcMapKey,
-		// 		val: &svcMapVal,
-		// 	})
-		// }
-
+		// -------------------  generate data for service map --------------------
 		addFunc := func(vip net.IP, port uint16, natType, natMode uint8) {
 			svcMapKey := bpf_cgroupMapkeyService{
 				Address: binary.LittleEndian.Uint32(vip.To4()),
@@ -138,45 +109,40 @@ func buildEbpfMapDataForV4ServiceTypeService(svc *corev1.Service, edsList map[st
 			})
 		}
 
+		// add date for clusterip
 		for _, vip := range getClusterIPs(svc, corev1.IPv4Protocol) {
-			addFunc(vip, uint16(svcPort.Port), NAT_TYPE_SERVICE, NatModeServiceClusterip)
+			addFunc(vip, uint16(svcPort.Port), natType, NatModeServiceClusterip)
 		}
-		for _, vip := range GetServiceV4LoadbalancerIP(svc) {
-			addFunc(vip, uint16(svcPort.Port), NAT_TYPE_SERVICE, NatModeServiceLoadBalancer)
-		}
-		if svc.Spec.ExternalIPs != nil {
-			for _, v := range svc.Spec.ExternalIPs {
-				vip := net.ParseIP(v)
-				if vip.To4() != nil {
-					addFunc(vip.To4(), uint16(svcPort.Port), NAT_TYPE_SERVICE, NatModeServiceExternalIp)
+
+		if natType == NAT_TYPE_SERVICE {
+			// add date for loadbalancerIP
+			for _, vip := range GetServiceV4LoadbalancerIP(svc) {
+				addFunc(vip, uint16(svcPort.Port), natType, NatModeServiceLoadBalancer)
+			}
+
+			// add date for ExternalIPs
+			if svc.Spec.ExternalIPs != nil {
+				for _, v := range svc.Spec.ExternalIPs {
+					vip := net.ParseIP(v)
+					if vip.To4() != nil {
+						addFunc(vip.To4(), uint16(svcPort.Port), natType, NatModeServiceExternalIp)
+					}
 				}
 			}
-		}
 
-		// handle nodePort alone cause it uses nodePort
-		if svcPort.NodePort != 0 {
-			// generate data for service map
-			addFunc(NODEPORT_V4_IP, uint16(svcPort.NodePort), NAT_TYPE_SERVICE, NatModeServiceNodePort)
+			// add date for NodePort
+			// handle nodePort alone cause it uses nodePort
+			if svcPort.NodePort != 0 {
+				// generate data for service map
+				addFunc(NODEPORT_V4_IP, uint16(svcPort.NodePort), natType, NatModeServiceNodePort)
+			}
 		}
 	}
+
 	return resultSvcList, resultBackList, nil
-
 }
 
-func buildEbpfMapDataForV4Service(natType uint8, svc *corev1.Service, edsList map[string]*discovery.EndpointSlice) ([]*serviceMapData, []*backendMapData, error) {
-	if svc == nil {
-		return nil, nil, fmt.Errorf("failed to buildEbpfMapDataForV4Service, service is nil")
-	}
-
-	if natType == NAT_TYPE_SERVICE {
-		return buildEbpfMapDataForV4ServiceTypeService(svc, edsList)
-	} else if natType == NAT_TYPE_REDIRECT {
-		return nil, nil, fmt.Errorf("buildEbpfMapDataForV4Service: unimplemented NAT_TYPE_REDIRECT")
-	} else if natType == NAT_TYPE_BALANCING {
-		return nil, nil, fmt.Errorf("buildEbpfMapDataForV4Service: unimplemented NAT_TYPE_BALANCING")
-	}
-	return nil, nil, fmt.Errorf("buildEbpfMapDataForV4Service: unknowd nat type %d", natType)
-}
+// -----------------------------------------------
 
 func (s *EbpfProgramStruct) applyEpfMapDataV4Service(l *zap.Logger, oldList, newList []*serviceMapData) error {
 
@@ -305,9 +271,9 @@ OUTER_NEW:
 	return nil
 }
 
-// -------------------------------------------------- for k8s service
+// -------------------------------------------------- for k8s service , localRedirect, balancing
 
-func (s *EbpfProgramStruct) UpdateEbpfMapForService(l *zap.Logger, oldSvc, newSvc *corev1.Service, oldEdsList, newEdsList map[string]*discovery.EndpointSlice) error {
+func (s *EbpfProgramStruct) UpdateEbpfMapForService(l *zap.Logger, natType uint8, oldSvc, newSvc *corev1.Service, oldEdsList, newEdsList map[string]*discovery.EndpointSlice) error {
 
 	processIpv4 := false
 	processIpv6 := false
@@ -321,11 +287,12 @@ func (s *EbpfProgramStruct) UpdateEbpfMapForService(l *zap.Logger, oldSvc, newSv
 	}
 
 	if processIpv4 {
-		oldSvcList, oldBkList, err1 := buildEbpfMapDataForV4Service(NAT_TYPE_SERVICE, oldSvc, oldEdsList)
+		oldSvcList, oldBkList, err1 := buildEbpfMapDataForV4Service(natType, oldSvc, oldEdsList)
+
 		if err1 != nil {
 			return fmt.Errorf("failed to buildEbpfMapDataForV4Service: %v", err1)
 		}
-		newSvcList, newBkList, err2 := buildEbpfMapDataForV4Service(NAT_TYPE_SERVICE, newSvc, newEdsList)
+		newSvcList, newBkList, err2 := buildEbpfMapDataForV4Service(natType, newSvc, newEdsList)
 		if err2 != nil {
 			return fmt.Errorf("failed to buildEbpfMapDataForV4Service: %v", err2)
 		}
@@ -345,7 +312,7 @@ func (s *EbpfProgramStruct) UpdateEbpfMapForService(l *zap.Logger, oldSvc, newSv
 	return nil
 }
 
-func (s *EbpfProgramStruct) DeleteEbpfMapForService(l *zap.Logger, svc *corev1.Service, edsList map[string]*discovery.EndpointSlice) error {
+func (s *EbpfProgramStruct) DeleteEbpfMapForService(l *zap.Logger, natType uint8, svc *corev1.Service, edsList map[string]*discovery.EndpointSlice) error {
 
 	processIpv4 := false
 	processIpv6 := false
@@ -359,7 +326,7 @@ func (s *EbpfProgramStruct) DeleteEbpfMapForService(l *zap.Logger, svc *corev1.S
 	}
 
 	if processIpv4 {
-		svcList, bkList, err := buildEbpfMapDataForV4Service(NAT_TYPE_SERVICE, svc, edsList)
+		svcList, bkList, err := buildEbpfMapDataForV4Service(natType, svc, edsList)
 		if err != nil {
 			return fmt.Errorf("failed to buildEbpfMapDataForV4Service: %v", err)
 		}
@@ -378,7 +345,3 @@ func (s *EbpfProgramStruct) DeleteEbpfMapForService(l *zap.Logger, svc *corev1.S
 
 	return nil
 }
-
-// -------------------------------------------------- for CRD redirect
-
-// -------------------------------------------------- for CRD  balancing

@@ -5,40 +5,49 @@ package ebpfWriter
 
 import (
 	"github.com/elf-io/balancing/pkg/ebpf"
+	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
 	"github.com/elf-io/balancing/pkg/lock"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	discovery "k8s.io/api/discovery/v1"
+	"k8s.io/client-go/kubernetes"
 	"time"
 )
 
 type EbpfWriter interface {
 	CleanEbpfMapData() error
 
-	UpdateService(*zap.Logger, *corev1.Service, bool) error
-	DeleteService(*zap.Logger, *corev1.Service) error
+	// for service
+	UpdateServiceByService(*zap.Logger, *corev1.Service, bool) error
+	DeleteServiceByService(*zap.Logger, *corev1.Service) error
+	UpdateServiceByEndpointSlice(*zap.Logger, *discovery.EndpointSlice, bool) error
+	DeleteServiceByEndpointSlice(*zap.Logger, *discovery.EndpointSlice) error
 
-	UpdateEndpointSlice(*zap.Logger, *discovery.EndpointSlice, bool) error
-	DeleteEndpointSlice(*zap.Logger, *discovery.EndpointSlice) error
-
+	// for node
 	UpdateNode(*zap.Logger, *corev1.Node, bool) error
 	DeleteNode(*zap.Logger, *corev1.Node) error
-}
 
-type EndpointData struct {
-	Svc *corev1.Service
-	// one endpointslice store 100 endpoints by default
-	// index: namesapce/name
-	EpsliceList map[string]*discovery.EndpointSlice
+	// for localRedirect
+	DeleteRedirectByPod(*zap.Logger, *corev1.Pod) error
+	UpdateRedirectByPod(*zap.Logger, *corev1.Pod) error
+	DeleteRedirectByService(*zap.Logger, *corev1.Service) error
+	UpdateRedirectByService(*zap.Logger, *corev1.Service) error
+	DeleteRedirectByPolicy(*zap.Logger, string) error
+	UpdateRedirectByPolicy(*zap.Logger, *balancingv1beta1.LocalRedirectPolicy) error
 }
 
 type ebpfWriter struct {
-	// index: namesapce/name
+	client *kubernetes.Clientset
+
 	ebpfServiceLock *lock.Mutex
-	endpointData    map[string]*EndpointData
+	// index: namesapce/serviceName
+	serviceData map[string]*SvcEndpointData
 
 	ebpfNodeLock *lock.Mutex
 	nodeData     map[string]*corev1.Node
+
+	redirectPolicyLock *lock.Mutex
+	redirectPolicyData map[string]*redirectPolicyData
 
 	// use the creationTimestamp to record the last update time, and calculate the validityTime
 	validityTime time.Duration
@@ -48,15 +57,18 @@ type ebpfWriter struct {
 
 var _ EbpfWriter = (*ebpfWriter)(nil)
 
-func NewEbpfWriter(ebpfhandler ebpf.EbpfProgram, validityTime time.Duration, l *zap.Logger) EbpfWriter {
+func NewEbpfWriter(c *kubernetes.Clientset, ebpfhandler ebpf.EbpfProgram, validityTime time.Duration, l *zap.Logger) EbpfWriter {
 	t := ebpfWriter{
-		ebpfServiceLock: &lock.Mutex{},
-		ebpfNodeLock:    &lock.Mutex{},
-		endpointData:    make(map[string]*EndpointData),
-		nodeData:        make(map[string]*corev1.Node),
-		validityTime:    validityTime,
-		log:             l,
-		ebpfhandler:     ebpfhandler,
+		client:             c,
+		ebpfServiceLock:    &lock.Mutex{},
+		redirectPolicyLock: &lock.Mutex{},
+		ebpfNodeLock:       &lock.Mutex{},
+		serviceData:        make(map[string]*SvcEndpointData),
+		nodeData:           make(map[string]*corev1.Node),
+		redirectPolicyData: make(map[string]*redirectPolicyData),
+		validityTime:       validityTime,
+		log:                l,
+		ebpfhandler:        ebpfhandler,
 	}
 
 	go t.DeamonGC()

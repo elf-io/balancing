@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/google/go-cmp/cmp"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
+	"github.com/google/go-cmp/cmp"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	kubeinformers "k8s.io/client-go/informers"
@@ -47,7 +47,10 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 	}
 
 	logger.Sugar().Infof("HandlerAdd process sevice %+v", name)
-	s.writer.UpdateService(logger, svc, false)
+	// update service
+	s.writer.UpdateServiceByService(logger, svc, false)
+	// update localRedirect
+	s.writer.UpdateRedirectByService(logger, svc)
 
 	return
 }
@@ -76,6 +79,7 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	}
 	logger.Sugar().Infof("HandlerUpdate process sevice %+v", name)
 
+	// update service
 	onlyUpdateTime := false
 	if t := cmp.Diff(oldSvc, newSvc); len(t) > 0 {
 		logger.Sugar().Debugf("service diff: %s", t)
@@ -83,7 +87,10 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	if reflect.DeepEqual(oldSvc.Spec, newSvc.Spec) && reflect.DeepEqual(oldSvc.Status, newSvc.Status) {
 		onlyUpdateTime = true
 	}
-	s.writer.UpdateService(logger, newSvc, onlyUpdateTime)
+	s.writer.UpdateServiceByService(logger, newSvc, onlyUpdateTime)
+
+	// update localRedirect
+	s.writer.UpdateRedirectByService(logger, newSvc)
 
 	return
 }
@@ -105,7 +112,11 @@ func (s *ServiceReconciler) HandlerDelete(obj interface{}) {
 		return
 	}
 	logger.Sugar().Infof("HandlerDelete process sevice %+v", svc)
-	s.writer.DeleteService(logger, svc)
+	// update service
+	s.writer.DeleteServiceByService(logger, svc)
+
+	// update localRedirect
+	s.writer.DeleteRedirectByService(logger, svc)
 
 	return
 }

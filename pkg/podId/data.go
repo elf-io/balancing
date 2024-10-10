@@ -1,4 +1,4 @@
-package podBank
+package podId
 
 import (
 	"github.com/elf-io/balancing/pkg/lock"

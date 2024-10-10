@@ -1,4 +1,4 @@
-package podBank
+package podId
 
 import (
 	"context"
@@ -10,12 +10,12 @@ import (
 	"strings"
 )
 
-type PidBankManager interface {
+type PodIdManager interface {
 	Update(*corev1.Pod, *corev1.Pod)
 	LookupPodByPid(uint32) (string, string, string, bool, error)
 }
 
-type podBankManager struct {
+type podIdManager struct {
 	client   *kubernetes.Clientset
 	log      *zap.Logger
 	NodeName string
@@ -24,21 +24,21 @@ type podBankManager struct {
 	podInfo *PodRegistry
 }
 
-var _ PidBankManager = (*podBankManager)(nil)
+var _ PodIdManager = (*podIdManager)(nil)
 
-var PodBankHander PidBankManager
+var PodIdHander PodIdManager
 
-func InitPodBankManager(c *kubernetes.Clientset, log *zap.Logger, nodeName string) {
-	if _, ok := PodBankHander.(*podBankManager); !ok {
-		t := &podBankManager{
+func InitPodIdManager(c *kubernetes.Clientset, log *zap.Logger, nodeName string) {
+	if _, ok := PodIdHander.(*podIdManager); !ok {
+		t := &podIdManager{
 			client:   c,
 			log:      log,
 			NodeName: nodeName,
 			// each node running pod with a total of max 1000
 			podInfo: NewPodRegistry(1000),
 		}
-		t.initPodBank()
-		PodBankHander = t
+		t.initPodId()
+		PodIdHander = t
 		log.Sugar().Info("finish initialize PodBankHander")
 	} else {
 		log.Sugar().Errorf("secondary calling for PodBankHander")
@@ -47,7 +47,7 @@ func InitPodBankManager(c *kubernetes.Clientset, log *zap.Logger, nodeName strin
 
 // -----------------------------------
 
-func (s *podBankManager) updatePodInfo(pod *corev1.Pod) error {
+func (s *podIdManager) updatePodInfo(pod *corev1.Pod) error {
 	getContaineridFunc := func(line string) string {
 		// ContainerID is the ID of the container in the format '<type>://<container_id>'.
 		index := strings.Index(line, "//")
@@ -77,7 +77,7 @@ func (s *podBankManager) updatePodInfo(pod *corev1.Pod) error {
 	return fmt.Errorf("no ContainerStatuses")
 }
 
-func (s *podBankManager) deletePodInfo(pod *corev1.Pod) {
+func (s *podIdManager) deletePodInfo(pod *corev1.Pod) {
 	key := PodName{
 		Podname:   pod.Name,
 		Namespace: pod.Namespace,
@@ -88,7 +88,7 @@ func (s *podBankManager) deletePodInfo(pod *corev1.Pod) {
 // -----------------------------------
 
 // before pod informer, build local database firstly for serving ebpf in case of missing event
-func (s *podBankManager) initPodBank() {
+func (s *podIdManager) initPodId() {
 
 	s.log.Sugar().Infof("initPodBank")
 
@@ -109,7 +109,6 @@ func (s *podBankManager) initPodBank() {
 			if err := s.updatePodInfo(&pod); err != nil {
 				s.log.Sugar().Errorf("error: %s", err)
 			}
-
 		}
 	}
 
@@ -117,7 +116,7 @@ func (s *podBankManager) initPodBank() {
 	return
 }
 
-func (s *podBankManager) Update(oldPod, newPod *corev1.Pod) {
+func (s *podIdManager) Update(oldPod, newPod *corev1.Pod) {
 	if newPod == nil && oldPod == nil {
 		return
 
@@ -141,7 +140,7 @@ func (s *podBankManager) Update(oldPod, newPod *corev1.Pod) {
 // 如果是 k8s pod，则 podName, namespace, containerdId 有值
 // 如果只是个 容器 但不是 pod，则   containerdId 有值
 // 如果只是个 主机上的应用，则 bool 有值
-func (s *podBankManager) LookupPodByPid(pid uint32) (podName, namespace, containerdId string, host bool, err error) {
+func (s *podIdManager) LookupPodByPid(pid uint32) (podName, namespace, containerdId string, host bool, err error) {
 	if pid == 0 {
 		return "", "", "", false, fmt.Errorf("empty input")
 	}

@@ -11,7 +11,8 @@ import (
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
 	"github.com/elf-io/balancing/pkg/nodeId"
-	"github.com/elf-io/balancing/pkg/podBank"
+	"github.com/elf-io/balancing/pkg/podId"
+	"github.com/elf-io/balancing/pkg/podLabel"
 	"github.com/elf-io/balancing/pkg/types"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -159,7 +160,9 @@ func RunReconciles() {
 	nodeId.InitNodeIdManager(Client, rootLogger.Named("nodeId"))
 
 	// before informer and ebpf, build pod ip database of local node
-	podBank.InitPodBankManager(Client, rootLogger.Named("podBank"), types.AgentConfig.LocalNodeName)
+	podId.InitPodIdManager(Client, rootLogger.Named("podId"), types.AgentConfig.LocalNodeName)
+
+	podLabel.InitPodLabelManager(rootLogger.Named("podLabel"))
 
 	// setup ebpf and load
 	bpfManager := ebpf.NewEbpfProgramMananger(rootLogger.Named("ebpf"))
@@ -169,20 +172,20 @@ func RunReconciles() {
 	defer bpfManager.UnloadProgramp()
 	rootLogger.Sugar().Infof("succeeded to Load ebpf Programp \n")
 	// setup ebpf writer
-	writer := ebpfWriter.NewEbpfWriter(bpfManager, InformerListInvterval, rootLogger.Named("ebpfWriter"))
+	writer := ebpfWriter.NewEbpfWriter(Client, bpfManager, InformerListInvterval, rootLogger.Named("ebpfWriter"))
 	// before informer, clean all map data to keep all data up to date
 	writer.CleanEbpfMapData()
 
 	// setup informer
 	stopWatchCh := make(chan struct{})
-	NewPodInformer(Client, stopWatchCh, types.AgentConfig.LocalNodeName)
+	NewPodInformer(Client, stopWatchCh, types.AgentConfig.LocalNodeName, writer)
 	NewNodeInformer(Client, stopWatchCh, writer)
 
 	NewServiceInformer(Client, stopWatchCh, writer)
 	NewEndpointSliceInformer(Client, stopWatchCh, writer)
 
 	// crd reconcile
-	SetupController()
+	SetupController(writer)
 
 	//
 	ebpfEvent := ebpfEvent.NewEbpfEvent(rootLogger.Named("ebpfEvent"), bpfManager)
@@ -200,7 +203,7 @@ func init() {
 }
 
 // for CRD
-func SetupController() {
+func SetupController(writer ebpfWriter.EbpfWriter) {
 
 	// ctrl.SetLogger(logr.New(controllerruntimelog.NullLogSink{}))
 	ctrl.SetLogger(controllerzap.New())
@@ -225,6 +228,7 @@ func SetupController() {
 		Complete(&ReconcilerBalancing{
 			client: mgr.GetClient(),
 			l:      rootLogger.Named("BalancingPolicyReconciler"),
+			writer: writer,
 		})
 	if err != nil {
 		rootLogger.Sugar().Fatalf("unable to NewControllerManagedBy for BalancingPolicy: %v", err)
@@ -236,6 +240,7 @@ func SetupController() {
 		Complete(&ReconcilerRedirect{
 			client: mgr.GetClient(),
 			l:      rootLogger.Named("LocalRedirectPolicyReconciler"),
+			writer: writer,
 		})
 	if err != nil {
 		rootLogger.Sugar().Fatalf("unable to NewControllerManagedBy for LocalRedirectPolicy : %v", err)

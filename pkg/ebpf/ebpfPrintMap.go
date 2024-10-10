@@ -5,55 +5,14 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"os"
+
 	"github.com/cilium/ebpf"
 	"github.com/cilium/ebpf/perf"
-	"os"
 )
 
-// func (s *EbpfProgramStruct) PrintMapDataService() error {
-//
-// 	keys := make([]bpf_cgroupMapkeyService, 100)
-// 	vals := make([]bpf_cgroupMapvalueService, 100)
-//
-// 	var cursor ebpf.MapBatchCursor
-// 	count := 0
-// 	for {
-// 		c, batchErr := s.BpfObjCgroup.MapService.BatchLookup(&cursor, keys, vals, nil)
-// 		count += c
-// 		finished := false
-// 		if batchErr != nil {
-// 			if errors.Is(batchErr, ebpf.ErrKeyNotExist) {
-// 				// end
-// 				finished = true
-// 			} else {
-// 				return fmt.Errorf("failed to batchlookup for %v\n", s.BpfObjCgroup.MapService.String())
-// 			}
-// 		}
-// 		for i := 0; i < len(keys) && i < c; i++ {
-// 			fmt.Printf("%v : key=%+v\n", i, keys[i])
-// 			fmt.Printf("%v : value=%+v\n", i, vals[i])
-// 			fmt.Printf("\n")
-// 		}
-// 		if finished {
-// 			break
-// 		}
-// 	}
-// 	fmt.Printf("end map %s: total items: %v \n",name, count)
-// 	return nil
-// }
-
-// type MapName string
-// const (
-// 	MapNameService   = MapName("mapService")
-// 	MapNameAffinity  = MapName("mapAffinity")
-// 	MapNameBackend   = MapName("mapBackend")
-// 	MapNameNatRecord = MapName("mapNatRecord")
-// 	MapNameNode      = MapName("mapNode")
-// )
-
+// PrintMapService prints the map data for services, categorized by NatType.
 func (s *EbpfProgramStruct) PrintMapService() error {
-	keys := make([]bpf_cgroupMapkeyService, 100)
-	vals := make([]bpf_cgroupMapvalueService, 100)
 
 	var mapPtr *ebpf.Map
 	if s.BpfObjCgroup.MapService != nil {
@@ -67,39 +26,79 @@ func (s *EbpfProgramStruct) PrintMapService() error {
 
 	fmt.Printf("------------------------------\n")
 	fmt.Printf("map  %s\n", name)
+
 	var cursor ebpf.MapBatchCursor
 	count := 0
+
+	// Temporary storage for categorized keys and values
+	var allKeysRedirect []bpf_cgroupMapkeyService
+	var allValsRedirect []bpf_cgroupMapvalueService
+	var allKeysService []bpf_cgroupMapkeyService
+	var allValsService []bpf_cgroupMapvalueService
+	var allKeysBalancing []bpf_cgroupMapkeyService
+	var allValsBalancing []bpf_cgroupMapvalueService
+
 	for {
+		keys := make([]bpf_cgroupMapkeyService, 100)
+		vals := make([]bpf_cgroupMapvalueService, 100)
+
 		c, batchErr := mapPtr.BatchLookup(&cursor, keys, vals, nil)
 		count += c
 		finished := false
 		if batchErr != nil {
 			if errors.Is(batchErr, ebpf.ErrKeyNotExist) {
-				// end
 				finished = true
 			} else {
 				return fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
 			}
 		}
-		for i := 0; i < len(keys) && i < c; i++ {
-			fmt.Printf("%v : key=%+v\n", i, keys[i])
-			fmt.Printf("%v : value=%+v\n", i, vals[i])
+		// Categorize current batch
+		for i := 0; i < c; i++ {
+			switch keys[i].NatType {
+			case NAT_TYPE_REDIRECT:
+				allKeysRedirect = append(allKeysRedirect, keys[i])
+				allValsRedirect = append(allValsRedirect, vals[i])
+			case NAT_TYPE_SERVICE:
+				allKeysService = append(allKeysService, keys[i])
+				allValsService = append(allValsService, vals[i])
+			case NAT_TYPE_BALANCING:
+				allKeysBalancing = append(allKeysBalancing, keys[i])
+				allValsBalancing = append(allValsBalancing, vals[i])
+			default:
+				fmt.Printf("Unknown NatType: %v : key=%s, value=%s\n", i, keys[i], vals[i])
+			}
 		}
 		if finished {
 			break
 		}
 	}
 
+	// Print categorized data
+	fmt.Println("LocalRedirect Entries:")
+	for i := 0; i < len(allKeysRedirect); i++ {
+		fmt.Printf("%v : key=%s, value=%s\n", i, allKeysRedirect[i], allValsRedirect[i])
+	}
+
+	fmt.Println("")
+	fmt.Println("Service Entries:")
+	for i := 0; i < len(allKeysService); i++ {
+		fmt.Printf("%v : key=%s, value=%s\n", i, allKeysService[i], allValsService[i])
+	}
+
+	fmt.Println("Balancing Entries:")
+	for i := 0; i < len(allKeysBalancing); i++ {
+		fmt.Printf("%v : key=%s, value=%s\n", i, allKeysBalancing[i], allValsBalancing[i])
+	}
+
+	fmt.Println("")
 	fmt.Printf("end map %s: total items: %v \n", name, count)
 	fmt.Printf("------------------------------\n")
 	fmt.Printf("\n")
 	return nil
 }
 
+// PrintMapBackend prints the map data for backends, categorized by NatType.
 func (s *EbpfProgramStruct) PrintMapBackend() error {
-	keys := make([]bpf_cgroupMapkeyBackend, 100)
-	vals := make([]bpf_cgroupMapvalueBackend, 100)
-
 	var mapPtr *ebpf.Map
 	if s.BpfObjCgroup.MapBackend != nil {
 		mapPtr = s.BpfObjCgroup.MapBackend
@@ -112,29 +111,71 @@ func (s *EbpfProgramStruct) PrintMapBackend() error {
 
 	fmt.Printf("------------------------------\n")
 	fmt.Printf("map  %s\n", name)
+
 	var cursor ebpf.MapBatchCursor
 	count := 0
+
+	// Temporary storage for categorized keys and values
+	var allKeysRedirect []bpf_cgroupMapkeyBackend
+	var allValsRedirect []bpf_cgroupMapvalueBackend
+	var allKeysService []bpf_cgroupMapkeyBackend
+	var allValsService []bpf_cgroupMapvalueBackend
+	var allKeysBalancing []bpf_cgroupMapkeyBackend
+	var allValsBalancing []bpf_cgroupMapvalueBackend
+
 	for {
+		keys := make([]bpf_cgroupMapkeyBackend, 100)
+		vals := make([]bpf_cgroupMapvalueBackend, 100)
+
 		c, batchErr := mapPtr.BatchLookup(&cursor, keys, vals, nil)
 		count += c
 		finished := false
 		if batchErr != nil {
 			if errors.Is(batchErr, ebpf.ErrKeyNotExist) {
-				// end
 				finished = true
 			} else {
 				return fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
 			}
 		}
-		for i := 0; i < len(keys) && i < c; i++ {
-			fmt.Printf("%v : key=%+v\n", i, keys[i])
-			fmt.Printf("%v : value=%+v\n", i, vals[i])
+		// Categorize current batch
+		for i := 0; i < c; i++ {
+			switch keys[i].NatType {
+			case NAT_TYPE_REDIRECT:
+				allKeysRedirect = append(allKeysRedirect, keys[i])
+				allValsRedirect = append(allValsRedirect, vals[i])
+			case NAT_TYPE_SERVICE:
+				allKeysService = append(allKeysService, keys[i])
+				allValsService = append(allValsService, vals[i])
+			case NAT_TYPE_BALANCING:
+				allKeysBalancing = append(allKeysBalancing, keys[i])
+				allValsBalancing = append(allValsBalancing, vals[i])
+			default:
+				fmt.Printf("Unknown NatType: %v : key=%s, value=%s\n", i, keys[i], vals[i])
+			}
 		}
 		if finished {
 			break
 		}
 	}
 
+	// Print categorized data
+	fmt.Println("LocalRedirect Entries:")
+	for i := 0; i < len(allKeysRedirect); i++ {
+		fmt.Printf("%v : key=%s, value=%s\n", i, allKeysRedirect[i], allValsRedirect[i])
+	}
+
+	fmt.Println("")
+	fmt.Println("Service Entries:")
+	for i := 0; i < len(allKeysService); i++ {
+		fmt.Printf("%v : key=%s, value=%s\n", i, allKeysService[i], allValsService[i])
+	}
+
+	fmt.Println("Balancing Entries:")
+	for i := 0; i < len(allKeysBalancing); i++ {
+		fmt.Printf("%v : key=%s, value=%s\n", i, allKeysBalancing[i], allValsBalancing[i])
+	}
+
+	fmt.Println("")
 	fmt.Printf("end map %s: total items: %v \n", name, count)
 	fmt.Printf("------------------------------\n")
 	fmt.Printf("\n")
