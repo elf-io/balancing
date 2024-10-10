@@ -78,21 +78,21 @@ func (s *EbpfProgramStruct) PrintMapService() error {
 	fmt.Println("Service Entries: ", len(allKeysService))
 	for i := 0; i < len(allKeysService); i++ {
 		fmt.Printf("[%v]: key=%s, \n", i, allKeysService[i])
-		fmt.Printf("      value=%s\n", allValsService[i])
+		fmt.Printf("     value=%s\n", allValsService[i])
 	}
 
 	fmt.Println("")
 	fmt.Println("LocalRedirect Entries: ", len(allKeysRedirect))
 	for i := 0; i < len(allKeysRedirect); i++ {
 		fmt.Printf("[%v]: key=%s\n", i, allKeysRedirect[i])
-		fmt.Printf("      value=%s\n", allValsRedirect[i])
+		fmt.Printf("     value=%s\n", allValsRedirect[i])
 	}
 
 	fmt.Println("")
 	fmt.Println("Balancing Entries: ", len(allKeysBalancing))
 	for i := 0; i < len(allKeysBalancing); i++ {
 		fmt.Printf("[%v]: key=%s\n", i, allKeysBalancing[i])
-		fmt.Printf("      value=%s\n", allValsBalancing[i])
+		fmt.Printf("     value=%s\n", allValsBalancing[i])
 	}
 
 	fmt.Println("")
@@ -168,21 +168,21 @@ func (s *EbpfProgramStruct) PrintMapBackend() error {
 	fmt.Println("Service Entries: ", len(allKeysService))
 	for i := 0; i < len(allKeysService); i++ {
 		fmt.Printf("[%v]: key=%s\n", i, allKeysService[i])
-		fmt.Printf("      value=%s\n", allValsService[i])
+		fmt.Printf("     value=%s\n", allValsService[i])
 	}
 
 	fmt.Println("")
 	fmt.Println("LocalRedirect Entries : ", len(allKeysRedirect))
 	for i := 0; i < len(allKeysRedirect); i++ {
 		fmt.Printf("[%v]: key=%s\n", i, allKeysRedirect[i])
-		fmt.Printf("      value=%s\n", allValsRedirect[i])
+		fmt.Printf("     value=%s\n", allValsRedirect[i])
 	}
 
 	fmt.Println("")
 	fmt.Println("Balancing Entries: ", len(allKeysBalancing))
 	for i := 0; i < len(allKeysBalancing); i++ {
 		fmt.Printf("[%v]: key=%s\n", i, allKeysBalancing[i])
-		fmt.Printf("      value=%s\n", allValsBalancing[i])
+		fmt.Printf("     value=%s\n", allValsBalancing[i])
 	}
 
 	fmt.Println("")

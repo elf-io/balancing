@@ -50,6 +50,7 @@ func buildEbpfMapDataForV4Service(natType uint8, svc *corev1.Service, edsList ma
 		allEp = append(allEp, localEp...)
 		allEp = append(allEp, remoteEp...)
 		for order, edp := range allEp {
+			// for pod port
 			backMapKey := bpf_cgroupMapkeyBackend{
 				Order:   uint32(order),
 				SvcId:   svcV4Id,
@@ -73,7 +74,8 @@ func buildEbpfMapDataForV4Service(natType uint8, svc *corev1.Service, edsList ma
 				val: &backMapVal,
 			})
 
-			if svcPort.NodePort != 0 {
+			// for nodePort
+			if svcPort.NodePort != 0 && natType == NAT_TYPE_SERVICE {
 				m := backMapKey
 				m.Dport = uint16(svcPort.NodePort)
 				n := backMapVal
