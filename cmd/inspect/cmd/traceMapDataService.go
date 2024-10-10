@@ -6,9 +6,9 @@ import (
 )
 
 var CmdTraceMapByService = &cobra.Command{
-	Use:   "service [-n Namespace] serviceName",
+	Use:   "service Namespace ServiceName",
 	Short: "clean the ebpf map of affinity ",
-	Args:  cobra.RangeArgs(1, 2),
+	Args:  cobra.RangeArgs(2, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 
 		fmt.Printf("args: %+v\n", args)
