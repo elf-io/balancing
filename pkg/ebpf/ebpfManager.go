@@ -58,10 +58,10 @@ type EbpfProgram interface {
 	GetMapDataEvent() <-chan MapEventValue
 
 	// for debug cli
-	PrintMapService() error
+	PrintMapService(*uint8, *uint32) error
 	PrintMapNodeIp() error
 	PrintMapNodeProxyIp() error
-	PrintMapBackend() error
+	PrintMapBackend(*uint8, *uint32) error
 	PrintMapAffinity() error
 	PrintMapNatRecord() error
 	PrintMapConfigure() error

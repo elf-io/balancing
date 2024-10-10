@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"github.com/elf-io/balancing/pkg/ebpf"
+	"github.com/spf13/cobra"
 	"os"
 )
 
@@ -24,7 +24,7 @@ var CmdPrintMapService = &cobra.Command{
 
 		fmt.Printf("\n")
 		fmt.Printf("print the ebpf map of service:\n")
-		bpf.PrintMapService()
+		bpf.PrintMapService(nil, nil)
 		fmt.Printf("\n")
 	},
 }

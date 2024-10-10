@@ -21,7 +21,7 @@ var CmdPrintMapBackend = &cobra.Command{
 
 		fmt.Printf("\n")
 		fmt.Printf("print the ebpf map of backend:\n")
-		bpf.PrintMapBackend()
+		bpf.PrintMapBackend(nil, nil)
 		fmt.Printf("\n")
 	},
 }
