@@ -55,10 +55,13 @@ var CmdTraceMapByService = &cobra.Command{
 		} else {
 			bpf.PrintMapService(&ebpf.NAT_TYPE_SERVICE, &svcV4Id)
 			fmt.Printf("\n")
+
+			bpf.PrintMapBackend(&ebpf.NAT_TYPE_SERVICE, &svcV4Id)
+			fmt.Printf("\n")
 		}
 
 		// todo: ipv6
-		
+
 	},
 }
 
