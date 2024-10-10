@@ -25,7 +25,13 @@ func (s *EbpfProgramStruct) PrintMapService(filterNatType *uint8, filterSvcV4Id 
 	name := mapPtr.String()
 
 	fmt.Printf("------------------------------\n")
-	fmt.Printf("map %s : filterNatType %v, filterSvcV4Id %v \n", name, filterNatType, filterSvcV4Id)
+	fmt.Printf("map %s :   \n", name)
+	if filterNatType != nil {
+		fmt.Printf("    filterNatType %s \n", GetNatTypeStr(*filterNatType))
+	}
+	if filterSvcV4Id != nil {
+		fmt.Printf("    filterSvcV4Id %v \n", *filterSvcV4Id)
+	}
 
 	var cursor ebpf.MapBatchCursor
 	count := 0
@@ -139,7 +145,13 @@ func (s *EbpfProgramStruct) PrintMapBackend(filterNatType *uint8, filterSvcV4Id 
 	name := mapPtr.String()
 
 	fmt.Printf("------------------------------\n")
-	fmt.Printf("map %s : filterNatType %v, filterSvcV4Id %v \n", name, filterNatType, filterSvcV4Id)
+	fmt.Printf("map %s :   \n", name)
+	if filterNatType != nil {
+		fmt.Printf("    filterNatType %s \n", GetNatTypeStr(*filterNatType))
+	}
+	if filterSvcV4Id != nil {
+		fmt.Printf("    filterSvcV4Id %v \n", *filterSvcV4Id)
+	}
 
 	var cursor ebpf.MapBatchCursor
 	count := 0
