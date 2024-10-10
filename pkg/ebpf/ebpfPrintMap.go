@@ -82,11 +82,11 @@ func (s *EbpfProgramStruct) PrintMapService(filterNatType *uint8, filterSvcV4Id 
 	// Print categorized data
 	fmt.Println("")
 	kc := 0
-	fmt.Println("Service Entries: ", len(allKeysService))
+	fmt.Println("Service Entries: ")
 	for i := 0; i < len(allKeysService); i++ {
 		if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_SERVICE) {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allValsService[i].SvcId) {
-				fmt.Printf("[%v]: key=%s, \n", i, allKeysService[i])
+				fmt.Printf("[%v]: key=%s, \n", kc, allKeysService[i])
 				fmt.Printf("     value=%s\n", allValsService[i])
 				kc++
 			}
@@ -97,11 +97,11 @@ func (s *EbpfProgramStruct) PrintMapService(filterNatType *uint8, filterSvcV4Id 
 
 	kc = 0
 	fmt.Println("")
-	fmt.Println("LocalRedirect Entries: ", len(allKeysRedirect))
+	fmt.Println("LocalRedirect Entries: ")
 	for i := 0; i < len(allKeysRedirect); i++ {
 		if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_REDIRECT) {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allValsRedirect[i].SvcId) {
-				fmt.Printf("[%v]: key=%s\n", i, allKeysRedirect[i])
+				fmt.Printf("[%v]: key=%s\n", kc, allKeysRedirect[i])
 				fmt.Printf("     value=%s\n", allValsRedirect[i])
 				kc++
 			}
@@ -112,11 +112,11 @@ func (s *EbpfProgramStruct) PrintMapService(filterNatType *uint8, filterSvcV4Id 
 
 	kc = 0
 	fmt.Println("")
-	fmt.Println("Balancing Entries: ", len(allKeysBalancing))
+	fmt.Println("Balancing Entries: ")
 	for i := 0; i < len(allKeysBalancing); i++ {
 		if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_BALANCING) {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allValsBalancing[i].SvcId) {
-				fmt.Printf("[%v]: key=%s\n", i, allKeysBalancing[i])
+				fmt.Printf("[%v]: key=%s\n", kc, allKeysBalancing[i])
 				fmt.Printf("     value=%s\n", allValsBalancing[i])
 				kc++
 			}
@@ -206,7 +206,7 @@ func (s *EbpfProgramStruct) PrintMapBackend(filterNatType *uint8, filterSvcV4Id 
 	for i := 0; i < len(allKeysService); i++ {
 		if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_SERVICE) {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allKeysService[i].SvcId) {
-				fmt.Printf("[%v]: key=%s\n", i, allKeysService[i])
+				fmt.Printf("[%v]: key=%s\n", kc, allKeysService[i])
 				fmt.Printf("     value=%s\n", allValsService[i])
 				kc++
 			}
@@ -221,7 +221,7 @@ func (s *EbpfProgramStruct) PrintMapBackend(filterNatType *uint8, filterSvcV4Id 
 	for i := 0; i < len(allKeysRedirect); i++ {
 		if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_REDIRECT) {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allKeysRedirect[i].SvcId) {
-				fmt.Printf("[%v]: key=%s\n", i, allKeysRedirect[i])
+				fmt.Printf("[%v]: key=%s\n", kc, allKeysRedirect[i])
 				fmt.Printf("     value=%s\n", allValsRedirect[i])
 				kc++
 			}
@@ -232,11 +232,11 @@ func (s *EbpfProgramStruct) PrintMapBackend(filterNatType *uint8, filterSvcV4Id 
 
 	fmt.Println("")
 	kc = 0
-	fmt.Println("Balancing Entries: ", len(allKeysBalancing))
+	fmt.Println("Balancing Entries: ")
 	for i := 0; i < len(allKeysBalancing); i++ {
 		if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_BALANCING) {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allKeysBalancing[i].SvcId) {
-				fmt.Printf("[%v]: key=%s\n", i, allKeysBalancing[i])
+				fmt.Printf("[%v]: key=%s\n", kc, allKeysBalancing[i])
 				fmt.Printf("     value=%s\n", allValsBalancing[i])
 				kc++
 			}
