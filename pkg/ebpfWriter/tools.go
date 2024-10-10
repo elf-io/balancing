@@ -15,6 +15,8 @@ import (
 func fakeEndpointSlice(policy *balancingv1beta1.LocalRedirectPolicy) (*discovery.EndpointSlice, error) {
 	eds := &discovery.EndpointSlice{}
 	eds.Name = policy.Name
+	eds.Namespace = "faked"
+
 	ipList := podLabel.PodLabelHandle.GetIPWithLabelSelector(&policy.Spec.LocalRedirectBackend.LocalEndpointSelector)
 	if len(ipList) == 0 {
 		return nil, nil
@@ -38,6 +40,7 @@ func fakeEndpointSlice(policy *balancingv1beta1.LocalRedirectPolicy) (*discovery
 func fakeServiceByAddressMatcher(policy *balancingv1beta1.LocalRedirectPolicy) (*corev1.Service, error) {
 	svc := &corev1.Service{}
 	svc.Name = policy.Name
+	svc.Namespace = "faked"
 	if utils.CheckIPv4Format(policy.Spec.RedirectFrontend.AddressMatcher.IP) {
 		svc.Spec.IPFamilies = []corev1.IPFamily{corev1.IPv4Protocol}
 	} else {

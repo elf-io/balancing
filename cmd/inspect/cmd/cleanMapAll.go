@@ -57,12 +57,6 @@ var CmdCleanMapAll = &cobra.Command{
 		} else {
 			fmt.Printf("    succeeded to clean %d items in affinity map\n", c)
 		}
-		if c, e := bpf.CleanMapConfigure(); e != nil {
-			fmt.Printf("    failed to clean configure map: %+v\n", e)
-			os.Exit(3)
-		} else {
-			fmt.Printf("    succeeded to clean %d items in configure map\n", c)
-		}
 
 		fmt.Printf("\n")
 	},

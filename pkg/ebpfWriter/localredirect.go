@@ -37,7 +37,6 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 
 	policy.ObjectMeta.CreationTimestamp = metav1.Time{Time: time.Now()}
 	index := policy.Name
-	l.Sugar().Debugf("update the RedirectPolicy %s", index)
 
 	s.redirectPolicyLock.Lock()
 	defer s.redirectPolicyLock.Unlock()
@@ -65,6 +64,7 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 			return e
 		} else {
 			policyData.Svc = t
+			l.Sugar().Debugf("fake service for RedirectPolicy %s", index)
 			frontReady = true
 		}
 	}

@@ -287,11 +287,16 @@ func (s *EbpfProgramStruct) UpdateEbpfMapForService(l *zap.Logger, natType uint8
 	}
 
 	if processIpv4 {
-		oldSvcList, oldBkList, err1 := buildEbpfMapDataForV4Service(natType, oldSvc, oldEdsList)
-
-		if err1 != nil {
-			return fmt.Errorf("failed to buildEbpfMapDataForV4Service: %v", err1)
+		oldSvcList := []*serviceMapData{}
+		oldBkList := []*backendMapData{}
+		var err1 error
+		if oldSvc != nil && len(oldEdsList) > 0 {
+			oldSvcList, oldBkList, err1 = buildEbpfMapDataForV4Service(natType, oldSvc, oldEdsList)
+			if err1 != nil {
+				return fmt.Errorf("failed to buildEbpfMapDataForV4Service: %v", err1)
+			}
 		}
+
 		newSvcList, newBkList, err2 := buildEbpfMapDataForV4Service(natType, newSvc, newEdsList)
 		if err2 != nil {
 			return fmt.Errorf("failed to buildEbpfMapDataForV4Service: %v", err2)
