@@ -37,7 +37,7 @@ func fakeEndpointSlice(policy *balancingv1beta1.LocalRedirectPolicy) (*discovery
 	return eds, nil
 }
 
-func fakeServiceByAddressMatcher(policy *balancingv1beta1.LocalRedirectPolicy) (*corev1.Service, error) {
+func FakeServiceByAddressMatcher(policy *balancingv1beta1.LocalRedirectPolicy) (*corev1.Service, error) {
 	svc := &corev1.Service{}
 	svc.Name = policy.Name
 	svc.Namespace = "faked"

@@ -59,7 +59,7 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 		}
 		s.ebpfServiceLock.Unlock()
 	} else {
-		if t, e := fakeServiceByAddressMatcher(policy); e != nil {
+		if t, e := FakeServiceByAddressMatcher(policy); e != nil {
 			l.Sugar().Debugf("Failed to fake service for RedirectPolicy %s: %v", index, e)
 			return e
 		} else {

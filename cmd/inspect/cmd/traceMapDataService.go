@@ -15,7 +15,7 @@ import (
 
 var CmdTraceMapByService = &cobra.Command{
 	Use:   "service Namespace ServiceName",
-	Short: "clean the ebpf map of affinity ",
+	Short: "get all the ebpf map data relevant to the service",
 	Args:  cobra.RangeArgs(2, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		namespace := args[0]
