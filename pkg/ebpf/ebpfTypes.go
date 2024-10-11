@@ -185,12 +185,13 @@ type MapEventValue struct {
 	NatPort              uint16
 	OriginalDestPort     uint16
 	Pid                  uint32
+	SvcId                uint32
 	IsIpv4               uint8 /* 0 for ipv6 data, 1 for ipv4 data */
 	IsSuccess            uint8 /* 1 for success , 0 for failure */
 	NatType              uint8 /* 1 for NAT_TYPE_FLOATIP , 2 for NAT_TYPE_SVC, 3 for NAT_TYPE_REDIRECT  */
 	FailureCode          uint8
 	NatMode              uint8
-	Pad                  [3]uint8
+	Pad                  [7]uint8
 }
 
 func GetIpv6Str(ipV6High, ipV6Low uint64) string {
@@ -203,8 +204,8 @@ func GetIpv6Str(ipV6High, ipV6Low uint64) string {
 }
 
 func (t MapEventValue) String() string {
-	return fmt.Sprintf(`{ CgroupId:%d, IsIpv4:%d, IsSuccess:%d, NatType:%s, NatMode:%s, OriginalDestV4Ip:%s, OriginalDestV6Ip:%s, OriginalDestPort:%d, NatV4Ip:%s, NatV6Ip:%s, NatPort:%d , Pid:%d, FailureCode:%s }`,
-		t.CgroupId, t.IsIpv4, t.IsSuccess, GetNatTypeStr(t.NatType), GetNatModeStr(t.NatMode),
+	return fmt.Sprintf(`{ CgroupId:%d, IsIpv4:%d, SvcId:%d, IsSuccess:%d, NatType:%s, NatMode:%s, OriginalDestV4Ip:%s, OriginalDestV6Ip:%s, OriginalDestPort:%d, NatV4Ip:%s, NatV6Ip:%s, NatPort:%d , Pid:%d, FailureCode:%s }`,
+		t.CgroupId, t.IsIpv4, t.SvcId, t.IsSuccess, GetNatTypeStr(t.NatType), GetNatModeStr(t.NatMode),
 		GetIpStr(t.OriginalDestV4Ip), GetIpv6Str(t.OriginalDestV6ipHigh, t.OriginalDestV6ipLow), t.OriginalDestPort, GetIpStr(t.NatV4Ip), GetIpv6Str(t.NatV6ipHigh, t.NatV6ipLow), t.NatPort, t.Pid, GetFailureStr(t.FailureCode))
 }
 

@@ -224,12 +224,14 @@ struct event_value {
 	__be16 original_dest_port;   // 小端存储。
 	__u32  pid;
 
+    __u32  svc_id ;
     __u8   is_ipv4 ; /* 0 for ipv6 data, 1 for ipv4 data */
     __u8   is_success ; /* 1 for success , 0 for failure */
     __u8   nat_type ;  /* NAT_TYPE_SERVICE (  lowest priority  ) ,NAT_TYPE_REDIRECT ,  NAT_TYPE_BALANCING ( highest priority )  */
     __u8   failure_code;
+
     __u8   nat_mode;    /* 用于标识发生了哪种 IP 地址的 nat， 参考 NAT_MODE_* 标志 */
-    __u8   pad[3];
+    __u8   pad[7];
 } ;
 
 // BPF_MAP_TYPE_PERF_EVENT_ARRAY 中的 key 和 value 并不存放真正的 数据， key 用来存放 cpu 索引， values 存放指向 perf event buffer 的地址

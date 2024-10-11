@@ -19,6 +19,9 @@ type SvcEndpointData struct {
 	// one endpointslice store 100 endpoints by default
 	// index: namesapce/endpointSliceName
 	EpsliceList map[string]*discovery.EndpointSlice
+	// identical to the serviceId in the ebpf map, it is used for event to find policy
+	// so only just update ServiceId before updating ebpf map
+	ServiceId uint32
 }
 
 func shallowCopyEdpSliceMap(t map[string]*discovery.EndpointSlice) map[string]*discovery.EndpointSlice {
@@ -49,6 +52,18 @@ func (s *ebpfWriter) UpdateServiceByService(l *zap.Logger, svc *corev1.Service, 
 		if d.EpsliceList != nil && len(d.EpsliceList) > 0 {
 			if !onlyUpdateTime {
 				l.Sugar().Infof("cache the data, and apply new data to ebpf map for service %v", index)
+				// only before update ebpf map, update serviceId
+				t := ebpf.GenerateSvcV4Id(svc)
+				if t == 0 {
+					l.Sugar().Errorf("failed to get serviceId for service  ")
+					return fmt.Errorf("failed to get serviceId for service  ")
+				}
+				if d.ServiceId != 0 && d.ServiceId != t {
+					l.Sugar().Warnf("the serviceId of service %s/%s changes from %d to %d  ", svc.Namespace, svc.Name, d.ServiceId, t)
+				}
+				d.ServiceId = t
+				l.Sugar().Debugf("update ServiceId to %d", t)
+				//
 				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, svc, d.EpsliceList, d.EpsliceList); e != nil {
 					l.Sugar().Errorf("failed to write ebpf map: %v", e)
 					return e
@@ -64,10 +79,11 @@ func (s *ebpfWriter) UpdateServiceByService(l *zap.Logger, svc *corev1.Service, 
 		}
 	} else {
 		l.Sugar().Debugf("cache the data, but no need to apply new data to ebpf map, cause miss endpointslice")
-		s.serviceData[index] = &SvcEndpointData{
+		t := &SvcEndpointData{
 			Svc:         svc,
 			EpsliceList: make(map[string]*discovery.EndpointSlice),
 		}
+		s.serviceData[index] = t
 	}
 
 	return nil
@@ -121,6 +137,7 @@ func (s *ebpfWriter) UpdateServiceByEndpointSlice(l *zap.Logger, epSlice *discov
 				l.Sugar().Infof("cache the data, and apply new data to ebpf map for the service %v", index)
 				oldEps := shallowCopyEdpSliceMap(d.EpsliceList)
 				d.EpsliceList[epindex] = epSlice
+				// no need to update svcId here, because service yaml does not change
 				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, d.Svc, oldEps, d.EpsliceList); e != nil {
 					d.EpsliceList = oldEps
 					l.Sugar().Errorf("failed to write ebpf map: %v", e)
@@ -168,6 +185,7 @@ func (s *ebpfWriter) DeleteServiceByEndpointSlice(l *zap.Logger, epSlice *discov
 				l.Sugar().Infof("delete data from ebpf map for EndpointSlice: %v", index)
 				oldEps := shallowCopyEdpSliceMap(d.EpsliceList)
 				delete(d.EpsliceList, epindex)
+				// no need to update svcId here, because service yaml does not change
 				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, d.Svc, oldEps, d.EpsliceList); e != nil {
 					d.EpsliceList[epindex] = oldEp
 					l.Sugar().Errorf("failed to write ebpf map: %v", e)

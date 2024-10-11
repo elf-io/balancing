@@ -172,6 +172,7 @@ static __always_inline int execute_nat(struct bpf_sock_addr *ctx , __u32 debug_l
         .nat_v6ip_low = 0 ,
         .original_dest_v6ip_high = 0 ,
         .original_dest_v6ip_low = 0 ,
+        .svc_id = 0 ,
         .is_ipv4 = 1 ,
         .is_success = 0 ,
         .original_dest_v4ip = dst_ip ,
@@ -214,6 +215,7 @@ static __always_inline int execute_nat(struct bpf_sock_addr *ctx , __u32 debug_l
     }
     debugf(DEBUG_INFO, "succeeded to find service value for %pI4:%d\n" , &dst_ip  , dst_port   );
     evt.nat_mode=svcval.nat_mode ;
+    evt.svc_id=svcval.svc_id ;
 
     __u32 backend_count = svcval.total_backend_count;
     if ( svcval.service_flags & (SERVICE_FLAG_INTERNAL_LOCAL_SVC | SERVICE_FLAG_EXTERNAL_LOCAL_SVC)  ) {

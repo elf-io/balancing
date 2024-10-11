@@ -22,6 +22,9 @@ type redirectPolicyData struct {
 	Policy  *balancingv1beta1.LocalRedirectPolicy
 	Svc     *corev1.Service
 	Epslice *discovery.EndpointSlice
+	// identical to the serviceId in the ebpf map, it is used for event to find policy
+	// so only just update ServiceId before updating ebpf map
+	ServiceId uint32
 }
 
 // UpdateRedirectByPolicy updates the redirect policy based on the given LocalRedirectPolicy.
@@ -81,6 +84,15 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 
 	s.redirectPolicyData[index] = policyData
 	if backReady && frontReady {
+		// update id
+		t := ebpf.GenerateSvcV4Id(policyData.Svc)
+		if t == 0 {
+			l.Sugar().Errorf("failed to get serviceId for localRedirec policy")
+			return fmt.Errorf("failed to get serviceId for localRedirec policy")
+		}
+		policyData.ServiceId = t
+		l.Sugar().Debugf("update ServiceId to %d", t)
+		// update map
 		t := map[string]*discovery.EndpointSlice{policyData.Epslice.Name: policyData.Epslice}
 		if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, nil, policyData.Svc, nil, t); e != nil {
 			l.Sugar().Errorf("Failed to write ebpf map for redirect policy %v: %v", index, e)
@@ -109,6 +121,7 @@ func (s *ebpfWriter) DeleteRedirectByPolicy(l *zap.Logger, policyName string) er
 		if d.Epslice != nil && len(d.Epslice.Endpoints) > 0 {
 			t[d.Epslice.Name] = d.Epslice
 		}
+		// no need to update svcId here, because the svcId does not change for redirect policy
 		if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, d.Svc, nil, t, nil); e != nil {
 			l.Sugar().Errorf("failed to delete ebpf map for redirect policy %v when policy is deleting: %v", index, e)
 			return e
@@ -132,11 +145,16 @@ func (s *ebpfWriter) UpdateRedirectByService(l *zap.Logger, svc *corev1.Service)
 				frontChanged := false
 				oldSvc := data.Svc
 				if data.Svc == nil || !reflect.DeepEqual(data.Svc.Spec, svc.Spec) {
+					if svc.Annotations == nil {
+						svc.Annotations = make(map[string]string)
+					}
+					svc.Annotations[types.AnnotationServiceID] = data.Policy.Annotations[types.AnnotationServiceID]
 					s.redirectPolicyData[policyName].Svc = svc
 					frontChanged = true
 					l.Sugar().Debugf("Service spec changed for policy: %s", policyName)
 				}
 				if frontChanged {
+					// no need to update svcId here, because the svcId does not change for redirect policy
 					t := map[string]*discovery.EndpointSlice{}
 					if data.Epslice != nil && len(data.Epslice.Endpoints) > 0 {
 						t[data.Epslice.Name] = data.Epslice
@@ -172,6 +190,7 @@ func (s *ebpfWriter) DeleteRedirectByService(l *zap.Logger, svc *corev1.Service)
 				if data.Epslice != nil && len(data.Epslice.Endpoints) > 0 {
 					t[data.Epslice.Name] = data.Epslice
 				}
+				// no need to update svcId here, because the svcId does not change for redirect policy
 				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, oldSvc, nil, t, t); e != nil {
 					l.Sugar().Errorf("Failed to delete ebpf map for redirect policy %v when service %s/%s is deleted: %v", policyName, svc.Namespace, svc.Name, e)
 				} else {
@@ -224,6 +243,7 @@ func (s *ebpfWriter) UpdateRedirectByPod(l *zap.Logger, pod *corev1.Pod) error {
 			l.Sugar().Debugf("the changing pod %s/%s influences redirect policy %s, newEndpoints: nil", pod.Namespace, pod.Name, policyName)
 		}
 
+		// no need to update svcId here, because the svcId does not change for redirect policy
 		if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, data.Svc, data.Svc, oldEpList, newEpList); e != nil {
 			l.Sugar().Errorf("failed to update ebpf map for redirect policy %v when pod %s/%s is changing: %v", policyName, pod.Namespace, pod.Name, e)
 		} else {
