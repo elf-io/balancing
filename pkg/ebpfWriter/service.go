@@ -60,9 +60,10 @@ func (s *ebpfWriter) UpdateServiceByService(l *zap.Logger, svc *corev1.Service, 
 				}
 				if d.ServiceId != 0 && d.ServiceId != t {
 					l.Sugar().Warnf("the serviceId of service %s/%s changes from %d to %d  ", svc.Namespace, svc.Name, d.ServiceId, t)
+				} else if d.ServiceId == 0 {
+					l.Sugar().Infof("update ServiceId to %d", t)
 				}
 				d.ServiceId = t
-				l.Sugar().Debugf("update ServiceId to %d", t)
 				//
 				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, svc, d.EpsliceList, d.EpsliceList); e != nil {
 					l.Sugar().Errorf("failed to write ebpf map: %v", e)
@@ -137,7 +138,19 @@ func (s *ebpfWriter) UpdateServiceByEndpointSlice(l *zap.Logger, epSlice *discov
 				l.Sugar().Infof("cache the data, and apply new data to ebpf map for the service %v", index)
 				oldEps := shallowCopyEdpSliceMap(d.EpsliceList)
 				d.EpsliceList[epindex] = epSlice
-				// no need to update svcId here, because service yaml does not change
+				// only before update ebpf map, update serviceId
+				t := ebpf.GenerateSvcV4Id(d.Svc)
+				if t == 0 {
+					l.Sugar().Errorf("failed to get serviceId for service  ")
+					return fmt.Errorf("failed to get serviceId for service  ")
+				}
+				if d.ServiceId != 0 && d.ServiceId != t {
+					l.Sugar().Warnf("the serviceId of service %s/%s changes from %d to %d  ", d.Svc.Namespace, d.Svc.Name, d.ServiceId, t)
+				} else if d.ServiceId == 0 {
+					l.Sugar().Infof("update ServiceId to %d", t)
+				}
+				d.ServiceId = t
+				// update
 				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, d.Svc, oldEps, d.EpsliceList); e != nil {
 					d.EpsliceList = oldEps
 					l.Sugar().Errorf("failed to write ebpf map: %v", e)
@@ -185,7 +198,19 @@ func (s *ebpfWriter) DeleteServiceByEndpointSlice(l *zap.Logger, epSlice *discov
 				l.Sugar().Infof("delete data from ebpf map for EndpointSlice: %v", index)
 				oldEps := shallowCopyEdpSliceMap(d.EpsliceList)
 				delete(d.EpsliceList, epindex)
-				// no need to update svcId here, because service yaml does not change
+				// only before update ebpf map, update serviceId
+				t := ebpf.GenerateSvcV4Id(d.Svc)
+				if t == 0 {
+					l.Sugar().Errorf("failed to get serviceId for service  ")
+					return fmt.Errorf("failed to get serviceId for service  ")
+				}
+				if d.ServiceId != 0 && d.ServiceId != t {
+					l.Sugar().Warnf("the serviceId of service %s/%s changes from %d to %d  ", d.Svc.Namespace, d.Svc.Name, d.ServiceId, t)
+				} else if d.ServiceId == 0 {
+					l.Sugar().Infof("update ServiceId to %d", t)
+				}
+				d.ServiceId = t
+				// update
 				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, d.Svc, oldEps, d.EpsliceList); e != nil {
 					d.EpsliceList[epindex] = oldEp
 					l.Sugar().Errorf("failed to write ebpf map: %v", e)
