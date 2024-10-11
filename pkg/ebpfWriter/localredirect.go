@@ -85,13 +85,13 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 	s.redirectPolicyData[index] = policyData
 	if backReady && frontReady {
 		// update id
-		t := ebpf.GenerateSvcV4Id(policyData.Svc)
-		if t == 0 {
+		w := ebpf.GenerateSvcV4Id(policyData.Svc)
+		if w == 0 {
 			l.Sugar().Errorf("failed to get serviceId for localRedirec policy")
 			return fmt.Errorf("failed to get serviceId for localRedirec policy")
 		}
-		policyData.ServiceId = t
-		l.Sugar().Debugf("update ServiceId to %d", t)
+		policyData.ServiceId = w
+		l.Sugar().Debugf("update ServiceId to %d", w)
 		// update map
 		t := map[string]*discovery.EndpointSlice{policyData.Epslice.Name: policyData.Epslice}
 		if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, nil, policyData.Svc, nil, t); e != nil {
