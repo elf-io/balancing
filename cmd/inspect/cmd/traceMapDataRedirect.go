@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpf"
-	"github.com/elf-io/balancing/pkg/ebpfWriter"
-	"k8s.io/client-go/kubernetes"
+	"github.com/elf-io/balancing/pkg/types"
+	"github.com/elf-io/balancing/pkg/utils"
 	"log"
 	"os"
 
@@ -47,30 +47,14 @@ var CmdTraceMapByRedirect = &cobra.Command{
 			log.Fatalf("Failed to get policy %s: %v", policyName, err)
 		}
 
-		var svcV4Id uint32
-		if policy.Spec.RedirectFrontend.ServiceMatcher != nil {
-			k8sClient, err := kubernetes.NewForConfig(config)
-			if err != nil {
-				log.Fatalf("Failed to create Kubernetes client: %v", err)
-			}
-
-			t := policy.Spec.RedirectFrontend.ServiceMatcher
-			// Query the specified service
-			service, err := k8sClient.CoreV1().Services(t.Namespace).Get(context.TODO(), t.ServiceName, metav1.GetOptions{})
-			if err != nil {
-				log.Fatalf("Failed to get service %s/%s: %v", t.Namespace, t.ServiceName, err)
-			}
-			// for ipv4 data
-			svcV4Id = ebpf.GenerateSvcV4Id(service)
-			// todo: for ipv6 id
-		} else {
-			if t, e := ebpfWriter.FakeServiceByAddressMatcher(policy); e != nil {
-				log.Fatalf("Failed to fake service for RedirectPolicy %v", e)
-			} else {
-				// for ipv4 data
-				svcV4Id = ebpf.GenerateSvcV4Id(t)
-				// todo: for ipv6 id
-			}
+		// get the serviceId
+		idStr, ok := policy.Annotations[types.AnnotationServiceID]
+		if !ok {
+			log.Fatalf("Failed to get serviceId annotation from policy %s", policyName)
+		}
+		svcV4Id, e := utils.StringToUint32(idStr)
+		if e != nil {
+			log.Fatalf("Failed to generate serviceId from policy %s: %s ", policyName, idStr)
 		}
 
 		bpf.PrintMapService(&ebpf.NAT_TYPE_REDIRECT, &svcV4Id)

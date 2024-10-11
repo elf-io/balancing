@@ -53,14 +53,14 @@ func InitNodeIdManager(c *kubernetes.Clientset, log *zap.Logger) {
 
 func (s *nodeIdManager) applyNewNodeIP(oldNode corev1.Node) (uint32, error) {
 	node := &oldNode
-	if v, ok := node.ObjectMeta.Annotations[types.NodeAnnotaitonNodeIdKey]; ok {
+	if v, ok := node.ObjectMeta.Annotations[types.NodeAnnotationNodeIdKey]; ok {
 		return stringToUint32(v)
 	}
 
 	for count := 1; count < 1000; count++ {
 		nodeId := generateRandomUint32()
 		t := Uint32ToString(nodeId)
-		node.ObjectMeta.Annotations[types.NodeAnnotaitonNodeIdKey] = t
+		node.ObjectMeta.Annotations[types.NodeAnnotationNodeIdKey] = t
 
 		s.log.Sugar().Info("node %s lacks nodeId, try to apply a new nodeId %s for ", node.Name, t)
 		if _, err := s.client.CoreV1().Nodes().Update(context.Background(), node, metav1.UpdateOptions{}); err != nil {
@@ -70,7 +70,7 @@ func (s *nodeIdManager) applyNewNodeIP(oldNode corev1.Node) (uint32, error) {
 				if err != nil {
 					s.log.Sugar().Errorf("failed to get node %s: %v", node.Name, err)
 				} else {
-					if nodeIdStr, ok := node.ObjectMeta.Annotations[types.NodeAnnotaitonNodeIdKey]; ok {
+					if nodeIdStr, ok := node.ObjectMeta.Annotations[types.NodeAnnotationNodeIdKey]; ok {
 						r, err1 := stringToUint32(nodeIdStr)
 						if err1 != nil {
 							s.log.Sugar().Errorf("resourceVersion conflicted,  node %s got an invalid nodeId %s: %v", node.Name, nodeIdStr, err1)
@@ -114,7 +114,7 @@ func (s *nodeIdManager) initNodeId() {
 
 	// build all nodeId first
 	for _, node := range nodeList.Items {
-		if nodeIdStr, ok := node.ObjectMeta.Annotations[types.NodeAnnotaitonNodeIdKey]; ok {
+		if nodeIdStr, ok := node.ObjectMeta.Annotations[types.NodeAnnotationNodeIdKey]; ok {
 			if t, err1 := stringToUint32(nodeIdStr); err1 != nil {
 				s.log.Sugar().Errorf("found an invalid nodeId %s for node %s: %v", nodeIdStr, node.Name, err1)
 				missNodeIdList = append(missNodeIdList, node)

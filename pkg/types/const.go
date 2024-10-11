@@ -9,13 +9,17 @@ const (
 	ApiGroup   = "balancing." + OrgName
 
 	// use this annotation to mark an ID in the annotation of each node
-	// "bpfElf.org/nodeId": "32BitNumber"
-	NodeAnnotaitonNodeIdKey = OrgName + "/nodeId"
+	// "balancing.elf.org/nodeId": "32BitNumber"
+	NodeAnnotationNodeIdKey = ApiGroup + "/nodeId"
+
+	// use this annotation to mark an ID in the annotation of each node
+	// "balancing.elf.org/serviceId": "32BitNumber"
+	AnnotationServiceID = ApiGroup + "/serviceId"
 
 	// the user could mark the ip in the annotation of each node
 	// "bpfElf.org/nodeProxyIpv4": "192.168.1.1."
-	NodeAnnotaitonNodeProxyIPv4 = OrgName + "/nodeProxyIpv4"
-	NodeAnnotaitonNodeProxyIPv6 = OrgName + "/nodeProxyIpv6"
+	NodeAnnotaitonNodeProxyIPv4 = ApiGroup + "/nodeProxyIpv4"
+	NodeAnnotaitonNodeProxyIPv6 = ApiGroup + "/nodeProxyIpv6"
 
 	HostProcMountDir = "/host"
 

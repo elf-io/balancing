@@ -138,6 +138,14 @@ func getClusterIPs(svc *corev1.Service, ipFamily corev1.IPFamily) []net.IP {
 }
 
 func GenerateSvcV4Id(svc *corev1.Service) uint32 {
+	// for balancing and localRedirect policy, it uses the uniq annotation id
+	if idStr, ok := svc.Annotations[types.AnnotationServiceID]; ok {
+		if id, err := utils.StringToUint32(idStr); err == nil {
+			return id
+		}
+	}
+
+	// for service , it uses clusterIP
 	// 使用 clusterip （假设 IP 地址唯一） 作为 service 之间的区别，它用于关联 一个 service 和 其所属的所有 endpoint
 	t := net.ParseIP(svc.Spec.ClusterIP)
 	if t.To4() != nil {

@@ -4,6 +4,8 @@
 package utils
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"os"
 	"strconv"
@@ -31,4 +33,31 @@ func StringToInt32(s string) (int32, error) {
 		return 0, fmt.Errorf("value out of int32 range: %d", i)
 	}
 	return int32(i), nil
+}
+
+func DeepCopy(src, dst interface{}) error {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	dec := gob.NewDecoder(&buf)
+	if err := enc.Encode(src); err != nil {
+		return err
+	}
+	if err := dec.Decode(dst); err != nil {
+		return err
+	}
+	return nil
+}
+
+func StringToUint32(str string) (uint32, error) {
+	if str == "" {
+		return 0, fmt.Errorf("empty string")
+	}
+	num, err := strconv.ParseUint(str, 10, 32)
+	if err != nil {
+		return 0, err
+	}
+	if num > uint64(uint32(^uint32(0))) {
+		return 0, fmt.Errorf("exceed the uint32")
+	}
+	return uint32(num), nil
 }

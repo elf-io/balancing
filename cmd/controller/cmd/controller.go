@@ -36,7 +36,7 @@ func SetupController() {
 		rootLogger.Sugar().Fatalf("unable to NewManager: %v", err)
 	}
 
-	t := webhookBalacning{}
+	t := &webhookBalacning{}
 	err = ctrl.NewWebhookManagedBy(mgr).
 		For(&balancingv1beta1.BalancingPolicy{}).
 		WithDefaulter(t).
@@ -46,7 +46,7 @@ func SetupController() {
 		rootLogger.Sugar().Fatalf("unable to NewWebhookManagedBy for BalancingPolicy : %v", err)
 	}
 
-	m := webhookRedirect{}
+	m := &webhookRedirect{}
 	err = ctrl.NewWebhookManagedBy(mgr).
 		For(&balancingv1beta1.LocalRedirectPolicy{}).
 		WithDefaulter(m).

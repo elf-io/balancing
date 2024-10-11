@@ -8,6 +8,8 @@ apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
   name: test-service-podendpoint
+  annotations:
+     balancing.elf.io/serviceId: "20001"
 spec:
   enabled: true
   frontend:
@@ -42,6 +44,8 @@ apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
   name: test-service-nodeproxy
+  annotations:
+     balancing.elf.io/serviceId: "20002"
 spec:
   enabled: true
   frontend:
@@ -76,6 +80,8 @@ apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
   name: test-service-nodeport
+  annotations:
+     balancing.elf.io/serviceId: "20003"
 spec:
   enabled: true
   frontend:
@@ -112,6 +118,8 @@ apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
   name: test-addr
+  annotations:
+     balancing.elf.io/serviceId: "20004"
 spec:
   enabled: true
   frontend:

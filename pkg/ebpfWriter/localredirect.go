@@ -5,17 +5,17 @@ package ebpfWriter
 
 import (
 	"fmt"
-	"reflect"
-	"time"
-
 	"github.com/elf-io/balancing/pkg/ebpf"
-	discovery "k8s.io/api/discovery/v1"
-	"k8s.io/apimachinery/pkg/labels"
-
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
+	"github.com/elf-io/balancing/pkg/types"
+	"github.com/elf-io/balancing/pkg/utils"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
+	discovery "k8s.io/api/discovery/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"reflect"
+	"time"
 )
 
 type redirectPolicyData struct {
@@ -54,7 +54,10 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 		index := t.Namespace + "/" + t.ServiceName
 		s.ebpfServiceLock.Lock()
 		if svcData, ok := s.serviceData[index]; ok {
-			policyData.Svc = svcData.Svc
+			var svc corev1.Service
+			utils.DeepCopy(svcData.Svc, &svc)
+			policyData.Svc = &svc
+			svc.Annotations[types.AnnotationServiceID] = policy.Annotations[types.AnnotationServiceID]
 			frontReady = true
 		}
 		s.ebpfServiceLock.Unlock()
