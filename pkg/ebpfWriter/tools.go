@@ -51,6 +51,7 @@ func FakeServiceByAddressMatcher(policy *balancingv1beta1.LocalRedirectPolicy) (
 	svc.Spec.Type = corev1.ServiceTypeClusterIP
 
 	if idStr, ok := policy.Annotations[types.AnnotationServiceID]; ok {
+		svc.Annotations = make(map[string]string)
 		svc.Annotations[types.AnnotationServiceID] = idStr
 	} else {
 		return nil, fmt.Errorf("failed to find annotation %s in the policy %s", types.AnnotationServiceID, policy.Name)
