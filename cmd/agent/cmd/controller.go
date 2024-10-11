@@ -142,7 +142,7 @@ func RunReconciles() {
 	SetupController(writer)
 
 	//
-	ebpfEvent := ebpfEvent.NewEbpfEvent(rootLogger.Named("ebpfEvent"), bpfManager)
+	ebpfEvent := ebpfEvent.NewEbpfEvent(rootLogger.Named("ebpfEvent"), bpfManager, writer)
 	ebpfEvent.WatchEbpfEvent(stopWatchCh)
 
 	rootLogger.Info("finish all setup ")
