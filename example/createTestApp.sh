@@ -200,7 +200,7 @@ spec:
         - containerPort: 80
           name: http
         - hostPort: 20080
-          name: http
+          name: mapport
 ---
 apiVersion: v1
 kind: Service
