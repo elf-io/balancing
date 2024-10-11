@@ -83,7 +83,7 @@ func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
 				eventStr += fmt.Sprintf("NatType=%s, NatMode=%s, ", ebpf.GetNatTypeStr(event.NatType), ebpf.GetNatModeStr(event.NatMode))
 				namespace, name, err := s.writer.GetPolicyBySvcId(event.NatType, event.SvcId)
 				if err != nil {
-					s.l.Sugar().Errorf("failed to find policy for ebpf event with natMode=%s and svcId=%d", ebpf.GetNatModeStr(event.NatType), event.SvcId)
+					s.l.Sugar().Errorf("failed to find policy for ebpf event with natMode=%s and svcId=%d : %v ", ebpf.GetNatTypeStr(event.NatType), event.SvcId, err)
 					eventStr += fmt.Sprintf("policyName= ")
 				} else {
 					switch event.NatType {
