@@ -1,6 +1,6 @@
 # localredirectpolicy: redirect the request to the pod in the local node
 
-kubectl get LocalRedirectPolicy  | awk '{print $1}' | sed '1 d' | xargs -n 1 -i kubectl delete LocalRedirectPolicy {}
+kubectl get localredirectpolicies  | awk '{print $1}' | sed '1 d' | xargs -n 1 -i kubectl delete localredirectpolicies {}
 
 cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
@@ -76,7 +76,7 @@ spec:
 EOF
 
 
-kubectl get localredirectpolicy
+kubectl get localredirectpolicies
 
 
 

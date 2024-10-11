@@ -1,6 +1,6 @@
 # balancingpolicy: redirect the request to the endpoint in the cluster
 
-kubectl get BalancingPolicy  | awk '{print $1}' | sed '1 d' | xargs -n 1 -i kubectl delete BalancingPolicy {}
+kubectl get balancingpolicies  | awk '{print $1}' | sed '1 d' | xargs -n 1 -i kubectl delete balancingpolicies {}
 
 
 cat <<EOF | kubectl apply -f -
@@ -153,7 +153,7 @@ spec:
 EOF
 
 
-kubectl get balancingpolicy
+kubectl get balancingpolicies
 
 
 
