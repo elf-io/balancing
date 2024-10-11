@@ -5,6 +5,9 @@ package ebpfWriter
 
 import (
 	"fmt"
+	"reflect"
+	"time"
+
 	"github.com/elf-io/balancing/pkg/ebpf"
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
 	"github.com/elf-io/balancing/pkg/types"
@@ -14,8 +17,6 @@ import (
 	discovery "k8s.io/api/discovery/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"reflect"
-	"time"
 )
 
 type redirectPolicyData struct {
@@ -76,7 +77,7 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 	}
 
 	if eds, e := fakeEndpointSlice(policy); e != nil {
-		l.Sugar().Debugf("Failed to fakeEndpointSlice for RedirectPolicy %s: %v", index, e)
+		l.Sugar().Errorf("Failed to fakeEndpointSlice for RedirectPolicy %s: %v", index, e)
 	} else if eds != nil && len(eds.Endpoints) > 0 {
 		policyData.Epslice = eds
 		backReady = true
