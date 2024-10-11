@@ -14,13 +14,10 @@ import (
 	"github.com/elf-io/balancing/pkg/podId"
 	"github.com/elf-io/balancing/pkg/podLabel"
 	"github.com/elf-io/balancing/pkg/types"
+	"github.com/elf-io/balancing/pkg/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	"os"
-	"path/filepath"
 	ctrl "sigs.k8s.io/controller-runtime"
 	controllerzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
@@ -96,58 +93,15 @@ func SetupController() {
 // ------------------------------
 
 var (
-	KubeConfigPath        = filepath.Join(os.Getenv("HOME"), ".kube", "config")
-	ScInPodPath           = "/var/run/secrets/kubernetes.io/serviceaccount"
 	InformerListInvterval = time.Second * 60
 )
-
-func existFile(filePath string) bool {
-	if info, err := os.Stat(filePath); err == nil {
-		if !info.IsDir() {
-			return true
-		}
-	}
-	return false
-}
-
-func ExistDir(dirPath string) bool {
-	if info, err := os.Stat(dirPath); err == nil {
-		if info.IsDir() {
-			return true
-		}
-	}
-	return false
-}
-
-func autoConfig() (*rest.Config, error) {
-	var config *rest.Config
-	var err error
-
-	if existFile(KubeConfigPath) == true {
-		config, err = clientcmd.BuildConfigFromFlags("", KubeConfigPath)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get config from kube config=%v , info=%v", KubeConfigPath, err)
-		}
-
-	} else if ExistDir(ScInPodPath) == true {
-		config, err = rest.InClusterConfig()
-		if err != nil {
-			return nil, fmt.Errorf("failed to get config from serviceaccount=%v , info=%v", ScInPodPath, err)
-		}
-
-	} else {
-		return nil, fmt.Errorf("failed to get config ")
-	}
-
-	return config, nil
-}
 
 func RunReconciles() {
 
 	rootLogger.Sugar().Debugf("RunReconciles")
 
 	// get clientset
-	c, e1 := autoConfig()
+	c, e1 := utils.AutoK8sConfig()
 	if e1 != nil {
 		rootLogger.Sugar().Fatalf("failed to find client-go config, make sure it is in a pod or ~/.kube/config exists: %v", e1)
 	}

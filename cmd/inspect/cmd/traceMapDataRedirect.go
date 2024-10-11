@@ -12,7 +12,6 @@ import (
 	crdclientset "github.com/elf-io/balancing/pkg/k8s/client/clientset/versioned/typed/balancing.elf.io/v1beta1"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var CmdTraceMapByRedirect = &cobra.Command{
@@ -32,7 +31,7 @@ var CmdTraceMapByRedirect = &cobra.Command{
 		defer bpf.UnloadAllEbpfMap()
 
 		// Load kubeconfig
-		config, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+		config, err := utils.AutoCrdConfig()
 		if err != nil {
 			log.Fatalf("Failed to load kubeconfig: %v", err)
 		}

@@ -7,7 +7,10 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 	"os"
+	"path/filepath"
 	"strconv"
 )
 
@@ -60,4 +63,73 @@ func StringToUint32(str string) (uint32, error) {
 		return 0, fmt.Errorf("exceed the uint32")
 	}
 	return uint32(num), nil
+}
+
+var (
+	KubeConfigPath = filepath.Join(os.Getenv("HOME"), ".kube", "config")
+	ScInPodPath    = "/var/run/secrets/kubernetes.io/serviceaccount"
+)
+
+func ExistFile(filePath string) bool {
+	if info, err := os.Stat(filePath); err == nil {
+		if !info.IsDir() {
+			return true
+		}
+	}
+	return false
+}
+
+func ExistDir(dirPath string) bool {
+	if info, err := os.Stat(dirPath); err == nil {
+		if info.IsDir() {
+			return true
+		}
+	}
+	return false
+}
+
+func AutoK8sConfig() (*rest.Config, error) {
+	var config *rest.Config
+	var err error
+
+	if ExistFile(KubeConfigPath) == true {
+		config, err = clientcmd.BuildConfigFromFlags("", KubeConfigPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get config from kube config=%v , info=%v", KubeConfigPath, err)
+		}
+
+	} else if ExistDir(ScInPodPath) == true {
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get config from serviceaccount=%v , info=%v", ScInPodPath, err)
+		}
+
+	} else {
+		return nil, fmt.Errorf("failed to get config ")
+	}
+
+	return config, nil
+}
+
+func AutoCrdConfig() (*rest.Config, error) {
+	var config *rest.Config
+	var err error
+
+	if ExistFile(KubeConfigPath) == true {
+		config, err = clientcmd.BuildConfigFromFlags("", KubeConfigPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get config from kube config=%v , info=%v", KubeConfigPath, err)
+		}
+
+	} else if ExistDir(ScInPodPath) == true {
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get config from serviceaccount=%v , info=%v", ScInPodPath, err)
+		}
+
+	} else {
+		return nil, fmt.Errorf("failed to get config ")
+	}
+
+	return config, nil
 }

@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpf"
+	"github.com/elf-io/balancing/pkg/utils"
 	"log"
 	"os"
 
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var CmdTraceMapByService = &cobra.Command{
@@ -31,7 +31,7 @@ var CmdTraceMapByService = &cobra.Command{
 		defer bpf.UnloadAllEbpfMap()
 
 		// Load kubeconfig
-		config, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+		config, err := utils.AutoK8sConfig()
 		if err != nil {
 			log.Fatalf("Failed to load kubeconfig: %v", err)
 		}
