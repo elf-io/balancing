@@ -198,9 +198,8 @@ spec:
           privileged: true
         ports:
         - containerPort: 80
+          hostPort: 20080
           name: http
-        - hostPort: 20080
-          name: mapport
 ---
 apiVersion: v1
 kind: Service
