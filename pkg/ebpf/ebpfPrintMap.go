@@ -82,48 +82,49 @@ func (s *EbpfProgramStruct) PrintMapService(filterNatType *uint8, filterSvcV4Id 
 	// Print categorized data
 	fmt.Println("")
 	kc := 0
-	fmt.Println("Service Entries: ")
-	for i := 0; i < len(allKeysService); i++ {
-		if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_SERVICE) {
+	if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_SERVICE) {
+		fmt.Println("Service Entries: ")
+		for i := 0; i < len(allKeysService); i++ {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allValsService[i].SvcId) {
 				fmt.Printf("[%v]: key=%s, \n", kc, allKeysService[i])
 				fmt.Printf("     value=%s\n", allValsService[i])
 				kc++
 			}
+
 		}
+		fmt.Println("account: ", kc)
+		count += kc
 	}
-	fmt.Println("account: ", kc)
-	count += kc
 
 	kc = 0
 	fmt.Println("")
 	fmt.Println("LocalRedirect Entries: ")
-	for i := 0; i < len(allKeysRedirect); i++ {
-		if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_REDIRECT) {
+	if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_REDIRECT) {
+		for i := 0; i < len(allKeysRedirect); i++ {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allValsRedirect[i].SvcId) {
 				fmt.Printf("[%v]: key=%s\n", kc, allKeysRedirect[i])
 				fmt.Printf("     value=%s\n", allValsRedirect[i])
 				kc++
 			}
 		}
+		fmt.Println("account: ", kc)
+		count += kc
 	}
-	fmt.Println("account: ", kc)
-	count += kc
 
 	kc = 0
 	fmt.Println("")
 	fmt.Println("Balancing Entries: ")
-	for i := 0; i < len(allKeysBalancing); i++ {
-		if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_BALANCING) {
+	if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_BALANCING) {
+		for i := 0; i < len(allKeysBalancing); i++ {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allValsBalancing[i].SvcId) {
 				fmt.Printf("[%v]: key=%s\n", kc, allKeysBalancing[i])
 				fmt.Printf("     value=%s\n", allValsBalancing[i])
 				kc++
 			}
 		}
+		fmt.Println("account: ", kc)
+		count += kc
 	}
-	fmt.Println("account: ", kc)
-	count += kc
 
 	fmt.Println("")
 	fmt.Printf("end map %s: account %v \n", name, count)
@@ -202,48 +203,48 @@ func (s *EbpfProgramStruct) PrintMapBackend(filterNatType *uint8, filterSvcV4Id 
 	// Print categorized data
 	fmt.Println("")
 	kc := 0
-	fmt.Println("Service Entries: ")
-	for i := 0; i < len(allKeysService); i++ {
-		if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_SERVICE) {
+	if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_SERVICE) {
+		fmt.Println("Service Entries: ")
+		for i := 0; i < len(allKeysService); i++ {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allKeysService[i].SvcId) {
 				fmt.Printf("[%v]: key=%s\n", kc, allKeysService[i])
 				fmt.Printf("     value=%s\n", allValsService[i])
 				kc++
 			}
 		}
+		fmt.Println("account: ", kc)
+		count += kc
 	}
-	fmt.Println("account: ", kc)
-	count += kc
 
 	fmt.Println("")
 	kc = 0
-	fmt.Println("LocalRedirect Entries: ")
-	for i := 0; i < len(allKeysRedirect); i++ {
-		if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_REDIRECT) {
+	if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_REDIRECT) {
+		fmt.Println("LocalRedirect Entries: ")
+		for i := 0; i < len(allKeysRedirect); i++ {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allKeysRedirect[i].SvcId) {
 				fmt.Printf("[%v]: key=%s\n", kc, allKeysRedirect[i])
 				fmt.Printf("     value=%s\n", allValsRedirect[i])
 				kc++
 			}
 		}
+		fmt.Println("account: ", kc)
+		count += kc
 	}
-	fmt.Println("account: ", kc)
-	count += kc
 
 	fmt.Println("")
 	kc = 0
-	fmt.Println("Balancing Entries: ")
-	for i := 0; i < len(allKeysBalancing); i++ {
-		if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_BALANCING) {
+	if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_BALANCING) {
+		fmt.Println("Balancing Entries: ")
+		for i := 0; i < len(allKeysBalancing); i++ {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allKeysBalancing[i].SvcId) {
 				fmt.Printf("[%v]: key=%s\n", kc, allKeysBalancing[i])
 				fmt.Printf("     value=%s\n", allValsBalancing[i])
 				kc++
 			}
 		}
+		fmt.Println("account: ", kc)
+		count += kc
 	}
-	fmt.Println("account: ", kc)
-	count += kc
 
 	fmt.Println("")
 	fmt.Printf("end map %s: account %v \n", name, count)

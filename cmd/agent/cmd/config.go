@@ -91,6 +91,10 @@ func init() {
 			if err := yaml.Unmarshal(configmapBytes, &types.AgentConfig.Configmap); nil != err {
 				logger.Sugar().Fatalf("failed to parse configmap data, error: %v", err)
 			}
+		} else {
+			logger.Info("no configmap file, set to default")
+			types.AgentConfig.Configmap.EnableIPv4 = true
+			types.AgentConfig.Configmap.EnableIPv6 = false
 		}
 	}
 	cobra.OnInitialize(printFlag)
