@@ -62,7 +62,7 @@ func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1b
 		s.ebpfServiceLock.Lock()
 		if svcData, ok := s.serviceData[index]; ok {
 			if e := utils.DeepCopy(svcData.Svc, &svc1); e != nil {
-				l.Sugar().Errorf("failed to DeepCopy service %s: %v", e, svcData.Svc.Name)
+				l.Sugar().Errorf("failed to DeepCopy service %s: %v", svcData.Svc.Name, e)
 				s.ebpfServiceLock.Unlock()
 				return fmt.Errorf("failed to DeepCopy service: %v", e)
 			}
@@ -74,7 +74,7 @@ func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1b
 		if e != nil {
 			return fmt.Errorf("failed to FakeServiceForBalancingPolicyByServiceMatcher: %v", e)
 		}
-		svc2.Annotations = make(map[string]string)
+		svc2.Annotations = map[string]string{}
 		svc2.Annotations[types.AnnotationServiceID] = policy.Annotations[types.AnnotationServiceID]
 		policyData.Svc = svc2
 		frontReady = true
@@ -168,7 +168,7 @@ func (s *ebpfWriter) UpdateBalancingByService(l *zap.Logger, svc *corev1.Service
 					if e != nil {
 						return fmt.Errorf("failed to FakeServiceForBalancingPolicyByServiceMatcher: %v", e)
 					}
-					svcNew.Annotations = make(map[string]string)
+					svcNew.Annotations = map[string]string{}
 					svcNew.Annotations[types.AnnotationServiceID] = data.Policy.Annotations[types.AnnotationServiceID]
 					//
 					s.balancingPolicyData[policyName].Svc = svcNew

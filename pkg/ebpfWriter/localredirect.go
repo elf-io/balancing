@@ -157,7 +157,7 @@ func (s *ebpfWriter) UpdateRedirectByService(l *zap.Logger, svc *corev1.Service)
 				oldSvc := data.Svc
 				if data.Svc == nil || !reflect.DeepEqual(data.Svc.Spec, svc.Spec) {
 					if svc.Annotations == nil {
-						svc.Annotations = make(map[string]string)
+						svc.Annotations = map[string]string{}
 					}
 					svc.Annotations[types.AnnotationServiceID] = data.Policy.Annotations[types.AnnotationServiceID]
 					s.redirectPolicyData[policyName].Svc = svc
