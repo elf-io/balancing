@@ -49,7 +49,7 @@ var CmdTraceMapByService = &cobra.Command{
 		}
 
 		// for ipv4 data
-		svcV4Id := ebpf.GenerateSvcV4Id(service)
+		svcV4Id, _ := ebpf.GenerateSvcV4Id(service)
 		if svcV4Id == 0 {
 			fmt.Printf("the service %s/%s does not have ipv4 data\n", namespace, serviceName)
 		} else {

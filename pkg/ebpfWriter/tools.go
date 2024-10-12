@@ -19,7 +19,7 @@ import (
 func fakeEndpointSliceForRedirectPolicy(policy *balancingv1beta1.LocalRedirectPolicy) (*discovery.EndpointSlice, error) {
 	eds := &discovery.EndpointSlice{}
 	eds.Name = policy.Name
-	eds.Namespace = "faked"
+	eds.Namespace = types.NamespaceIgnore
 
 	ipList := podLabel.PodLabelHandle.GetLocalIPWithLabelSelector(&policy.Spec.LocalRedirectBackend.LocalEndpointSelector)
 	if len(ipList) == 0 {
@@ -92,7 +92,7 @@ func (s *ebpfWriter) getNodeProxyIp(nodeName string) (ipv4 string, ipv6 string) 
 func (s *ebpfWriter) fakeEndpointSliceForBalancingPolicy(policy *balancingv1beta1.BalancingPolicy) (*discovery.EndpointSlice, error) {
 	eds := &discovery.EndpointSlice{}
 	eds.Name = policy.Name
-	eds.Namespace = "faked"
+	eds.Namespace = types.NamespaceIgnore
 
 	if policy.Spec.BalancingBackend.ServiceEndpoint != nil {
 		ipList := podLabel.PodLabelHandle.GetGlobalIPWithLabelSelector(&policy.Spec.BalancingBackend.ServiceEndpoint.EndpointSelector)
@@ -172,7 +172,7 @@ func (s *ebpfWriter) fakeEndpointSliceForBalancingPolicy(policy *balancingv1beta
 	}
 
 	if policy.Spec.BalancingBackend.AddressEndpoint != nil {
-		nodeName := "faked"
+		nodeName := types.NodeNameIgnore
 		for _, v := range policy.Spec.BalancingBackend.AddressEndpoint.IPAddresses {
 			t := discovery.Endpoint{}
 			t.Addresses = []string{}
@@ -191,7 +191,8 @@ func (s *ebpfWriter) fakeEndpointSliceForBalancingPolicy(policy *balancingv1beta
 func FakeServiceForRedirectPolicy(policy *balancingv1beta1.LocalRedirectPolicy) (*corev1.Service, error) {
 	svc := &corev1.Service{}
 	svc.Name = policy.Name
-	svc.Namespace = "faked"
+	svc.Namespace = types.NamespaceIgnore
+
 	if utils.CheckIPv4Format(policy.Spec.RedirectFrontend.AddressMatcher.IP) {
 		svc.Spec.IPFamilies = []corev1.IPFamily{corev1.IPv4Protocol}
 	} else {
@@ -253,7 +254,8 @@ func FakeServiceForBalancingPolicyByAddressMatcher(policy *balancingv1beta1.Bala
 
 	svc := &corev1.Service{}
 	svc.Name = policy.Name
-	svc.Namespace = "faked"
+	svc.Namespace = types.NamespaceIgnore
+
 	if utils.CheckIPv4Format(policy.Spec.BalancingFrontend.AddressMatcher.IP) {
 		svc.Spec.IPFamilies = []corev1.IPFamily{corev1.IPv4Protocol}
 	} else {

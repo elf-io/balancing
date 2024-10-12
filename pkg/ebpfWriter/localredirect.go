@@ -90,9 +90,13 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 	s.redirectPolicyData[index] = policyData
 	if backReady && frontReady {
 		// update id
-		w := ebpf.GenerateSvcV4Id(policyData.Svc)
+		w, ipv6flag := ebpf.GenerateSvcV4Id(policyData.Svc)
 		if w == 0 {
-			l.Sugar().Errorf("failed to get serviceId for localRedirec policy")
+			if ipv6flag {
+				l.Sugar().Debug("ignore ipv6 service for localRedirec policy")
+			} else {
+				l.Sugar().Errorf("failed to get serviceId for localRedirec policy")
+			}
 			return fmt.Errorf("failed to get serviceId for localRedirec policy")
 		}
 		policyData.ServiceId = w

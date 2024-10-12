@@ -30,4 +30,7 @@ const (
 	LogLevelEbpfDebug = "verbose"
 	LogLevelEbpfInfo  = "info"
 	LogLevelEbpfErr   = "error"
+
+	NodeNameIgnore  = "ignoreNode"
+	NamespaceIgnore = "ignoreNamespace"
 )

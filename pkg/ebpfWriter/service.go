@@ -53,10 +53,14 @@ func (s *ebpfWriter) UpdateServiceByService(l *zap.Logger, svc *corev1.Service, 
 			if !onlyUpdateTime {
 				l.Sugar().Infof("cache the data, and apply new data to ebpf map for service %v", index)
 				// only before update ebpf map, update serviceId
-				t := ebpf.GenerateSvcV4Id(svc)
+				t, ipv6flag := ebpf.GenerateSvcV4Id(svc)
 				if t == 0 {
-					l.Sugar().Errorf("failed to get serviceId for service  ")
-					return fmt.Errorf("failed to get serviceId for service  ")
+					if ipv6flag {
+						l.Sugar().Debug("ignore ipv6 service ")
+					} else {
+						l.Sugar().Errorf("failed to get serviceV4Id for service :%+v ", svc)
+					}
+					return fmt.Errorf("failed to get serviceV4Id for service  ")
 				}
 				if d.ServiceId != 0 && d.ServiceId != t {
 					l.Sugar().Warnf("the serviceId of service %s/%s changes from %d to %d  ", svc.Namespace, svc.Name, d.ServiceId, t)
@@ -138,11 +142,15 @@ func (s *ebpfWriter) UpdateServiceByEndpointSlice(l *zap.Logger, epSlice *discov
 				l.Sugar().Infof("cache the data, and apply new data to ebpf map for the service %v", index)
 				oldEps := shallowCopyEdpSliceMap(d.EpsliceList)
 				d.EpsliceList[epindex] = epSlice
-				// only before update ebpf map, update serviceId
-				t := ebpf.GenerateSvcV4Id(d.Svc)
+				// it only updates serviceId before updating ebpf map
+				t, ipv6flag := ebpf.GenerateSvcV4Id(d.Svc)
 				if t == 0 {
-					l.Sugar().Errorf("failed to get serviceId for service  ")
-					return fmt.Errorf("failed to get serviceId for service  ")
+					if ipv6flag {
+						l.Sugar().Debug("ignore ipv6 service ")
+					} else {
+						l.Sugar().Errorf("failed to get serviceV4Id for service :%+v ", d.Svc)
+					}
+					return fmt.Errorf("failed to get serviceV4Id for service  ")
 				}
 				if d.ServiceId != 0 && d.ServiceId != t {
 					l.Sugar().Warnf("the serviceId of service %s/%s changes from %d to %d  ", d.Svc.Namespace, d.Svc.Name, d.ServiceId, t)
@@ -199,10 +207,14 @@ func (s *ebpfWriter) DeleteServiceByEndpointSlice(l *zap.Logger, epSlice *discov
 				oldEps := shallowCopyEdpSliceMap(d.EpsliceList)
 				delete(d.EpsliceList, epindex)
 				// only before update ebpf map, update serviceId
-				t := ebpf.GenerateSvcV4Id(d.Svc)
+				t, ipv6flag := ebpf.GenerateSvcV4Id(d.Svc)
 				if t == 0 {
-					l.Sugar().Errorf("failed to get serviceId for service  ")
-					return fmt.Errorf("failed to get serviceId for service  ")
+					if ipv6flag {
+						l.Sugar().Debug("ignore ipv6 service ")
+					} else {
+						l.Sugar().Errorf("failed to get serviceV4Id for service :%+v ", d.Svc)
+					}
+					return fmt.Errorf("failed to get serviceV4Id for service  ")
 				}
 				if d.ServiceId != 0 && d.ServiceId != t {
 					l.Sugar().Warnf("the serviceId of service %s/%s changes from %d to %d  ", d.Svc.Namespace, d.Svc.Name, d.ServiceId, t)

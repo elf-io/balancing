@@ -172,14 +172,19 @@ func (s *nodeIdManager) GetNodeId(nodeName string) (uint32, error) {
 		return 0, fmt.Errorf("empty nodeName ")
 	}
 
+	// for redirect and balancing polity, it does not care about nodeId
+	if nodeName == types.NodeNameIgnore {
+		return 0xffffffff, nil
+	}
+
 	s.dataLock.Lock()
 	defer s.dataLock.Unlock()
 	if nodeId, ok := s.nodeIdData[nodeName]; ok {
 		return nodeId, nil
 	}
-	s.log.Sugar().Errorf("no dataId for node %s ", nodeName)
+	s.log.Sugar().Errorf("no node Id for node %s ", nodeName)
 
-	return 0, fmt.Errorf("no dataId")
+	return 0, fmt.Errorf("no node Id")
 }
 
 func (s *nodeIdManager) DeleteNodeId(nodeName string) {

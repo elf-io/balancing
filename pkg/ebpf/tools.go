@@ -137,11 +137,21 @@ func getClusterIPs(svc *corev1.Service, ipFamily corev1.IPFamily) []net.IP {
 	return IPs
 }
 
-func GenerateSvcV4Id(svc *corev1.Service) uint32 {
+func GenerateSvcV4Id(svc *corev1.Service) (id uint32, ipv6Flag bool) {
+	ok := false
+	for _, v := range svc.Spec.IPFamilies {
+		if v == corev1.IPv4Protocol {
+			ok = true
+		}
+	}
+	if !ok {
+		return 0, true
+	}
+
 	// for balancing and localRedirect policy, it uses the uniq annotation id
 	if idStr, ok := svc.Annotations[types.AnnotationServiceID]; ok {
 		if id, err := utils.StringToUint32(idStr); err == nil {
-			return id
+			return id, false
 		}
 	}
 
@@ -149,15 +159,15 @@ func GenerateSvcV4Id(svc *corev1.Service) uint32 {
 	// 使用 clusterip （假设 IP 地址唯一） 作为 service 之间的区别，它用于关联 一个 service 和 其所属的所有 endpoint
 	t := net.ParseIP(svc.Spec.ClusterIP)
 	if t.To4() != nil {
-		return binary.LittleEndian.Uint32(t.To4())
+		return binary.LittleEndian.Uint32(t.To4()), false
 	}
 	for _, v := range svc.Spec.ClusterIPs {
 		t := net.ParseIP(v)
 		if t.To4() != nil {
-			return binary.LittleEndian.Uint32(t.To4())
+			return binary.LittleEndian.Uint32(t.To4()), false
 		}
 	}
-	return 0
+	return 0, false
 }
 
 func buildEbpfMapDataForSvcPort() {

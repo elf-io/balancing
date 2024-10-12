@@ -91,9 +91,13 @@ func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1b
 	s.balancingPolicyData[index] = policyData
 	if backReady && frontReady {
 		// update id
-		w := ebpf.GenerateSvcV4Id(policyData.Svc)
+		w, ipv6flag := ebpf.GenerateSvcV4Id(policyData.Svc)
 		if w == 0 {
-			l.Sugar().Errorf("failed to get serviceId for BalancingPolicy policy")
+			if ipv6flag {
+				l.Sugar().Debug("ignore ipv6 service for BalancingPolicy policy")
+			} else {
+				l.Sugar().Errorf("failed to get serviceId for BalancingPolicy policy")
+			}
 			return fmt.Errorf("failed to get serviceId for BalancingPolicy policy")
 		}
 		policyData.ServiceId = w

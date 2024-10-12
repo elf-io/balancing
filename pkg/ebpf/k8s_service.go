@@ -32,7 +32,7 @@ func buildEbpfMapDataForV4Service(natType uint8, svc *corev1.Service, edsList ma
 	resultSvcList := []*serviceMapData{}
 	resultBackList := []*backendMapData{}
 
-	svcV4Id := GenerateSvcV4Id(svc)
+	svcV4Id, _ := GenerateSvcV4Id(svc)
 	if svcV4Id == 0 {
 		return nil, nil, fmt.Errorf("failed to generate svcId")
 	}
