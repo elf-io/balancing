@@ -29,7 +29,7 @@ func (s *ebpfWriter) UpdateNode(l *zap.Logger, node *corev1.Node, onlyUpdateTime
 	if ok && len(entryIp) != 0 && net.ParseIP(entryIp).To4() == nil {
 		l.Sugar().Errorf("the v4 entryIp %s of node %s defined by the user is invalid ", entryIp, node.Name)
 	}
-	entryIp, ok := node.ObjectMeta.Annotations[types.NodeAnnotaitonNodeProxyIPv6]
+	entryIp, ok = node.ObjectMeta.Annotations[types.NodeAnnotaitonNodeProxyIPv6]
 	if ok && len(entryIp) != 0 && net.ParseIP(entryIp) == nil {
 		l.Sugar().Errorf("the v6 entryIp %s of node %s defined by the user is invalid ", entryIp, node.Name)
 		if net.ParseIP(entryIp).To4() != nil {
