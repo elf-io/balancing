@@ -23,41 +23,6 @@ const (
 	RedirectModeNodeProxy   = RedirectMode("nodeProxy")
 )
 
-type BalacningPortInfo struct {
-	// Port is an L4 port number of pod. The string will be strictly parsed as a single uint16.
-	//
-	// +kubebuilder:validation:Pattern=`^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$`
-	// +kubebuilder:validation:Required
-	Port string `json:"port"`
-
-	// HostPort is an L4 port number of hostPort. The string will be strictly parsed as a single uint16.
-	//
-	// +kubebuilder:validation:Pattern=`^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$`
-	// +kubebuilder:validation:Required
-	HostPort string `json:"hostPort"`
-
-	// NodeProxyPort is an L4 port number of node Port. The string will be strictly parsed as a single uint16.
-	//
-	// +kubebuilder:validation:Pattern=`^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$`
-	// +kubebuilder:validation:Required
-	NodeProxyPort string `json:"nodeProxyPort"`
-
-	// Protocol is the L4 protocol.
-	// Accepted values: "TCP", "UDP"
-	//
-	// +kubebuilder:validation:Enum=TCP;UDP
-	// +kubebuilder:validation:Required
-	Protocol string `json:"protocol"`
-
-	// Name is a port name, which must contain at least one [a-z],
-	// and may also contain [0-9] and '-' anywhere except adjacent to another
-	// '-' or in the beginning or the end.
-	//
-	// +kubebuilder:validation:Pattern=`^([0-9]{1,4})|([a-zA-Z0-9]-?)*[a-zA-Z](-?[a-zA-Z0-9])*$`
-	// +kubebuilder:validation:Optional
-	Name string `json:"name"`
-}
-
 type ServiceEndpoint struct {
 	// LocalEndpointSelector selects node local pod(s) where traffic is redirected to.
 	//
@@ -69,7 +34,7 @@ type ServiceEndpoint struct {
 	// When multiple ports are specified, the ports must be named.
 	//
 	// +kubebuilder:validation:Required
-	ToPorts []BalacningPortInfo `json:"toPorts"`
+	ToPorts []PortInfo `json:"toPorts"`
 
 	// RedirectMode defines the destination IP
 	//

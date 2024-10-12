@@ -290,20 +290,9 @@ func FakeServiceForBalancingPolicyByAddressMatcher(policy *balancingv1beta1.Bala
 		if policy.Spec.BalancingBackend.ServiceEndpoint != nil {
 			for _, m := range policy.Spec.BalancingBackend.ServiceEndpoint.ToPorts {
 				if m.Name == v.Name && strings.Compare(strings.ToLower(m.Protocol), strings.ToLower(v.Protocol)) == 0 {
-					var port string
-					switch policy.Spec.BalancingBackend.ServiceEndpoint.RedirectMode {
-					case balancingv1beta1.RedirectModePodEndpoint:
-						port = m.Port
-					case balancingv1beta1.RedirectModeHostPort:
-						port = m.HostPort
-					case balancingv1beta1.RedirectModeNodeProxy:
-						port = m.NodeProxyPort
-					default:
-						return nil, fmt.Errorf("unspported RedirectMode %v for BalancingPolicy %v", policy.Spec.BalancingBackend.ServiceEndpoint.RedirectMode, policy.Name)
-					}
-					p, e := utils.StringToInt32(port)
+					p, e := utils.StringToInt32(m.Port)
 					if e != nil {
-						return nil, fmt.Errorf("unspported port %v for BalancingPolicy %v: %v", port, policy.Name, e)
+						return nil, fmt.Errorf("unspported port %v for BalancingPolicy %v: %v", m.Port, policy.Name, e)
 					}
 					t.TargetPort = intstr.FromInt32(p)
 					ok = true
@@ -350,15 +339,15 @@ func FakeServiceForBalancingPolicyByServiceMatcher(policy *balancingv1beta1.Bala
 	svc.Status.LoadBalancer.Ingress = nil
 	svc.Spec.IPFamilyPolicy = oldSvc.Spec.IPFamilyPolicy
 	svc.Spec.ClusterIP = oldSvc.Spec.ClusterIP
-	svc.Spec.ClusterIPs = make([]string)
+	svc.Spec.ClusterIPs = []string{}
 	for _, v := range oldSvc.Spec.ClusterIPs {
 		svc.Spec.ClusterIPs = append(svc.Spec.ClusterIPs, v)
 	}
-	svc.Spec.IPFamilies = make([]corev1.IPFamily)
+	svc.Spec.IPFamilies = []corev1.IPFamily{}
 	for _, v := range oldSvc.Spec.IPFamilies {
 		svc.Spec.IPFamilies = append(svc.Spec.IPFamilies, v)
 	}
-	svc.Spec.Ports = make([]corev1.ServicePort)
+	svc.Spec.Ports = []corev1.ServicePort{}
 
 LOOP_policyPort:
 	for _, policyPort := range policy.Spec.BalancingFrontend.ServiceMatcher.ToPorts {
@@ -392,18 +381,7 @@ LOOP_policyPort:
 				} else {
 					for _, toPort := range policy.Spec.BalancingBackend.ServiceEndpoint.ToPorts {
 						if toPort.Name == policyPort.Name && strings.ToLower(toPort.Protocol) == strings.ToLower(policyPort.Protocol) {
-							var port string
-							switch policy.Spec.BalancingBackend.ServiceEndpoint.RedirectMode {
-							case balancingv1beta1.RedirectModePodEndpoint:
-								port = toPort.Port
-							case balancingv1beta1.RedirectModeHostPort:
-								port = toPort.HostPort
-							case balancingv1beta1.RedirectModeNodeProxy:
-								port = toPort.NodeProxyPort
-							default:
-								return nil, fmt.Errorf("unspported RedirectMode %v for BalancingPolicy %v", policy.Spec.BalancingBackend.ServiceEndpoint.RedirectMode, policy.Name)
-							}
-							p, e := utils.StringToInt32(port)
+							p, e := utils.StringToInt32(toPort.Port)
 							if e != nil {
 								return nil, fmt.Errorf("unspported port %v for BalancingPolicy %v: %v", port, policy.Name, e)
 							}
@@ -423,5 +401,5 @@ LOOP_policyPort:
 		return nil, fmt.Errorf("failed to find policyPort %v in the service %s/%s", policyPort, oldSvc.Namespace, oldSvc.Name)
 	}
 
-	return nil
+	return nil, nil
 }
