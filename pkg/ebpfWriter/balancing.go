@@ -42,6 +42,8 @@ func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1b
 	s.balancingPolicyLock.Lock()
 	defer s.balancingPolicyLock.Unlock()
 
+	l.Sugar().Debugf("get lock")
+
 	if _, ok := s.balancingPolicyData[index]; ok {
 		l.Sugar().Debugf("only support policy creation, do not support modification, BalancingPolicy %s", index)
 		return nil
@@ -51,6 +53,8 @@ func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1b
 	policyData := &balancingPolicyData{Policy: policy}
 
 	if policy.Spec.BalancingFrontend.ServiceMatcher != nil {
+		l.Sugar().Debugf("deal with ServiceMatcher")
+
 		t := policy.Spec.BalancingFrontend.ServiceMatcher
 		index := t.Namespace + "/" + t.ServiceName
 		var svc1, svc2 *corev1.Service
@@ -71,6 +75,8 @@ func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1b
 		policyData.Svc = svc2
 		frontReady = true
 	} else {
+		l.Sugar().Debugf("deal with AddressMatcher")
+
 		if t, e := FakeServiceForBalancingPolicyByAddressMatcher(policy); e != nil {
 			l.Sugar().Debugf("Failed to fake service for BalancingPolicy %s: %v", index, e)
 			return e
@@ -84,6 +90,7 @@ func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1b
 	if eds, e := s.fakeEndpointSliceForBalancingPolicy(policy); e != nil {
 		l.Sugar().Errorf("Failed to fakeEndpointSliceForBalancingPolicy for BalancingPolicy %s: %v", index, e)
 	} else if eds != nil && len(eds.Endpoints) > 0 {
+		l.Sugar().Debugf("fakeEndpointSliceForBalancingPolicy")
 		policyData.Epslice = eds
 		backReady = true
 	}
@@ -110,6 +117,9 @@ func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1b
 		}
 		l.Sugar().Infof("Succeeded to UpdateEbpfMapForService for BalancingPolicy %s", index)
 	}
+
+	l.Sugar().Debugf("finish")
+
 	return nil
 }
 
