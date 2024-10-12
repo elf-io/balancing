@@ -62,7 +62,9 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 		if svcData, ok := s.serviceData[index]; ok {
 			var svc corev1.Service
 			if e := utils.DeepCopy(svcData.Svc, &svc); e != nil {
-				return fmt.Errorf("failed to DeepCopy: %v", e)
+				l.Sugar().Errorf("failed to DeepCopy service %s: %v", e, svcData.Svc.Name)
+				s.ebpfServiceLock.Unlock()
+				return fmt.Errorf("failed to DeepCopy service: %v", e)
 			}
 			policyData.Svc = &svc
 			svc.Annotations[types.AnnotationServiceID] = policy.Annotations[types.AnnotationServiceID]

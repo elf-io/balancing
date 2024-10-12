@@ -62,10 +62,14 @@ func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1b
 		s.ebpfServiceLock.Lock()
 		if svcData, ok := s.serviceData[index]; ok {
 			if e := utils.DeepCopy(svcData.Svc, &svc1); e != nil {
-				return fmt.Errorf("failed to DeepCopy: %v", e)
+				l.Sugar().Errorf("failed to DeepCopy service %s: %v", e, svcData.Svc.Name)
+				s.ebpfServiceLock.Unlock()
+				return fmt.Errorf("failed to DeepCopy service: %v", e)
 			}
 		}
 		s.ebpfServiceLock.Unlock()
+
+		l.Sugar().Debugf("FakeServiceForBalancingPolicyByServiceMatcher")
 		svc2, e = FakeServiceForBalancingPolicyByServiceMatcher(policy, svc1)
 		if e != nil {
 			return fmt.Errorf("failed to FakeServiceForBalancingPolicyByServiceMatcher: %v", e)
