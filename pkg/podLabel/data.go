@@ -34,9 +34,10 @@ package podLabel
 */
 
 import (
-	"github.com/elf-io/balancing/pkg/types"
 	"net"
 	"sort"
+
+	"github.com/elf-io/balancing/pkg/types"
 
 	"github.com/elf-io/balancing/pkg/lock"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -130,10 +131,10 @@ func (ps *PodStore) FindGlobalIPsByLabelSelector(selector *metav1.LabelSelector)
 
 func (ps *PodStore) FindLocalIPsByLabelSelector(selector *metav1.LabelSelector) []IpInfo {
 	t := ps.FindGlobalIPsByLabelSelector(selector)
-	if len(t) >= 0 {
-		r := make([]IpInfo)
+	if len(t) > 0 {
+		r := make([]IpInfo, 0) // 修正切片初始化
 		for _, val := range t {
-			if val.NodeName = types.AgentConfig.LocalNodeName {
+			if val.NodeName == types.AgentConfig.LocalNodeName { // 修正比较运算符
 				r = append(r, val)
 			}
 		}

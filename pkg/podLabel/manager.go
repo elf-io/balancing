@@ -105,7 +105,7 @@ func (m *podLabelManager) UpdatePodInfo(oldPod *corev1.Pod, newPod *corev1.Pod) 
 			}
 
 			m.l.Sugar().Debugf("update pod %s/%s, ip4: %v, ip6: %v, node: %s ", newPod.Namespace, newPod.Name, ipv4, ipv6, newPod.Spec.NodeName)
-			m.store.UpdatePod(newPod.Namespace, newPod.Name, newPod.Labels, ipv4, ipv6)
+			m.store.UpdatePod(newPod.Namespace, newPod.Name, newPod.Labels, ipv4, ipv6, newPod.Spec.NodeName)
 			return true
 		}
 	}
