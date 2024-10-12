@@ -13,6 +13,7 @@ spec:
   enabled: true
   frontend:
     serviceMatcher:
+      # controller 进行限制，只能有一个 LocalRedirectPolicy 绑定 同名 service   , 否则 agent 侧会 相互覆盖数据
       serviceName: http-server-v4
       namespace: default
       toPorts:

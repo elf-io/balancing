@@ -39,6 +39,9 @@ fowardToNode ： 是否解析到 pod 所在的 node 的 nodePort  ， 适用与�
 
 ============ 问题
 
+ controller 进行限制，只能有一个 BalancingPolicy / LocalRedirectPolicy 绑定 同名 service   , 否则 agent 侧会 相互覆盖数据
+
+
 目前只支持 ipv4， 不支持 ipv6
 
 如果 node ip 变换了，目前 backend 中的 pod 所在 的 node ip 不会变化，需要增强

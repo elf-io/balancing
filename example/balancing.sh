@@ -14,6 +14,7 @@ spec:
   enabled: true
   frontend:
     serviceMatcher:
+      # controller 进行限制，只能有一个 BalancingPolicy 绑定 同名 service  , 否则 agent 侧会 因为 clusterIP 相同 相互覆盖数据
       serviceName: http-server-v4
       namespace: default
       toPorts:
@@ -55,7 +56,8 @@ spec:
   enabled: true
   frontend:
     serviceMatcher:
-      serviceName: http-server-v4
+      # controller 进行限制，只能有一个 BalancingPolicy 绑定 同名 service   , 否则 agent 侧会 相互覆盖数据
+      serviceName: http-server-affinity-v4
       namespace: default
       toPorts:
         # the port and protocol must be in line with the service , but the name should not be
@@ -98,7 +100,8 @@ spec:
   enabled: true
   frontend:
     serviceMatcher:
-      serviceName: http-server-v4
+      # controller 进行限制，只能有一个 BalancingPolicy 绑定 同名 service   , 否则 agent 侧会 相互覆盖数据
+      serviceName: http-server-external-v4
       namespace: default
       toPorts:
         # the port and protocol must be in line with the service , but the name should not be
