@@ -32,6 +32,10 @@ spec:
       jsonPath: .spec.frontend.addressMatcher.ip
       name: addressMatcher
       type: string
+    - description: serviceEndpointRedirect
+      jsonPath: .spec.backend.serviceEndpoint.redirectMode
+      name: serviceEndpointRedirect
+      type: string
     - description: enabled
       jsonPath: .spec.enabled
       name: enabled
