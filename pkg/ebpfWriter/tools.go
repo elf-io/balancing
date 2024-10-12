@@ -358,7 +358,7 @@ LOOP_policyPort:
 			return nil, fmt.Errorf("unspported port %v for BalancingPolicy %v: %v", policyPort.Port, policy.Name, e)
 		}
 		for _, svcPort := range oldSvc.Spec.Ports {
-			if strings.ToLower(string(svcPort.Protocol)) == strings.ToLower(policyPort.Protocol) && svcPort.Name == policyPort.Name && svcPort.Port == port {
+			if strings.ToLower(string(svcPort.Protocol)) == strings.ToLower(policyPort.Protocol) && svcPort.Port == port {
 				// succeeded to find the port
 				newport := corev1.ServicePort{
 					Name:       svcPort.Name,
