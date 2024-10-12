@@ -43,7 +43,9 @@ func (s *ReconcilerBalancing) Reconcile(ctx context.Context, req ctrl.Request) (
 	err := s.client.Get(ctx, req.NamespacedName, rs)
 	if errors.IsNotFound(err) {
 		logger.Sugar().Debugf("policy %v has been deleted", req.NamespacedName.Name)
-		s.writer.DeleteBalancingByPolicy(logger, req.NamespacedName.Name)
+		if e := s.writer.DeleteBalancingByPolicy(logger, req.NamespacedName.Name); e != nil {
+			logger.Sugar().Errorf("%v", e)
+		}
 		return res, nil
 	} else if err != nil {
 		logger.Sugar().Debugf("could not fetch %v: %+v", req.NamespacedName.Name, err)
@@ -56,7 +58,9 @@ func (s *ReconcilerBalancing) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	logger.Sugar().Debugf("reconcile: balancing policy %v", req.NamespacedName.Name)
-	s.writer.UpdateBalancingByPolicy(logger, rs)
+	if e := s.writer.UpdateBalancingByPolicy(logger, rs); e != nil {
+		logger.Sugar().Errorf("%v", e)
+	}
 
 	return res, nil
 

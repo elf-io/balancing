@@ -43,7 +43,9 @@ func (s *ReconcilerRedirect) Reconcile(ctx context.Context, req ctrl.Request) (c
 	err := s.client.Get(ctx, req.NamespacedName, rs)
 	if errors.IsNotFound(err) {
 		logger.Sugar().Debugf("policy %v has been deleted", req.NamespacedName.Name)
-		s.writer.DeleteRedirectByPolicy(logger, req.NamespacedName.Name)
+		if e := s.writer.DeleteRedirectByPolicy(logger, req.NamespacedName.Name); e != nil {
+			logger.Sugar().Errorf("%v", e)
+		}
 		return res, nil
 	} else if err != nil {
 		logger.Sugar().Debugf("could not fetch %v: %+v", req.NamespacedName.Name, err)
@@ -56,7 +58,9 @@ func (s *ReconcilerRedirect) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	logger.Sugar().Debugf("reconcile: LocalRedirectPolicy policy %s", req.NamespacedName.Name)
-	s.writer.UpdateRedirectByPolicy(logger, rs)
+	if e := s.writer.UpdateRedirectByPolicy(logger, rs); e != nil {
+		logger.Sugar().Errorf("%v", e)
+	}
 
 	return res, nil
 }
