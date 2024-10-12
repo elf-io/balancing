@@ -17,6 +17,7 @@ spec:
       serviceName: http-server-v4
       namespace: default
       toPorts:
+        # the port and protocol must be in line with the service , but the name should not be
         - port: "8080"
           protocol: TCP
           name: p1
@@ -57,6 +58,7 @@ spec:
       serviceName: http-server-v4
       namespace: default
       toPorts:
+        # the port and protocol must be in line with the service , but the name should not be
         - port: "8080"
           protocol: TCP
           name: p1
@@ -99,6 +101,7 @@ spec:
       serviceName: http-server-v4
       namespace: default
       toPorts:
+        # the port and protocol must be in line with the service , but the name should not be
         - port: "8080"
           protocol: TCP
           name: p1
