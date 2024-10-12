@@ -89,9 +89,9 @@ cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
-  name: test-service-hostport
+  name: test-service-nodeProxy
   annotations:
-     balancing.elf.io/serviceId: "20002"
+     balancing.elf.io/serviceId: "20003"
 spec:
   enabled: true
   frontend:
