@@ -403,5 +403,5 @@ LOOP_policyPort:
 		return nil, fmt.Errorf("failed to find policyPort %v in the service %s/%s", policyPort, oldSvc.Namespace, oldSvc.Name)
 	}
 
-	return nil, nil
+	return svc, nil
 }

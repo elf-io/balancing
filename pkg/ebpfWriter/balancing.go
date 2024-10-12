@@ -74,6 +74,9 @@ func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1b
 		if e != nil {
 			return fmt.Errorf("failed to FakeServiceForBalancingPolicyByServiceMatcher: %v", e)
 		}
+		if svc2 == nil {
+			return fmt.Errorf("failed to FakeServiceForBalancingPolicyByServiceMatcher")
+		}
 		svc2.Annotations = map[string]string{
 			types.AnnotationServiceID: policy.Annotations[types.AnnotationServiceID],
 		}
@@ -168,6 +171,9 @@ func (s *ebpfWriter) UpdateBalancingByService(l *zap.Logger, svc *corev1.Service
 					svcNew, e := FakeServiceForBalancingPolicyByServiceMatcher(data.Policy, svc)
 					if e != nil {
 						return fmt.Errorf("failed to FakeServiceForBalancingPolicyByServiceMatcher: %v", e)
+					}
+					if svcNew == nil {
+						return fmt.Errorf("failed to FakeServiceForBalancingPolicyByServiceMatcher")
 					}
 					svcNew.Annotations = map[string]string{
 						types.AnnotationServiceID: data.Policy.Annotations[types.AnnotationServiceID],
