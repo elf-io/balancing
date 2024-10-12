@@ -26,6 +26,9 @@ func (s *EbpfProgramStruct) applyEpfMapDataNodeIpV4(l *zap.Logger, oldNode *core
 		nodeIpMapList := []*nodeIpMapData{}
 		for _, v := range node.Status.Addresses {
 			t := net.ParseIP(v.Address)
+			if t == nil {
+				continue
+			}
 			if t.To4() != nil {
 				nodeIpMapList = append(nodeIpMapList, &nodeIpMapData{
 					key: &bpf_cgroupMapkeyNodeIp{
@@ -150,6 +153,9 @@ func (s *EbpfProgramStruct) applyEpfMapDataNodeProxyIpV4(l *zap.Logger, oldNode 
 		// for the internal ip
 		for _, v := range newNode.Status.Addresses {
 			t := net.ParseIP(v.Address)
+			if t == nil {
+				continue
+			}
 			if t.To4() != nil {
 				entryIp = v.Address
 				break

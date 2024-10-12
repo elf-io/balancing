@@ -25,17 +25,19 @@ spec:
           name: p2
   backend:
     serviceEndpoint:
-      serviceName: http-server-v4
-      namespace: default
-      # podEndpoint;nodeProxy;nodePort
+      endpointSelector:
+        matchLabels:
+          app: http-redirect
       redirectMode: podEndpoint
       toPorts:
-      - port: "80"
-        protocol: TCP
-        name: p1
-      - port: "80"
-        protocol: TCP
-        name: p2
+          # 只能有一个 name: p1
+        - port: "80"
+          protocol: TCP
+          name: p1
+          # 只能有一个 name: p2
+        - port: "80"
+          protocol: TCP
+          name: p2
 EOF
 
 
@@ -43,7 +45,7 @@ cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
-  name: test-service-nodeproxy
+  name: test-service-hostport
   annotations:
      balancing.elf.io/serviceId: "20002"
 spec:
@@ -61,27 +63,31 @@ spec:
           name: p2
   backend:
     serviceEndpoint:
-      serviceName: http-server-v4
-      namespace: default
-      # podEndpoint;nodeProxy;nodePort
-      redirectMode: nodeProxy
+      endpointSelector:
+        matchLabels:
+          app: http-redirect
+      # 对于 hostPort 部署的应用，同一个 node 上只会有一个 pod 启动成功，多余的 pod 会因为端口占用而启动失败
+      redirectMode: hostPort
       toPorts:
-      - port: "80"
-        protocol: TCP
-        name: p1
-      - port: "80"
-        protocol: TCP
-        name: p2
+          # 只能有一个 name: p1
+        - hostPort: "20080"
+          protocol: TCP
+          name: p1
+          # 只能有一个 name: p2
+        - hostPort: "20080"
+          protocol: TCP
+          name: p2
 EOF
+
 
 
 cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
-  name: test-service-nodeport
+  name: test-service-hostport
   annotations:
-     balancing.elf.io/serviceId: "20003"
+     balancing.elf.io/serviceId: "20002"
 spec:
   enabled: true
   frontend:
@@ -97,19 +103,22 @@ spec:
           name: p2
   backend:
     serviceEndpoint:
-      serviceName: http-server-v4
-      namespace: default
-      # podEndpoint;nodeProxy;nodePort
-      redirectMode: nodePort
+      endpointSelector:
+        matchLabels:
+          app: http-redirect
+      redirectMode: nodeProxy
       toPorts:
-      - port: "80"
-        protocol: TCP
-        name: p1
-      - port: "80"
-        protocol: TCP
-        name: p2
+          # 只能有一个 name: p1
+        - nodeProxyPort: "20080"
+          port: "80"
+          protocol: TCP
+          name: p1
+          # 只能有一个 name: p2
+        - nodeProxyPort: "20080"
+          port: "80"
+          protocol: TCP
+          name: p2
 EOF
-
 
 
 
@@ -134,22 +143,18 @@ spec:
           name: p2
   backend:
     addressEndpoint:
-      - ip: "1.1.1.1"
-        port: "9080"
-        protocol: TCP
-        name: p1
-      - ip: "1.1.1.2"
-        port: "9080"
-        protocol: TCP
-        name: p1
-      - ip: "1.1.2.1"
-        port: "9080"
-        protocol: TCP
-        name: p2
-      - ip: "1.1.2.2"
-        port: "9080"
-        protocol: TCP
-        name: p2
+      addresses:
+        - "1.1.1.1"
+        - "1.1.1.2"
+      toPorts:
+          # 只能有一个 name: p1
+        - port: "80"
+          protocol: TCP
+          name: p1
+          # 只能有一个 name: p2
+        - port: "80"
+          protocol: TCP
+          name: p2
 EOF
 
 

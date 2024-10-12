@@ -198,6 +198,7 @@ spec:
           privileged: true
         ports:
         - containerPort: 80
+           # 对于 hostPort 部署的应用，同一个 node 上只会有一个 pod 启动成功，多余的 pod 会因为端口占用而启动失败
           hostPort: 20080
           name: http
 ---

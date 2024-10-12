@@ -132,7 +132,7 @@ func RunReconciles() {
 
 	// setup informer
 	stopWatchCh := make(chan struct{})
-	NewPodInformer(Client, stopWatchCh, types.AgentConfig.LocalNodeName, writer)
+	NewPodInformer(Client, stopWatchCh, writer)
 	NewNodeInformer(Client, stopWatchCh, writer)
 
 	NewServiceInformer(Client, stopWatchCh, writer)

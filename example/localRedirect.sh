@@ -25,7 +25,7 @@ spec:
           protocol: TCP
           name: p2
   backend:
-    localEndpointSelector:
+    endpointSelector:
       matchLabels:
         app: http-redirect
     toPorts:
@@ -63,7 +63,7 @@ spec:
           protocol: TCP
           name: p2
   backend:
-    localEndpointSelector:
+    endpointSelector:
       matchLabels:
         app: http-redirect
     toPorts:

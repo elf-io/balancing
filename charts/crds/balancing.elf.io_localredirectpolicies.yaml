@@ -59,7 +59,7 @@ spec:
                 description: LocalEndpointSelector specifies backend configuration
                   to redirect traffic to.
                 properties:
-                  localEndpointSelector:
+                  endpointSelector:
                     description: LocalEndpointSelector selects node local pod(s) where
                       traffic is redirected to.
                     properties:
@@ -138,7 +138,7 @@ spec:
                       type: object
                     type: array
                 required:
-                - localEndpointSelector
+                - endpointSelector
                 - toPorts
                 type: object
                 x-kubernetes-validations:

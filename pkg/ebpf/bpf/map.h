@@ -39,7 +39,6 @@ struct mapkey_service {
 #define SERVICE_FLAG_EXTERNAL_LOCAL_SVC	0x1
 #define SERVICE_FLAG_INTERNAL_LOCAL_SVC	0x2
 //
-#define NAT_FLAG_ACCESS_NODEPORT_BALANCING	0x1
 //
 #define NAT_FLAG_ALLOW_ACCESS_SERVICE	0x1
 
@@ -59,7 +58,7 @@ struct mapvalue_service {
   __u32 local_backend_count;         // how many local-node backend exist in the service ，用于实现 clientIP 亲和
   __u32 affinity_second;       /* In seconds, only for svc frontend */
   __u8  service_flags;                /* SERVICE_FLAG_EXTERNAL_LOCAL_SVC  , SERVICE_FLAG_INTERNAL_LOCAL_SVC */
-  __u8  balancing_flags;                /* NAT_FLAG_ACCESS_NODEPORT_BALANCING（是打到 pod 所在节点的 nodePort，还是 pod ip）  */
+  __u8  balancing_flags;                /* not used  */
   __u8  redirect_flags;         /* NAT_FLAG_ALLOW_ACCESS_SERVICE( 如果在 local-node backend 不可用时，是否正常解析到 clusterIP)  */
   __u8  nat_mode;               /* 用于标识 对应的 key 中的 ip 地址是 哪种哪些， 参考 NAT_MODE_* 标志 */
 };

@@ -51,6 +51,8 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 	s.writer.UpdateServiceByService(logger, svc, false)
 	// update localRedirect
 	s.writer.UpdateRedirectByService(logger, svc)
+	// update balancing
+	s.writer.UpdateBalancingByService(logger, svc)
 
 	return
 }
@@ -91,6 +93,8 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 
 	// update localRedirect
 	s.writer.UpdateRedirectByService(logger, newSvc)
+	// update balancing
+	s.writer.UpdateBalancingByService(logger, newSvc)
 
 	return
 }
@@ -117,6 +121,8 @@ func (s *ServiceReconciler) HandlerDelete(obj interface{}) {
 
 	// update localRedirect
 	s.writer.DeleteRedirectByService(logger, svc)
+	// update balancing
+	s.writer.DeleteBalancingByService(logger, svc)
 
 	return
 }

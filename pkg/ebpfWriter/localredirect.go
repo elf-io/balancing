@@ -20,8 +20,10 @@ import (
 )
 
 type redirectPolicyData struct {
-	Policy  *balancingv1beta1.LocalRedirectPolicy
-	Svc     *corev1.Service
+	Policy *balancingv1beta1.LocalRedirectPolicy
+	// a faked service for writing ebpf
+	Svc *corev1.Service
+	// a faked EndpointSlice for writing ebpf
 	Epslice *discovery.EndpointSlice
 	// identical to the serviceId in the ebpf map, it is used for event to find policy
 	// so only just update ServiceId before updating ebpf map
@@ -59,14 +61,16 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 		s.ebpfServiceLock.Lock()
 		if svcData, ok := s.serviceData[index]; ok {
 			var svc corev1.Service
-			utils.DeepCopy(svcData.Svc, &svc)
+			if e := utils.DeepCopy(svcData.Svc, &svc); e != nil {
+				return fmt.Errorf("failed to DeepCopy: %v", e)
+			}
 			policyData.Svc = &svc
 			svc.Annotations[types.AnnotationServiceID] = policy.Annotations[types.AnnotationServiceID]
 			frontReady = true
 		}
 		s.ebpfServiceLock.Unlock()
 	} else {
-		if t, e := FakeServiceByAddressMatcher(policy); e != nil {
+		if t, e := FakeServiceForRedirectPolicy(policy); e != nil {
 			l.Sugar().Debugf("Failed to fake service for RedirectPolicy %s: %v", index, e)
 			return e
 		} else {
@@ -76,8 +80,8 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 		}
 	}
 
-	if eds, e := fakeEndpointSlice(policy); e != nil {
-		l.Sugar().Errorf("Failed to fakeEndpointSlice for RedirectPolicy %s: %v", index, e)
+	if eds, e := fakeEndpointSliceForRedirectPolicy(policy); e != nil {
+		l.Sugar().Errorf("Failed to fakeEndpointSliceForRedirectPolicy for RedirectPolicy %s: %v", index, e)
 	} else if eds != nil && len(eds.Endpoints) > 0 {
 		policyData.Epslice = eds
 		backReady = true
@@ -222,9 +226,9 @@ func (s *ebpfWriter) UpdateRedirectByPod(l *zap.Logger, pod *corev1.Pod) error {
 		}
 		l.Sugar().Debugf("influence RedirectPolicy %s when pod %s/%s changes", policyName, pod.Namespace, pod.Name)
 
-		newEps, e := fakeEndpointSlice(data.Policy)
+		newEps, e := fakeEndpointSliceForRedirectPolicy(data.Policy)
 		if e != nil {
-			l.Sugar().Errorf("failed to fakeEndpointSlice for RedirectPolicy %s when pod %s/%s changes: %v", policyName, pod.Namespace, pod.Name, e)
+			l.Sugar().Errorf("failed to fakeEndpointSliceForRedirectPolicy for RedirectPolicy %s when pod %s/%s changes: %v", policyName, pod.Namespace, pod.Name, e)
 			continue
 		}
 

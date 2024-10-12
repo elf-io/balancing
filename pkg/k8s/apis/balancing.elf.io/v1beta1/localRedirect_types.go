@@ -93,7 +93,7 @@ type LocalRedirectBackend struct {
 	// LocalEndpointSelector selects node local pod(s) where traffic is redirected to.
 	//
 	// +kubebuilder:validation:Required
-	LocalEndpointSelector metav1.LabelSelector `json:"localEndpointSelector"`
+	LocalEndpointSelector metav1.LabelSelector `json:"endpointSelector"`
 
 	// ToPorts is a list of L4 ports with protocol of node local pod(s) where traffic
 	// is redirected to.

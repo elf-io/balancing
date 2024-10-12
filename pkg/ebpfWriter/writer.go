@@ -36,6 +36,15 @@ type EbpfWriter interface {
 	DeleteRedirectByPolicy(*zap.Logger, string) error
 	UpdateRedirectByPolicy(*zap.Logger, *balancingv1beta1.LocalRedirectPolicy) error
 
+	// for balancing
+	DeleteBalancingByPod(*zap.Logger, *corev1.Pod) error
+	UpdateBalancingByPod(*zap.Logger, *corev1.Pod) error
+	DeleteBalancingByService(*zap.Logger, *corev1.Service) error
+	UpdateBalancingByService(*zap.Logger, *corev1.Service) error
+	DeleteBalancingByPolicy(*zap.Logger, string) error
+	UpdateBalancingByPolicy(*zap.Logger, *balancingv1beta1.BalancingPolicy) error
+	UpdateBalancingByNode(*zap.Logger, *corev1.Node) error
+
 	// for ebpf event to find the service and policy
 	GetPolicyBySvcId(uint8, uint32) (string, string, error)
 }

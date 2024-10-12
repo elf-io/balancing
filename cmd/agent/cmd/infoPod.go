@@ -1,14 +1,12 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	"github.com/elf-io/balancing/pkg/podId"
 	"github.com/elf-io/balancing/pkg/podLabel"
 	"github.com/elf-io/balancing/pkg/types"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -32,9 +30,17 @@ func (s *PodReconciler) HandlerAdd(obj interface{}) {
 		zap.String("pod", name),
 	)
 
+	// for ebpf event
 	if pod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 		podId.PodIdHander.Update(nil, pod)
-		if changed := podLabel.PodLabelHandle.UpdatePodInfo(nil, pod); changed {
+	}
+
+	if changed := podLabel.PodLabelHandle.UpdatePodInfo(nil, pod); changed {
+		// inform the balancing policy
+		s.writer.UpdateBalancingByPod(logger, pod)
+
+		// inform the localRedirect poliy
+		if pod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 			// data changed, try to update the ebpf data
 			s.writer.UpdateRedirectByPod(logger, pod)
 		}
@@ -59,13 +65,20 @@ func (s *PodReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		zap.String("pod", name),
 	)
 
+	// for ebpf event
 	if newPod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 		if !reflect.DeepEqual(oldPod.Status.ContainerStatuses, newPod.Status.ContainerStatuses) {
 			logger.Sugar().Debugf("update id for pod %s/%s", newPod.Namespace, newPod.Name)
 			podId.PodIdHander.Update(oldPod, newPod)
 		}
+	}
 
-		if changed := podLabel.PodLabelHandle.UpdatePodInfo(oldPod, newPod); changed {
+	if changed := podLabel.PodLabelHandle.UpdatePodInfo(oldPod, newPod); changed {
+		// inform the balancing policy
+		s.writer.UpdateBalancingByPod(logger, newPod)
+
+		// inform the localRedirect poliy
+		if newPod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 			// data changed, try to update the ebpf data
 			s.writer.UpdateRedirectByPod(logger, newPod)
 		}
@@ -87,8 +100,14 @@ func (s *PodReconciler) HandlerDelete(obj interface{}) {
 
 	if pod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 		podId.PodIdHander.Update(pod, nil)
+	}
 
-		if changed := podLabel.PodLabelHandle.UpdatePodInfo(pod, nil); changed {
+	if changed := podLabel.PodLabelHandle.UpdatePodInfo(pod, nil); changed {
+		// inform the balancing policy
+		s.writer.DeleteBalancingByPod(logger, pod)
+
+		// inform the localRedirect poliy
+		if pod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 			// data changed, try to update the ebpf data
 			s.writer.DeleteRedirectByPod(logger, pod)
 		}
@@ -97,12 +116,10 @@ func (s *PodReconciler) HandlerDelete(obj interface{}) {
 	return
 }
 
-func NewPodInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, localNodeName string, writer ebpfWriter.EbpfWriter) {
+func NewPodInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, writer ebpfWriter.EbpfWriter) {
 
 	// call HandlerUpdate at an interval of 60s
-	kubeInformerFactory := kubeinformers.NewSharedInformerFactoryWithOptions(Client, InformerListInvterval, kubeinformers.WithTweakListOptions(func(options *metav1.ListOptions) {
-		options.FieldSelector = fmt.Sprintf("spec.nodeName=%s", localNodeName)
-	}))
+	kubeInformerFactory := kubeinformers.NewSharedInformerFactoryWithOptions(Client, InformerListInvterval)
 	res := corev1.SchemeGroupVersion.WithResource("pods")
 	info, e3 := kubeInformerFactory.ForResource(res)
 	if e3 != nil {

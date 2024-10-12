@@ -30,8 +30,14 @@ func (s *NodeReconciler) HandlerAdd(obj interface{}) {
 	)
 
 	logger.Sugar().Debugf("HandlerAdd process node %+v", node.Name)
+
+	// before UpdateNode, BuildNodeId firstly
 	nodeId.NodeIdManagerHander.BuildNodeId(node)
 	s.writer.UpdateNode(logger, node, false)
+
+	// before UpdateBalancingByNode, UpdateNode firstly
+	// update the nodeip and nodeProxyIp for balancing
+	s.writer.UpdateBalancingByNode(logger, node)
 
 	return
 }
@@ -80,6 +86,12 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	}
 	s.writer.UpdateNode(logger, newNode, onlyUpdateTime)
 
+	if !onlyUpdateTime {
+		// node ip or nodePoryIP changes, update the nodeip and nodeProxyIp for balancing
+		// before UpdateBalancingByNode, UpdateNode firstly
+		s.writer.UpdateBalancingByNode(logger, newNode)
+	}
+
 	return
 }
 
@@ -96,9 +108,12 @@ func (s *NodeReconciler) HandlerDelete(obj interface{}) {
 	logger.Sugar().Infof("HandlerDelete process node %+v", node.Name)
 	s.writer.DeleteNode(logger, node)
 
-	// must  update the ebpf firstly, then delete the nodeIP
+	// must update the ebpf firstly, then delete the nodeIP
 	nodeId.NodeIdManagerHander.DeleteNodeId(node.Name)
 
+	// before UpdateBalancingByNode, UpdateNode firstly
+	s.writer.UpdateBalancingByNode(logger, node)
+	
 	return
 }
 

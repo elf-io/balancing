@@ -19,53 +19,28 @@ type RedirectMode string
 
 const (
 	RedirectModePodEndpoint = RedirectMode("podEndpoint")
-	RedirectModeNodePort    = RedirectMode("nodePort")
+	RedirectModeHostPort    = RedirectMode("hostPort")
 	RedirectModeNodeProxy   = RedirectMode("nodeProxy")
 )
 
-type ServiceEndpoint struct {
-	// Namespace is the Kubernetes service namespace.
-	// The service namespace must match the namespace of the parent Local
-	// Redirect Policy.  For Cluster-wide Local Redirect Policy, this
-	// can be any namespace.
-	// +kubebuilder:validation:Required
-	Namespace string `json:"namespace"`
-
-	// Name is the name of a destination Kubernetes service that identifies traffic
-	// to be redirected.
-	// The service type needs to be ClusterIP.
-	//
-	// +kubebuilder:validation:Required
-	ServiceName string `json:"serviceName"`
-
-	// RedirectMode defines the destination IP
-	//
-	// +kubebuilder:validation:Enum=podEndpoint;nodeProxy;nodePort
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=podEndpoint
-	RedirectMode RedirectMode `json:"redirectMode"`
-
-	// ToPorts is a list of destination service L4 ports with protocol for
-	// traffic to be redirected. If not specified, traffic for all the service
-	// ports will be redirected.
-	// When multiple ports are specified, the ports must be named.
-	//
-	// +kubebuilder:validation:Optional
-	ToPorts []PortInfo `json:"toPorts,omitempty"`
-}
-
-type BackendEndpoint struct {
-	// IP is a destination ip address for traffic to be redirected.
-	//
-	// +kubebuilder:validation:Pattern=`((^\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\s*$)|(^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$))`
-	// +kubebuilder:validation:Required
-	IP string `json:"ip"`
-
-	// Port is an L4 port number. The string will be strictly parsed as a single uint16.
+type BalacningPortInfo struct {
+	// Port is an L4 port number of pod. The string will be strictly parsed as a single uint16.
 	//
 	// +kubebuilder:validation:Pattern=`^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$`
 	// +kubebuilder:validation:Required
 	Port string `json:"port"`
+
+	// HostPort is an L4 port number of hostPort. The string will be strictly parsed as a single uint16.
+	//
+	// +kubebuilder:validation:Pattern=`^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$`
+	// +kubebuilder:validation:Required
+	HostPort string `json:"hostPort"`
+
+	// NodeProxyPort is an L4 port number of node Port. The string will be strictly parsed as a single uint16.
+	//
+	// +kubebuilder:validation:Pattern=`^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$`
+	// +kubebuilder:validation:Required
+	NodeProxyPort string `json:"nodeProxyPort"`
 
 	// Protocol is the L4 protocol.
 	// Accepted values: "TCP", "UDP"
@@ -83,11 +58,45 @@ type BackendEndpoint struct {
 	Name string `json:"name"`
 }
 
+type ServiceEndpoint struct {
+	// LocalEndpointSelector selects node local pod(s) where traffic is redirected to.
+	//
+	// +kubebuilder:validation:Required
+	EndpointSelector metav1.LabelSelector `json:"endpointSelector"`
+
+	// ToPorts is a list of L4 ports with protocol of node local pod(s) where traffic
+	// is redirected to.
+	// When multiple ports are specified, the ports must be named.
+	//
+	// +kubebuilder:validation:Required
+	ToPorts []BalacningPortInfo `json:"toPorts"`
+
+	// RedirectMode defines the destination IP
+	//
+	// +kubebuilder:validation:Enum=podEndpoint;nodeProxy;hostPort
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=podEndpoint
+	RedirectMode RedirectMode `json:"redirectMode"`
+}
+
+type BackendEndpoint struct {
+	// destination ip address for traffic to be redirected.
+	//
+	IPAddresses []string `json:"addresses"`
+
+	// ToPorts is a list of destination L4 ports with protocol for traffic
+	// to be redirected.
+	// When multiple ports are specified, the ports must be named.
+	//
+	// +kubebuilder:validation:Required
+	ToPorts []PortInfo `json:"toPorts"`
+}
+
 type BalancingBackend struct {
 	// AddressEndpoint is a tuple {IP, port, protocol} where the traffic will be redirected.
 	//
 	// +kubebuilder:validation:OneOf
-	AddressEndpoint []BackendEndpoint `json:"addressEndpoint,omitempty"`
+	AddressEndpoint *BackendEndpoint `json:"addressEndpoint,omitempty"`
 
 	// serviceEndpoint are pods where the traffic will be redirected.
 	//
