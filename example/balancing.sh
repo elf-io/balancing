@@ -127,6 +127,7 @@ spec:
   enabled: true
   frontend:
     addressMatcher:
+      # controller 进行限制，只能有一个 BalancingPolicy 绑定 相同 ip   , 否则 agent 侧会 相互覆盖数据
       ip: "169.254.169.254"
       toPorts:
         - port: "8080"
