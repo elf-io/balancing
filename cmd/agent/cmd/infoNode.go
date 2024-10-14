@@ -64,29 +64,27 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		zap.String("node", newNode.Name),
 	)
 
-	logger.Sugar().Debugf("HandlerUpdate process node %+v", newNode.Name)
-
-	// update nodeId mapping to nodeName
-	if !reflect.DeepEqual(oldNode.ObjectMeta.Annotations, oldNode.ObjectMeta.Annotations) {
-		nodeId.NodeIdManagerHander.BuildNodeId(newNode)
-	}
-
-	onlyUpdateTime := true
+	NoChange := true
 	if t := cmp.Diff(oldNode.Status.Addresses, newNode.Status.Addresses); len(t) > 0 {
 		logger.Sugar().Debugf("node address: %s", t)
 	}
 	if !reflect.DeepEqual(oldNode.Status.Addresses, newNode.Status.Addresses) {
-		onlyUpdateTime = false
+		NoChange = false
 	}
-	if checkNodeProxyIPChanged(oldNode, newNode, types.NodeAnnotaitonNodeProxyIPv4) {
-		onlyUpdateTime = false
+	if checkNodeProxyIPChanged(oldNode, newNode, types.NodeAnnotaitonNodeProxyIPv4) || checkNodeProxyIPChanged(oldNode, newNode, types.NodeAnnotaitonNodeProxyIPv6) {
+		NoChange = false
+		// update nodeId mapping to nodeName
+		nodeId.NodeIdManagerHander.BuildNodeId(newNode)
 	}
-	if checkNodeProxyIPChanged(oldNode, newNode, types.NodeAnnotaitonNodeProxyIPv6) {
-		onlyUpdateTime = false
+	if !NoChange {
+		logger.Sugar().Infof("HandlerUpdate process changed node %+v", newNode.Name)
+	} else {
+		logger.Sugar().Debugf("HandlerUpdate process node %+v", newNode.Name)
 	}
-	s.writer.UpdateNode(logger, newNode, onlyUpdateTime)
 
-	if !onlyUpdateTime {
+	s.writer.UpdateNode(logger, newNode, NoChange)
+
+	if !NoChange {
 		// node ip or nodePoryIP changes, update the nodeip and nodeProxyIp for balancing
 		// before UpdateBalancingByNode, UpdateNode firstly
 		s.writer.UpdateBalancingByNode(logger, newNode)
@@ -113,7 +111,7 @@ func (s *NodeReconciler) HandlerDelete(obj interface{}) {
 
 	// before UpdateBalancingByNode, UpdateNode firstly
 	s.writer.UpdateBalancingByNode(logger, node)
-	
+
 	return
 }
 

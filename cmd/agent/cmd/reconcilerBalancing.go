@@ -56,8 +56,8 @@ func (s *ReconcilerBalancing) Reconcile(ctx context.Context, req ctrl.Request) (
 		logger.Sugar().Errorf("localRedirect policy %v is invalid: %v", req.NamespacedName.Name, e)
 		return res, nil
 	}
-
 	logger.Sugar().Debugf("reconcile: balancing policy %v", req.NamespacedName.Name)
+
 	if e := s.writer.UpdateBalancingByPolicy(logger, rs); e != nil {
 		logger.Sugar().Errorf("%v", e)
 	}

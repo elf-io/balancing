@@ -104,7 +104,6 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		logger.Sugar().Debugf("HandlerAdd skip unsupported service %+v", name)
 		return
 	}
-	logger.Sugar().Infof("HandlerUpdate process sevice %+v", name)
 
 	// update service
 	NoChange := false
@@ -113,6 +112,11 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	}
 	if reflect.DeepEqual(oldSvc.Spec, newSvc.Spec) && reflect.DeepEqual(oldSvc.Status, newSvc.Status) {
 		NoChange = true
+	}
+	if !NoChange {
+		logger.Sugar().Infof("HandlerUpdate process changed sevice %+v", name)
+	} else {
+		logger.Sugar().Debugf("HandlerUpdate process sevice %+v", name)
 	}
 	if true {
 		svc := corev1.Service{}

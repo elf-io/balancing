@@ -30,6 +30,8 @@ func (s *PodReconciler) HandlerAdd(obj interface{}) {
 		zap.String("pod", name),
 	)
 
+	logger.Sugar().Debugf("process HandlerAdd for pod %s/%s", pod.Namespace, pod.Name)
+
 	// for ebpf event
 	if pod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 		podId.PodIdHander.Update(nil, pod)
@@ -65,10 +67,12 @@ func (s *PodReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		zap.String("pod", name),
 	)
 
+	logger.Sugar().Debugf("process HandlerUpdate for pod %s/%s", newPod.Namespace, newPod.Name)
+
 	// for ebpf event
 	if newPod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 		if !reflect.DeepEqual(oldPod.Status.ContainerStatuses, newPod.Status.ContainerStatuses) {
-			logger.Sugar().Debugf("update id for pod %s/%s", newPod.Namespace, newPod.Name)
+			logger.Sugar().Debugf("update podId for pod %s/%s", newPod.Namespace, newPod.Name)
 			podId.PodIdHander.Update(oldPod, newPod)
 		}
 	}
@@ -97,6 +101,8 @@ func (s *PodReconciler) HandlerDelete(obj interface{}) {
 	logger := s.log.With(
 		zap.String("pod", name),
 	)
+
+	logger.Sugar().Debugf("process HandlerDelete for pod %s/%s", pod.Namespace, pod.Name)
 
 	if pod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 		podId.PodIdHander.Update(pod, nil)

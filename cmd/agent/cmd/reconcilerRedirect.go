@@ -51,13 +51,13 @@ func (s *ReconcilerRedirect) Reconcile(ctx context.Context, req ctrl.Request) (c
 		logger.Sugar().Debugf("could not fetch %v: %+v", req.NamespacedName.Name, err)
 		return res, fmt.Errorf("could not fetch: %+v", err)
 	}
+	logger.Sugar().Debugf("reconcile: LocalRedirectPolicy policy %s", req.NamespacedName.Name)
 
 	if e := CheckPolicyValidity(rs); e != nil {
 		logger.Sugar().Errorf("localRedirect policy %v is invalid: %v", req.NamespacedName.Name, e)
 		return res, nil
 	}
 
-	logger.Sugar().Debugf("reconcile: LocalRedirectPolicy policy %s", req.NamespacedName.Name)
 	if e := s.writer.UpdateRedirectByPolicy(logger, rs); e != nil {
 		logger.Sugar().Errorf("%v", e)
 	}
