@@ -39,16 +39,16 @@ type EventInfo struct {
 	ContainerId   string
 	HostClient    bool
 	NodeName      string
-	IsIpv4        int
-	IsSuccess     int
+	IsIpv4        bool
+	IsSuccess     bool
 	DestIp        string
-	DestPort      int
+	DestPort      string
 	NatIp         string
-	NatPort       int
-	Pid           int
+	NatPort       string
+	Pid           string
 	Failure       string
 	TimeStamp     string
-	ServiceId     uint32
+	ServiceId     string
 	PolicyName    string
 	NatType       string
 	NatMode       string
@@ -72,12 +72,12 @@ func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
 
 				eventInfo := EventInfo{
 					NodeName:  types.AgentConfig.LocalNodeName,
-					IsIpv4:    event.IsIpv4,
-					IsSuccess: event.IsSuccess,
-					Pid:       event.Pid,
+					IsIpv4:    event.IsIpv4 != 0,
+					IsSuccess: event.IsSuccess != 0,
+					Pid:       fmt.Sprintf("%d", event.Pid),
 					Failure:   ebpf.GetFailureStr(event.FailureCode),
 					TimeStamp: time.Now().UTC().Format("2006-01-02T15:04:05Z"),
-					ServiceId: event.SvcId,
+					ServiceId: fmt.Sprintf("%d", event.SvcId),
 					NatType:   ebpf.GetNatTypeStr(event.NatType),
 					NatMode:   ebpf.GetNatModeStr(event.NatMode),
 				}
@@ -108,14 +108,14 @@ func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
 
 				if event.IsIpv4 != 0 {
 					eventInfo.DestIp = ebpf.GetIpStr(event.OriginalDestV4Ip)
-					eventInfo.DestPort = event.OriginalDestPort
+					eventInfo.DestPort = fmt.Sprintf("%d", event.OriginalDestPort)
 					eventInfo.NatIp = ebpf.GetIpStr(event.NatV4Ip)
-					eventInfo.NatPort = event.NatPort
+					eventInfo.NatPort = fmt.Sprintf("%d", event.NatPort)
 				} else {
 					eventInfo.DestIp = ebpf.GetIpv6Str(event.OriginalDestV6ipHigh, event.OriginalDestV6ipLow)
-					eventInfo.DestPort = event.OriginalDestPort
+					eventInfo.DestPort = fmt.Sprintf("%d", event.OriginalDestPort)
 					eventInfo.NatIp = ebpf.GetIpv6Str(event.NatV6ipHigh, event.NatV6ipLow)
-					eventInfo.NatPort = event.NatPort
+					eventInfo.NatPort = fmt.Sprintf("%d", event.NatPort)
 				}
 
 				namespace, name, err := s.writer.GetPolicyBySvcId(event.NatType, event.SvcId)
