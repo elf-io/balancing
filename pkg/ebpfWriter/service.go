@@ -107,7 +107,7 @@ func (s *ebpfWriter) DeleteServiceByService(l *zap.Logger, svc *corev1.Service) 
 	if d, ok := s.serviceData[index]; ok {
 		// todo : generate a ebpf map data and apply it
 		l.Sugar().Infof("delete data from ebpf map for service: %v", index)
-		if e := s.ebpfhandler.DeleteEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, d.EpsliceList); e != nil {
+		if e := s.ebpfhandler.DeleteEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, d.EpsliceList, nil); e != nil {
 			l.Sugar().Errorf("failed to write ebpf map: %v", e)
 			return e
 		}
