@@ -115,7 +115,7 @@ type nodeProxyIpMapData struct {
 func getNodeProxyIpV4(l *zap.Logger, node *corev1.Node) (entryIp string, err error) {
 	entryIp, _ = node.ObjectMeta.Annotations[types.NodeAnnotaitonNodeProxyIPv4]
 	if len(entryIp) != 0 && net.ParseIP(entryIp).To4() == nil {
-		l.Sugar().Errorf("the v4 entryIp %s defined by the use is invalid, use the internal ip of the node %s ", entryIp, newNode.Name)
+		l.Sugar().Errorf("the v4 entryIp %s defined by the use is invalid, use the internal ip of the node %s ", entryIp, node.Name)
 		entryIp = ""
 	}
 	if len(entryIp) == 0 {
