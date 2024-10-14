@@ -121,7 +121,7 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			return
 		}
 		// use a copied service incase modification
-		s.writer.UpdateRedirectByService(logger, &svc)
+		s.writer.UpdateServiceByService(logger, &svc, onlyUpdateTime)
 	}
 
 	// update localRedirect
