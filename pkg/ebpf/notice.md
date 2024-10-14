@@ -37,6 +37,13 @@ nodeIP + nodePort
 fowardToNode ： 是否解析到 pod 所在的 node 的 nodePort  ， 适用与集群外部 的节点
 
 
+
+优先级：
+	当请求的目的地址 相同时，按照如下 优先级 生效
+		localRedirect > balancing > service
+
+
+
 ============ 问题
 
  controller 进行限制，只能有一个 BalancingPolicy / LocalRedirectPolicy 绑定 同名 service   , 否则 agent 侧会 相互覆盖数据

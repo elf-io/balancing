@@ -107,12 +107,12 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	logger.Sugar().Infof("HandlerUpdate process sevice %+v", name)
 
 	// update service
-	onlyUpdateTime := false
+	NoChange := false
 	if t := cmp.Diff(oldSvc, newSvc); len(t) > 0 {
 		logger.Sugar().Debugf("service diff: %s", t)
 	}
 	if reflect.DeepEqual(oldSvc.Spec, newSvc.Spec) && reflect.DeepEqual(oldSvc.Status, newSvc.Status) {
-		onlyUpdateTime = true
+		NoChange = true
 	}
 	if true {
 		svc := corev1.Service{}
@@ -121,11 +121,11 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			return
 		}
 		// use a copied service incase modification
-		s.writer.UpdateServiceByService(logger, &svc, onlyUpdateTime)
+		s.writer.UpdateServiceByService(logger, &svc, NoChange)
 	}
 
 	// update localRedirect
-	if true {
+	if !NoChange {
 		svc := corev1.Service{}
 		if e := utils.DeepCopy(newSvc, &svc); e != nil {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
@@ -135,7 +135,7 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		s.writer.UpdateRedirectByService(logger, &svc)
 	}
 	// update balancing
-	if true {
+	if !NoChange {
 		svc := corev1.Service{}
 		if e := utils.DeepCopy(newSvc, &svc); e != nil {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)

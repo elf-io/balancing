@@ -290,7 +290,13 @@ static __always_inline int execute_nat(struct bpf_sock_addr *ctx , __u32 debug_l
         }
         debugf(DEBUG_VERSBOSE, "nat by first affinity, for %pI4:%d\n" , &dst_ip  , dst_port   );
     }else{
-        if ( svckey.nat_type == NAT_TYPE_BALANCING ) {
+        if ( svckey.nat_type == NAT_TYPE_REDIRECT ) {
+            evt.nat_type = NAT_TYPE_REDIRECT ;
+            nat_ip = backendValue->pod_address ;
+            nat_port = backendValue->pod_port ;
+            debugf(DEBUG_VERSBOSE, "nat by redirect, for %pI4:%d\n" , &dst_ip  , dst_port   );
+
+        } else if ( svckey.nat_type == NAT_TYPE_BALANCING ) {
             /*
             evt.nat_type = NAT_TYPE_BALANCING ;
             if ( svcval.balancing_flags & NAT_FLAG_ACCESS_NODEPORT_BALANCING ) {
@@ -313,11 +319,7 @@ static __always_inline int execute_nat(struct bpf_sock_addr *ctx , __u32 debug_l
             nat_ip = backendValue->pod_address ;
             nat_port = backendValue->pod_port ;
             debugf(DEBUG_VERSBOSE, "nat by balancing, for %pI4:%d\n" , &dst_ip  , dst_port   );
-        }else if ( svckey.nat_type == NAT_TYPE_REDIRECT ) {
-            evt.nat_type = NAT_TYPE_REDIRECT ;
-            nat_ip = backendValue->pod_address ;
-            nat_port = backendValue->pod_port ;
-            debugf(DEBUG_VERSBOSE, "nat by redirect, for %pI4:%d\n" , &dst_ip  , dst_port   );
+
         }else {
             evt.nat_type = NAT_TYPE_SERVICE ;
             nat_ip = backendValue->pod_address ;
