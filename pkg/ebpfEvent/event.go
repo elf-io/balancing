@@ -33,25 +33,25 @@ func NewEbpfEvent(l *zap.Logger, ebpfHandler ebpf.EbpfProgram, writer ebpfWriter
 
 // 定义一个结构体来存储事件信息
 type EventInfo struct {
-	ClientPodName string
-	Namespace     string
-	PodUuid       string
-	ContainerId   string
-	HostClient    bool
-	NodeName      string
-	IsIpv4        bool
-	IsSuccess     bool
-	DestIp        string
-	DestPort      string
-	NatIp         string
-	NatPort       string
-	Pid           string
-	Failure       string
-	TimeStamp     string
-	ServiceId     string
-	PolicyName    string
-	NatType       string
-	NatMode       string
+	ClientPodName     string
+	ClientNamespace   string
+	ClientPid         string
+	ClientPodUuid     string
+	ClientContainerId string
+	IsHostApp         bool
+	NodeName          string
+	IsIpv4            bool
+	IsSuccess         bool
+	DestIp            string
+	DestPort          string
+	NatIp             string
+	NatPort           string
+	Failure           string
+	TimeStamp         string
+	ServiceId         string
+	PolicyName        string
+	NatType           string
+	NatMode           string
 }
 
 func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
@@ -74,7 +74,7 @@ func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
 					NodeName:  types.AgentConfig.LocalNodeName,
 					IsIpv4:    event.IsIpv4 != 0,
 					IsSuccess: event.IsSuccess != 0,
-					Pid:       fmt.Sprintf("%d", event.Pid),
+					ClientPid: fmt.Sprintf("%d", event.Pid),
 					Failure:   ebpf.GetFailureStr(event.FailureCode),
 					TimeStamp: time.Now().UTC().Format("2006-01-02T15:04:05Z"),
 					ServiceId: fmt.Sprintf("%d", event.SvcId),
@@ -86,24 +86,16 @@ func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
 				if err != nil {
 					s.l.Sugar().Errorf("failed to get podName for pid %d: %v", event.Pid, err)
 					eventInfo.ClientPodName = "unknown"
-					eventInfo.Namespace = "unknown"
-					eventInfo.PodUuid = "unknown"
-					eventInfo.ContainerId = "unknown"
-					eventInfo.HostClient = false
+					eventInfo.ClientNamespace = "unknown"
+					eventInfo.ClientPodUuid = "unknown"
+					eventInfo.ClientContainerId = "unknown"
+					eventInfo.IsHostApp = false
 				} else {
-					if hostFlag {
-						eventInfo.HostClient = true
-					} else {
-						if len(podName) > 0 {
-							eventInfo.ClientPodName = podName
-							eventInfo.Namespace = namespace
-							eventInfo.HostClient = false
-						} else {
-							eventInfo.PodUuid = podUuid
-							eventInfo.ContainerId = containerId
-							eventInfo.HostClient = false
-						}
-					}
+					eventInfo.ClientPodName = podName
+					eventInfo.ClientNamespace = namespace
+					eventInfo.ClientPodUuid = podUuid
+					eventInfo.ClientContainerId = containerId
+					eventInfo.IsHostApp = hostFlag
 				}
 
 				if event.IsIpv4 != 0 {
