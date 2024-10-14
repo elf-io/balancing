@@ -350,6 +350,9 @@ func FakeServiceForBalancingPolicyByServiceMatcher(policy *balancingv1beta1.Bala
 		svc.Spec.IPFamilies = append(svc.Spec.IPFamilies, v)
 	}
 	svc.Spec.Ports = []corev1.ServicePort{}
+	svc.Annotations = map[string]string{
+		types.AnnotationServiceID: policy.Annotations[types.AnnotationServiceID],
+	}
 
 LOOP_policyPort:
 	for _, policyPort := range policy.Spec.BalancingFrontend.ServiceMatcher.ToPorts {

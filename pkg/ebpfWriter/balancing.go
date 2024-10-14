@@ -10,7 +10,6 @@ import (
 
 	"github.com/elf-io/balancing/pkg/ebpf"
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
-	"github.com/elf-io/balancing/pkg/types"
 	"github.com/elf-io/balancing/pkg/utils"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
@@ -76,9 +75,6 @@ func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1b
 		}
 		if svc2 == nil {
 			return fmt.Errorf("failed to FakeServiceForBalancingPolicyByServiceMatcher")
-		}
-		svc2.Annotations = map[string]string{
-			types.AnnotationServiceID: policy.Annotations[types.AnnotationServiceID],
 		}
 		policyData.Svc = svc2
 		frontReady = true
@@ -175,10 +171,6 @@ func (s *ebpfWriter) UpdateBalancingByService(l *zap.Logger, svc *corev1.Service
 					if svcNew == nil {
 						return fmt.Errorf("failed to FakeServiceForBalancingPolicyByServiceMatcher")
 					}
-					svcNew.Annotations = map[string]string{
-						types.AnnotationServiceID: data.Policy.Annotations[types.AnnotationServiceID],
-					}
-					//
 					s.balancingPolicyData[policyName].Svc = svcNew
 					frontChanged = true
 					l.Sugar().Debugf("Service spec changed for policy: %s", policyName)
@@ -189,7 +181,7 @@ func (s *ebpfWriter) UpdateBalancingByService(l *zap.Logger, svc *corev1.Service
 					if data.Epslice != nil && len(data.Epslice.Endpoints) > 0 {
 						t[data.Epslice.Name] = data.Epslice
 					}
-					if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, oldSvc, svc, t, t); e != nil {
+					if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, oldSvc, s.balancingPolicyData[policyName].Svc, t, t); e != nil {
 						l.Sugar().Errorf("Failed to update ebpf map for balancing policy %v when service %s/%s is changing: %v", policyName, svc.Namespace, svc.Name, e)
 					} else {
 						l.Sugar().Infof("Succeeded to update ebpf map for balancing policy %v when service %s/%s is changing", policyName, svc.Namespace, svc.Name)
