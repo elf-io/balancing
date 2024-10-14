@@ -17,7 +17,7 @@ import (
 
 type PodIdManager interface {
 	Update(*corev1.Pod, *corev1.Pod)
-	LookupPodByPid(uint32) (string, string, string, bool, error)
+	LookupPodByPid(uint32) (string, string, string, string, bool, error)
 }
 
 type podIdManager struct {
@@ -145,12 +145,13 @@ func (s *podIdManager) Update(oldPod, newPod *corev1.Pod) {
 // 如果是 k8s pod，则 podName, namespace, containerdId 有值
 // 如果只是个 容器 但不是 pod，则   containerdId 有值
 // 如果只是个 主机上的应用，则 bool 有值
-func (s *podIdManager) LookupPodByPid(pid uint32) (podName, namespace, containerdId string, hostApp bool, err error) {
+func (s *podIdManager) LookupPodByPid(pid uint32) (podName, namespace, containerdId, podUuid string, hostApp bool, err error) {
 	hostApp = false
 	if pid == 0 {
-		return "", "", "", false, fmt.Errorf("empty input")
+		return "", "", "", "", false, fmt.Errorf("empty input")
 	}
 
+	// get pod infromation from cgroup
 	podId, containerId, host, e := getPodAndContainerID(pid)
 	if e != nil {
 		err = fmt.Errorf("failed to getPodAndContainerID for pid %d: %v ", pid, e)
@@ -158,20 +159,21 @@ func (s *podIdManager) LookupPodByPid(pid uint32) (podName, namespace, container
 	}
 	s.log.Sugar().Debugf("process pid %d got: podUuid=%s, containerId=%s, host=%v", pid, podId, containerId, host)
 	if host {
-		return "", "", "", true, nil
+		// this is a host application
+		return "", "", "", "", true, nil
 	}
 
 	if len(podId) == 0 && len(containerId) > 0 {
-		return "", "", containerId, false, nil
+		return "", "", containerId, podId, false, nil
 	}
 
-	// first, check lookup history
+	// for a k8s pod, get its pod name
 	value := PodID{
 		PodUuid:     podId,
 		ContainerId: containerId,
 	}
 	if k, ok := s.podInfo.GetKeyByValue(value); ok {
-		return k.Podname, k.Namespace, containerId, false, nil
+		return k.Podname, k.Namespace, containerId, podId, false, nil
 	}
 
 	err = fmt.Errorf("no data of PodName for pid %d", pid)

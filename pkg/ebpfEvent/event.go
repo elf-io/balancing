@@ -47,21 +47,21 @@ func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
 				s.l.Sugar().Debugf("received an ebpf event: %s ", event)
 				var eventStr string
 
-				podName, namespace, containerId, hostFlag, err := podId.PodIdHander.LookupPodByPid(event.Pid)
+				podName, namespace, containerId, podUuid, hostFlag, err := podId.PodIdHander.LookupPodByPid(event.Pid)
 				if err != nil {
 					s.l.Sugar().Errorf("failed to get podName for pid %d: %v", event.Pid, err)
 					// container application , but miss pod name
-					eventStr += fmt.Sprintf("ClientPodName=unknown, Namespace=unknown, ContainerId=unknown, HostClient=false, ")
+					eventStr += fmt.Sprintf("ClientPodName=unknown, Namespace=unknown, podUuid=unknown, ContainerId=unknown, HostClient=false, ")
 				} else {
 					if hostFlag {
-						eventStr += fmt.Sprintf("ClientPodName=, Namespace=, ContainerId=, HostClient=true, ")
+						eventStr += fmt.Sprintf("ClientPodName=, Namespace=, PodUuid=, ContainerId=, HostClient=true, ")
 					} else {
 						if len(podName) > 0 {
 							// k8s pod
-							eventStr += fmt.Sprintf("ClientPodName=%s, Namespace=%s, ContainerId=, HostClient=false, ", podName, namespace)
+							eventStr += fmt.Sprintf("ClientPodName=%s, Namespace=%s, PodUuid=, ContainerId=, HostClient=false, ", podName, namespace)
 						} else {
 							// just a container
-							eventStr += fmt.Sprintf("ClientPodName=, Namespace=, ContainerId=%s, HostClient=false, ", containerId)
+							eventStr += fmt.Sprintf("ClientPodName=, Namespace=, PodUuid=%s, ContainerId=%s, HostClient=false, ", podUuid, containerId)
 						}
 					}
 				}

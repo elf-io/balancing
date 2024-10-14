@@ -39,6 +39,7 @@ var (
 	crioContainerRegex       = regexp.MustCompile(`crio-([0-9a-f]{64})\.scope$`)
 )
 
+// get pod information from cgroup
 func getPodAndContainerID(pid uint32) (podId string, containerId string, host bool, err error) {
 	podId = ""
 	containerId = ""
