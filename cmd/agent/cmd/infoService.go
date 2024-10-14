@@ -66,7 +66,7 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			return
 		}
 		// use a copied service incase modification
-		s.writer.UpdateRedirectByService(logger, &svc)
+		s.writer.UpdateRedirectByService(logger, &newSvc)
 	}
 	// update balancing
 	if true {
@@ -76,7 +76,7 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			return
 		}
 		// use a copied service incase modification
-		s.writer.UpdateBalancingByService(logger, &svc)
+		s.writer.UpdateBalancingByService(logger, &newSvc)
 	}
 
 	return
