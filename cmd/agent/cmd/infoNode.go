@@ -45,7 +45,13 @@ func (s *NodeReconciler) HandlerAdd(obj interface{}) {
 func checkNodeProxyIPChanged(oldNode, newNode *corev1.Node, entryKey string) bool {
 	oldEntryIP, _ := oldNode.ObjectMeta.Annotations[entryKey]
 	newEntryIP, _ := newNode.ObjectMeta.Annotations[entryKey]
-	return oldEntryIP == newEntryIP
+	return oldEntryIP != newEntryIP
+}
+
+func checkNodeIdChanged(oldNode, newNode *corev1.Node) bool {
+	oldId, _ := oldNode.Annotations[types.NodeAnnotationNodeIdKey]
+	newId, _ := newNode.Annotations[types.NodeAnnotationNodeIdKey]
+	return oldId != newId
 }
 
 func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
@@ -75,8 +81,6 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	if checkNodeProxyIPChanged(oldNode, newNode, types.NodeAnnotaitonNodeProxyIPv4) || checkNodeProxyIPChanged(oldNode, newNode, types.NodeAnnotaitonNodeProxyIPv6) {
 		NoChange = false
 		logger.Sugar().Infof("node NodeProxyIP changed, new: %+v, old: %+v", newNode.Annotations, oldNode.Annotations)
-		// update nodeId mapping to nodeName
-		nodeId.NodeIdManagerHander.BuildNodeId(newNode)
 	}
 
 	s.writer.UpdateNode(logger, newNode, NoChange)
@@ -85,6 +89,12 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		// node ip or nodePoryIP changes, update the nodeip and nodeProxyIp for balancing
 		// before UpdateBalancingByNode, UpdateNode firstly
 		s.writer.UpdateBalancingByNode(logger, newNode)
+	}
+
+	if checkNodeIdChanged(oldNode, newNode) {
+		logger.Sugar().Infof("the nodeId of node %s changes", newNode.Name)
+		// update nodeId mapping to nodeName
+		nodeId.NodeIdManagerHander.BuildNodeId(newNode)
 	}
 
 	return

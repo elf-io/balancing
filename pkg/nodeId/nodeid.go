@@ -13,6 +13,11 @@ import (
 	"time"
 )
 
+/*
+   each node has a persistent ID
+*/
+
+*/
 type NodeIdManager interface {
 	GetNodeId(string) (uint32, error)
 	BuildNodeId(*corev1.Node) error
