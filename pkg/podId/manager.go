@@ -10,6 +10,11 @@ import (
 	"strings"
 )
 
+/*
+  存储数据 podName -> pod containerId
+  可根据进程的 pid  -》 查询到 containerId -》 查询到对应 哪个 pod
+*/
+
 type PodIdManager interface {
 	Update(*corev1.Pod, *corev1.Pod)
 	LookupPodByPid(uint32) (string, string, string, bool, error)
@@ -140,7 +145,8 @@ func (s *podIdManager) Update(oldPod, newPod *corev1.Pod) {
 // 如果是 k8s pod，则 podName, namespace, containerdId 有值
 // 如果只是个 容器 但不是 pod，则   containerdId 有值
 // 如果只是个 主机上的应用，则 bool 有值
-func (s *podIdManager) LookupPodByPid(pid uint32) (podName, namespace, containerdId string, host bool, err error) {
+func (s *podIdManager) LookupPodByPid(pid uint32) (podName, namespace, containerdId string, hostApp bool, err error) {
+	hostApp = false
 	if pid == 0 {
 		return "", "", "", false, fmt.Errorf("empty input")
 	}
@@ -150,7 +156,7 @@ func (s *podIdManager) LookupPodByPid(pid uint32) (podName, namespace, container
 		err = fmt.Errorf("failed to getPodAndContainerID for pid %d: %v ", pid, e)
 		return
 	}
-	s.log.Sugar().Debugf("pod %d got: podUuid=%s, containerId=%s, host=%v", pid, podId, containerId, host)
+	s.log.Sugar().Debugf("process pid %d got: podUuid=%s, containerId=%s, host=%v", pid, podId, containerId, host)
 	if host {
 		return "", "", "", true, nil
 	}
