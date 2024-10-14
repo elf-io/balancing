@@ -28,6 +28,29 @@ type balancingPolicyData struct {
 	ServiceId uint32
 }
 
+func (s *ebpfWriter) getBalancingNatMode(policy *balancingv1beta1.BalancingPolicy) *uint8 {
+	if policy == nil {
+		return nil
+	}
+
+	if policy.Spec.BalancingBackend.ServiceEndpoint != nil {
+		switch policy.Spec.BalancingBackend.ServiceEndpoint.RedirectMode {
+		case balancingv1beta1.RedirectModePodEndpoint:
+			return &ebpf.NatModeBalancingPod
+		case balancingv1beta1.RedirectModeHostPort:
+			return &ebpf.NatModeBalancingHostPort
+		case balancingv1beta1.RedirectModeNodeProxy:
+			return &ebpf.NatModeBalancingNodeProxy
+		default:
+			s.log.Sugar().Errorf("unknow RedirectMode in policy %s", policy.Name)
+			return nil
+		}
+	} else {
+		return &ebpf.NatModeBalancingAddress
+	}
+	return nil
+}
+
 func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1beta1.BalancingPolicy) error {
 	if policy == nil {
 		return fmt.Errorf("empty policy")
@@ -120,7 +143,7 @@ PROCESS_EDS_LABEL:
 		l.Sugar().Debugf("update ServiceId to %d", w)
 		// update map
 		t := map[string]*discovery.EndpointSlice{policyData.Epslice.Name: policyData.Epslice}
-		if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, nil, policyData.Svc, nil, t); e != nil {
+		if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, nil, policyData.Svc, nil, t, s.getBalancingNatMode(policy)); e != nil {
 			l.Sugar().Errorf("Failed to write ebpf map for balancing policy %v: %v", index, e)
 			return e
 		}
@@ -146,8 +169,7 @@ func (s *ebpfWriter) DeleteBalancingByPolicy(l *zap.Logger, policyName string) e
 		if d.Epslice != nil && len(d.Epslice.Endpoints) > 0 {
 			t[d.Epslice.Name] = d.Epslice
 		}
-		// no need to update svcId here, because the svcId does not change for balancing policy
-		if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, d.Svc, nil, t, nil); e != nil {
+		if e := s.ebpfhandler.DeleteEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, d.Svc, t, s.getBalancingNatMode(d.Policy)); e != nil {
 			l.Sugar().Errorf("failed to delete ebpf map for balancing policy %v when policy is deleting: %v", index, e)
 			return e
 		}
@@ -186,7 +208,7 @@ func (s *ebpfWriter) UpdateBalancingByService(l *zap.Logger, svc *corev1.Service
 					if data.Epslice != nil && len(data.Epslice.Endpoints) > 0 {
 						t[data.Epslice.Name] = data.Epslice
 					}
-					if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, oldSvc, s.balancingPolicyData[policyName].Svc, t, t); e != nil {
+					if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, oldSvc, s.balancingPolicyData[policyName].Svc, t, t, s.getBalancingNatMode(data.Policy)); e != nil {
 						l.Sugar().Errorf("Failed to update ebpf map for balancing policy %v when service %s/%s is changing: %v", policyName, svc.Namespace, svc.Name, e)
 					} else {
 						l.Sugar().Infof("Succeeded to update ebpf map for balancing policy %v when service %s/%s is changing", policyName, svc.Namespace, svc.Name)
@@ -216,7 +238,7 @@ func (s *ebpfWriter) DeleteBalancingByService(l *zap.Logger, svc *corev1.Service
 					t[data.Epslice.Name] = data.Epslice
 				}
 				// no need to update svcId here, because the svcId does not change for balancing policy
-				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, oldSvc, nil, t, t); e != nil {
+				if e := s.ebpfhandler.DeleteEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, oldSvc, t, s.getBalancingNatMode(data.Policy)); e != nil {
 					l.Sugar().Errorf("Failed to delete ebpf map for balancing policy %v when service %s/%s is deleted: %v", policyName, svc.Namespace, svc.Name, e)
 				} else {
 					l.Sugar().Infof("succeeded to delete ebpf map for balancing policy %v when service %s/%s is deleted", policyName, svc.Namespace, svc.Name)
@@ -278,7 +300,7 @@ func (s *ebpfWriter) UpdateBalancingByPod(l *zap.Logger, pod *corev1.Pod) error 
 			continue
 		} else {
 			// no need to update svcId here, because the svcId does not change for balancing policy
-			if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, data.Svc, data.Svc, oldEpList, newEpList); e != nil {
+			if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, data.Svc, data.Svc, oldEpList, newEpList, s.getBalancingNatMode(data.Policy)); e != nil {
 				l.Sugar().Errorf("failed to update ebpf map for balancing policy %v when pod %s/%s is changing: %v", policyName, pod.Namespace, pod.Name, e)
 			} else {
 				l.Sugar().Infof("succeeded to update ebpf map for balancing policy %v when pod %s/%s is changing ", policyName, pod.Namespace, pod.Name)
@@ -344,7 +366,7 @@ func (s *ebpfWriter) UpdateBalancingByNode(l *zap.Logger, node *corev1.Node) err
 			continue
 		} else {
 			// no need to update svcId here, because the svcId does not change for balancing policy
-			if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, data.Svc, data.Svc, oldEpList, newEpList); e != nil {
+			if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, data.Svc, data.Svc, oldEpList, newEpList, s.getBalancingNatMode(data.Policy)); e != nil {
 				l.Sugar().Errorf("failed to update ebpf map for balancing policy %v when node %s is changing: %v", policyName, node.Name, e)
 			} else {
 				l.Sugar().Infof("succeeded to update ebpf map for balancing policy %v when node %s is changing ", policyName, node.Name)

@@ -69,7 +69,7 @@ func (s *ebpfWriter) UpdateServiceByService(l *zap.Logger, svc *corev1.Service, 
 				}
 				d.ServiceId = t
 				//
-				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, svc, d.EpsliceList, d.EpsliceList); e != nil {
+				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, svc, d.EpsliceList, d.EpsliceList, nil); e != nil {
 					l.Sugar().Errorf("failed to write ebpf map: %v", e)
 					return e
 				}
@@ -159,7 +159,7 @@ func (s *ebpfWriter) UpdateServiceByEndpointSlice(l *zap.Logger, epSlice *discov
 				}
 				d.ServiceId = t
 				// update
-				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, d.Svc, oldEps, d.EpsliceList); e != nil {
+				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, d.Svc, oldEps, d.EpsliceList, nil); e != nil {
 					d.EpsliceList = oldEps
 					l.Sugar().Errorf("failed to write ebpf map: %v", e)
 					return e
@@ -223,7 +223,7 @@ func (s *ebpfWriter) DeleteServiceByEndpointSlice(l *zap.Logger, epSlice *discov
 				}
 				d.ServiceId = t
 				// update
-				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, d.Svc, oldEps, d.EpsliceList); e != nil {
+				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_SERVICE, d.Svc, d.Svc, oldEps, d.EpsliceList, nil); e != nil {
 					d.EpsliceList[epindex] = oldEp
 					l.Sugar().Errorf("failed to write ebpf map: %v", e)
 					return e

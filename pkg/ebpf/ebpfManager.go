@@ -90,8 +90,8 @@ type EbpfProgram interface {
 
 	// for agent
 	// for k8s service and endpointslice
-	UpdateEbpfMapForService(*zap.Logger, uint8, *corev1.Service, *corev1.Service, map[string]*discovery.EndpointSlice, map[string]*discovery.EndpointSlice) error
-	DeleteEbpfMapForService(*zap.Logger, uint8, *corev1.Service, map[string]*discovery.EndpointSlice) error
+	UpdateEbpfMapForService(*zap.Logger, uint8, *corev1.Service, *corev1.Service, map[string]*discovery.EndpointSlice, map[string]*discovery.EndpointSlice, *uint8) error
+	DeleteEbpfMapForService(*zap.Logger, uint8, *corev1.Service, map[string]*discovery.EndpointSlice, *uint8) error
 	// for k8s node
 	UpdateEbpfMapForNode(*zap.Logger, *corev1.Node, *corev1.Node) error
 	DeleteEbpfMapForNode(*zap.Logger, *corev1.Node) error

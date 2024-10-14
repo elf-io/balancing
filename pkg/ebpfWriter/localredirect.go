@@ -30,6 +30,18 @@ type redirectPolicyData struct {
 	ServiceId uint32
 }
 
+func (s *ebpfWriter) getRedirectNatMode(policy *balancingv1beta1.LocalRedirectPolicy) *uint8 {
+	if policy == nil {
+		return nil
+	}
+	if policy.Spec.RedirectFrontend.ServiceMatcher != nil {
+		return &ebpf.NatModeRedirectService
+	} else {
+		return &ebpf.NatModeRedirectAddress
+	}
+	return nil
+}
+
 // UpdateRedirectByPolicy updates the redirect policy based on the given LocalRedirectPolicy.
 // It checks if the policy already exists and only supports creation, not modification.
 // If the policy is new, it generates the necessary service and endpoint slice data
@@ -110,7 +122,7 @@ PROCESS_EDS_LABEL:
 		l.Sugar().Debugf("update ServiceId to %d", w)
 		// update map
 		t := map[string]*discovery.EndpointSlice{policyData.Epslice.Name: policyData.Epslice}
-		if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, nil, policyData.Svc, nil, t); e != nil {
+		if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, nil, policyData.Svc, nil, t, s.getRedirectNatMode(policy)); e != nil {
 			l.Sugar().Errorf("Failed to write ebpf map for redirect policy %v: %v", index, e)
 			return e
 		}
@@ -138,7 +150,7 @@ func (s *ebpfWriter) DeleteRedirectByPolicy(l *zap.Logger, policyName string) er
 			t[d.Epslice.Name] = d.Epslice
 		}
 		// no need to update svcId here, because the svcId does not change for redirect policy
-		if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, d.Svc, nil, t, nil); e != nil {
+		if e := s.ebpfhandler.DeleteEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, d.Svc, t, s.getRedirectNatMode(d.Policy)); e != nil {
 			l.Sugar().Errorf("failed to delete ebpf map for redirect policy %v when policy is deleting: %v", index, e)
 			return e
 		}
@@ -175,7 +187,7 @@ func (s *ebpfWriter) UpdateRedirectByService(l *zap.Logger, svc *corev1.Service)
 					if data.Epslice != nil && len(data.Epslice.Endpoints) > 0 {
 						t[data.Epslice.Name] = data.Epslice
 					}
-					if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, oldSvc, svc, t, t); e != nil {
+					if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, oldSvc, svc, t, t, s.getRedirectNatMode(data.Policy)); e != nil {
 						l.Sugar().Errorf("Failed to update ebpf map for redirect policy %v when service %s/%s is changing: %v", policyName, svc.Namespace, svc.Name, e)
 					} else {
 						l.Sugar().Infof("Succeeded to update ebpf map for redirect policy %v when service %s/%s is changing", policyName, svc.Namespace, svc.Name)
@@ -207,7 +219,7 @@ func (s *ebpfWriter) DeleteRedirectByService(l *zap.Logger, svc *corev1.Service)
 					t[data.Epslice.Name] = data.Epslice
 				}
 				// no need to update svcId here, because the svcId does not change for redirect policy
-				if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, oldSvc, nil, t, t); e != nil {
+				if e := s.ebpfhandler.DeleteEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, oldSvc, t, s.getRedirectNatMode(data.Policy)); e != nil {
 					l.Sugar().Errorf("Failed to delete ebpf map for redirect policy %v when service %s/%s is deleted: %v", policyName, svc.Namespace, svc.Name, e)
 				} else {
 					l.Sugar().Infof("succeeded to delete ebpf map for redirect policy %v when service %s/%s is deleted", policyName, svc.Namespace, svc.Name)
@@ -265,7 +277,7 @@ func (s *ebpfWriter) UpdateRedirectByPod(l *zap.Logger, pod *corev1.Pod) error {
 			continue
 		} else {
 			// no need to update svcId here, because the svcId does not change for redirect policy
-			if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, data.Svc, data.Svc, oldEpList, newEpList); e != nil {
+			if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, data.Svc, data.Svc, oldEpList, newEpList, s.getRedirectNatMode(data.Policy)); e != nil {
 				l.Sugar().Errorf("failed to update ebpf map for redirect policy %v when pod %s/%s is changing: %v", policyName, pod.Namespace, pod.Name, e)
 			} else {
 				l.Sugar().Infof("succeeded to update ebpf map for redirect policy %v when pod %s/%s is changing ", policyName, pod.Namespace, pod.Name)

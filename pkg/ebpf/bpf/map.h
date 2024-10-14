@@ -48,9 +48,14 @@ struct mapkey_service {
 #define NAT_MODE_SERVICE_EXTERNALIP  	0x3
 #define NAT_MODE_SERVICE_NODEPORT   	0x4
 //
-#define NAT_MODE_REDIRECT   	        0x5
+#define NAT_MODE_REDIRECT_SERVICE   	        0x10
+#define NAT_MODE_REDIRECT_ADDRESS   	        0x11
 //
-#define NAT_MODE_BALANCING   	        0x6
+#define NAT_MODE_BALANCING_SERVICE_POD   	        0x20
+#define NAT_MODE_BALANCING_SERVICE_HOSTPORT   	    0x21
+#define NAT_MODE_BALANCING_SERVICE_NODEPROXY   	    0x22
+#define NAT_MODE_BALANCING_ADDRESS   	            0x23
+
 
 struct mapvalue_service {
   __u32 svc_id ;                 // 一个 service 有一个 唯一的 ID ，用来映射 service 下 所有的 endpoint
@@ -196,9 +201,9 @@ struct {
 // no available backend
 #define FAILURE_CODE_AGENT__NO_BACKEND 	                     1
 // there is available backend, but failed to find it in backend map
-#define FAILURE_CODE_AGENT__FIND_BACKEND_FAILURE            2
+#define FAILURE_CODE_AGENT__FIND_BACKEND_FAILURE             2
 // failed to find node entry ip map
-#define FAILURE_CODE_AGENT__FIND_NODE_ENTRY_IP_MAP_FAILURE  3
+#define FAILURE_CODE_AGENT__FIND_NODE_ENTRY_IP_MAP_FAILURE   3
 // failed to update affinity map
 #define FAILURE_CODE_SYSTEM__UPDATE_AFFINITY_MAP_FAILURE     100
 // failed to update natRecord map

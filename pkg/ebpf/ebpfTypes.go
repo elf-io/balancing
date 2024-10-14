@@ -27,14 +27,21 @@ var ProtocalMap = map[uint8]string{
 	IPPROTO_UDP: "udp",
 }
 
-const (
-	NatTypeNone = iota
-	NatModeServiceClusterip
-	NatModeServiceLoadBalancer
-	NatModeServiceExternalIp
-	NatModeServiceNodePort
-	NatModeRedirect
-	NatModeBalancing
+// in line with NAT_MODE_* in the map.h
+var (
+	//
+	NatModeServiceClusterip    = uint8(0x01)
+	NatModeServiceLoadBalancer = uint8(0x02)
+	NatModeServiceExternalIp   = uint8(0x03)
+	NatModeServiceNodePort     = uint8(0x04)
+	//
+	NatModeRedirectService = uint8(0x10)
+	NatModeRedirectAddress = uint8(0x11)
+	//
+	NatModeBalancingPod       = uint8(0x20)
+	NatModeBalancingHostPort  = uint8(0x21)
+	NatModeBalancingNodeProxy = uint8(0x22)
+	NatModeBalancingAddress   = uint8(0x23)
 )
 
 var NatModeMap = map[uint8]string{
@@ -42,8 +49,14 @@ var NatModeMap = map[uint8]string{
 	NatModeServiceLoadBalancer: "ServiceLoadbalancer",
 	NatModeServiceExternalIp:   "ServiceExternalIP",
 	NatModeServiceNodePort:     "ServiceNodeport",
-	NatModeRedirect:            "localRedirect",
-	NatModeBalancing:           "balancing",
+	//
+	NatModeRedirectService: "localRedirectService",
+	NatModeRedirectAddress: "localRedirectAddress",
+	//
+	NatModeBalancingPod:       "balancingPod",
+	NatModeBalancingHostPort:  "balancingHostPort",
+	NatModeBalancingNodeProxy: "balancingNodeProxy",
+	NatModeBalancingAddress:   "balancingAddress",
 }
 
 var FailureCodeMap = map[uint8]string{

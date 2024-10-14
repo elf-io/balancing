@@ -23,7 +23,7 @@ type backendMapData struct {
 	val *bpf_cgroupMapvalueBackend
 }
 
-func buildEbpfMapDataForV4Service(natType uint8, svc *corev1.Service, edsList map[string]*discovery.EndpointSlice) ([]*serviceMapData, []*backendMapData, error) {
+func buildEbpfMapDataForV4Service(natType uint8, svc *corev1.Service, edsList map[string]*discovery.EndpointSlice, natMode *uint8) ([]*serviceMapData, []*backendMapData, error) {
 
 	if svc == nil {
 		return nil, nil, fmt.Errorf("service is empty")
@@ -113,13 +113,23 @@ func buildEbpfMapDataForV4Service(natType uint8, svc *corev1.Service, edsList ma
 
 		// add date for clusterip
 		for _, vip := range getClusterIPs(svc, corev1.IPv4Protocol) {
-			addFunc(vip, uint16(svcPort.Port), natType, NatModeServiceClusterip)
+			mode := NatModeServiceClusterip
+			if natMode != nil {
+				// for balancing and redirect policy, natMode is specified by the yaml
+				mode = *natMode
+			}
+			addFunc(vip, uint16(svcPort.Port), natType, mode)
 		}
 
 		if natType == NAT_TYPE_SERVICE {
 			// add date for loadbalancerIP
 			for _, vip := range GetServiceV4LoadbalancerIP(svc) {
-				addFunc(vip, uint16(svcPort.Port), natType, NatModeServiceLoadBalancer)
+				mode := NatModeServiceLoadBalancer
+				if natMode != nil {
+					// for balancing and redirect policy, natMode is specified by the yaml
+					mode = *natMode
+				}
+				addFunc(vip, uint16(svcPort.Port), natType, mode)
 			}
 
 			// add date for ExternalIPs
@@ -127,7 +137,12 @@ func buildEbpfMapDataForV4Service(natType uint8, svc *corev1.Service, edsList ma
 				for _, v := range svc.Spec.ExternalIPs {
 					vip := net.ParseIP(v)
 					if vip.To4() != nil {
-						addFunc(vip.To4(), uint16(svcPort.Port), natType, NatModeServiceExternalIp)
+						mode := NatModeServiceExternalIp
+						if natMode != nil {
+							// for balancing and redirect policy, natMode is specified by the yaml
+							mode = *natMode
+						}
+						addFunc(vip.To4(), uint16(svcPort.Port), natType, mode)
 					}
 				}
 			}
@@ -135,8 +150,13 @@ func buildEbpfMapDataForV4Service(natType uint8, svc *corev1.Service, edsList ma
 			// add date for NodePort
 			// handle nodePort alone cause it uses nodePort
 			if svcPort.NodePort != 0 {
+				mode := NatModeServiceNodePort
+				if natMode != nil {
+					// for balancing and redirect policy, natMode is specified by the yaml
+					mode = *natMode
+				}
 				// generate data for service map
-				addFunc(NODEPORT_V4_IP, uint16(svcPort.NodePort), natType, NatModeServiceNodePort)
+				addFunc(NODEPORT_V4_IP, uint16(svcPort.NodePort), natType, mode)
 			}
 		}
 	}
@@ -275,7 +295,7 @@ OUTER_NEW:
 
 // -------------------------------------------------- for k8s service , localRedirect, balancing
 
-func (s *EbpfProgramStruct) UpdateEbpfMapForService(l *zap.Logger, natType uint8, oldSvc, newSvc *corev1.Service, oldEdsList, newEdsList map[string]*discovery.EndpointSlice) error {
+func (s *EbpfProgramStruct) UpdateEbpfMapForService(l *zap.Logger, natType uint8, oldSvc, newSvc *corev1.Service, oldEdsList, newEdsList map[string]*discovery.EndpointSlice, natMode *uint8) error {
 
 	processIpv4 := false
 	processIpv6 := false
@@ -293,13 +313,13 @@ func (s *EbpfProgramStruct) UpdateEbpfMapForService(l *zap.Logger, natType uint8
 		oldBkList := []*backendMapData{}
 		var err1 error
 		if oldSvc != nil && len(oldEdsList) > 0 {
-			oldSvcList, oldBkList, err1 = buildEbpfMapDataForV4Service(natType, oldSvc, oldEdsList)
+			oldSvcList, oldBkList, err1 = buildEbpfMapDataForV4Service(natType, oldSvc, oldEdsList, natMode)
 			if err1 != nil {
 				return fmt.Errorf("failed to buildEbpfMapDataForV4Service: %v", err1)
 			}
 		}
 
-		newSvcList, newBkList, err2 := buildEbpfMapDataForV4Service(natType, newSvc, newEdsList)
+		newSvcList, newBkList, err2 := buildEbpfMapDataForV4Service(natType, newSvc, newEdsList, natMode)
 		if err2 != nil {
 			return fmt.Errorf("failed to buildEbpfMapDataForV4Service: %v", err2)
 		}
@@ -319,7 +339,7 @@ func (s *EbpfProgramStruct) UpdateEbpfMapForService(l *zap.Logger, natType uint8
 	return nil
 }
 
-func (s *EbpfProgramStruct) DeleteEbpfMapForService(l *zap.Logger, natType uint8, svc *corev1.Service, edsList map[string]*discovery.EndpointSlice) error {
+func (s *EbpfProgramStruct) DeleteEbpfMapForService(l *zap.Logger, natType uint8, svc *corev1.Service, edsList map[string]*discovery.EndpointSlice, natMode *uint8) error {
 
 	processIpv4 := false
 	processIpv6 := false
@@ -333,7 +353,7 @@ func (s *EbpfProgramStruct) DeleteEbpfMapForService(l *zap.Logger, natType uint8
 	}
 
 	if processIpv4 {
-		svcList, bkList, err := buildEbpfMapDataForV4Service(natType, svc, edsList)
+		svcList, bkList, err := buildEbpfMapDataForV4Service(natType, svc, edsList, natMode)
 		if err != nil {
 			return fmt.Errorf("failed to buildEbpfMapDataForV4Service: %v", err)
 		}
