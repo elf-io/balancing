@@ -18,7 +18,7 @@ func (s *EbpfProgramStruct) UpdateMapService(keyList []bpf_cgroupMapkeyService, 
 
 	c, e := s.BpfObjCgroup.MapService.BatchUpdate(keyList, valueList, &ebpf.BatchOptions{})
 	if e != nil {
-		return fmt.Errorf("failed to BatchUpdate: %+v", e)
+		return fmt.Errorf("failed to BatchUpdate for keys %+v: %+v", keyList, e)
 	}
 
 	if len(keyList) != c {
@@ -37,7 +37,7 @@ func (s *EbpfProgramStruct) UpdateMapBackend(keyList []bpf_cgroupMapkeyBackend, 
 
 	c, e := s.BpfObjCgroup.MapBackend.BatchUpdate(keyList, valueList, &ebpf.BatchOptions{})
 	if e != nil {
-		return fmt.Errorf("failed to BatchUpdate: %+v", e)
+		return fmt.Errorf("failed to BatchUpdate for keys %+v: %+v", keyList, e)
 	}
 
 	if len(keyList) != c {
@@ -56,7 +56,7 @@ func (s *EbpfProgramStruct) UpdateMapNodeIp(keyList []bpf_cgroupMapkeyNodeIp, va
 
 	c, e := s.BpfObjCgroup.MapNodeIp.BatchUpdate(keyList, valueList, &ebpf.BatchOptions{})
 	if e != nil {
-		return fmt.Errorf("failed to BatchUpdate: %+v", e)
+		return fmt.Errorf("failed to BatchUpdate for keys %+v: %+v", keyList, e)
 	}
 
 	if len(keyList) != c {
@@ -75,7 +75,7 @@ func (s *EbpfProgramStruct) UpdateMapNodeProxyIp(keyList []uint32, valueList []b
 
 	c, e := s.BpfObjCgroup.MapNodeProxyIp.BatchUpdate(keyList, valueList, &ebpf.BatchOptions{})
 	if e != nil {
-		return fmt.Errorf("failed to BatchUpdate: %+v", e)
+		return fmt.Errorf("failed to BatchUpdate for keys %+v: %+v", keyList, e)
 	}
 
 	if len(keyList) != c {
@@ -94,7 +94,7 @@ func (s *EbpfProgramStruct) UpdateMapNatRecord(keyList []bpf_cgroupMapkeyNatReco
 
 	c, e := s.BpfObjCgroup.MapNatRecord.BatchUpdate(keyList, valueList, &ebpf.BatchOptions{})
 	if e != nil {
-		return fmt.Errorf("failed to BatchUpdate: %+v", e)
+		return fmt.Errorf("failed to BatchUpdate for keys %+v: %+v", keyList, e)
 	}
 
 	if len(keyList) != c {
@@ -113,7 +113,7 @@ func (s *EbpfProgramStruct) UpdateMapAffinity(keyList []bpf_cgroupMapkeyAffinity
 
 	c, e := s.BpfObjCgroup.MapAffinity.BatchUpdate(keyList, valueList, &ebpf.BatchOptions{})
 	if e != nil {
-		return fmt.Errorf("failed to BatchUpdate: %+v", e)
+		return fmt.Errorf("failed to BatchUpdate for keys %+v: %+v", keyList, e)
 	}
 
 	if len(keyList) != c {
@@ -126,7 +126,7 @@ func (s *EbpfProgramStruct) UpdateMapConfigure(index uint32, value uint32) error
 
 	e := s.BpfObjCgroup.MapConfigure.Put(index, value)
 	if e != nil {
-		return fmt.Errorf("failed to Put: %+v", e)
+		return fmt.Errorf("failed to MapConfigure for key %+v: %+v", index, e)
 	}
 	return nil
 }
@@ -139,7 +139,7 @@ func (s *EbpfProgramStruct) DeleteMapService(keyList []bpf_cgroupMapkeyService) 
 	}
 	c, e := s.BpfObjCgroup.MapService.BatchDelete(keyList, &ebpf.BatchOptions{})
 	if e != nil {
-		return fmt.Errorf("failed to BatchDelete: %+v", e)
+		return fmt.Errorf("failed to BatchDelete for keys %+v: %+v", keyList, e)
 	}
 	if len(keyList) != c {
 		return fmt.Errorf("deleted account %v , different from expected account %v ", c, len(keyList))
@@ -153,7 +153,7 @@ func (s *EbpfProgramStruct) DeleteMapBackend(keyList []bpf_cgroupMapkeyBackend) 
 	}
 	c, e := s.BpfObjCgroup.MapBackend.BatchDelete(keyList, &ebpf.BatchOptions{})
 	if e != nil {
-		return fmt.Errorf("failed to BatchDelete: %+v", e)
+		return fmt.Errorf("failed to BatchDelete for keys %+v: %+v", keyList, e)
 	}
 	if len(keyList) != c {
 		return fmt.Errorf("deleted account %v , different from expected account %v ", c, len(keyList))
@@ -167,7 +167,7 @@ func (s *EbpfProgramStruct) DeleteMapNodeIp(keyList []bpf_cgroupMapkeyNodeIp) er
 	}
 	c, e := s.BpfObjCgroup.MapNodeIp.BatchDelete(keyList, &ebpf.BatchOptions{})
 	if e != nil {
-		return fmt.Errorf("failed to BatchDelete: %+v", e)
+		return fmt.Errorf("failed to BatchDelete for keys %+v: %+v", keyList, e)
 	}
 	if len(keyList) != c {
 		return fmt.Errorf("deleted account %v , different from expected account %v ", c, len(keyList))
@@ -181,7 +181,7 @@ func (s *EbpfProgramStruct) DeleteMapNodeProxyIp(keyList []uint32) error {
 	}
 	c, e := s.BpfObjCgroup.MapNodeProxyIp.BatchDelete(keyList, &ebpf.BatchOptions{})
 	if e != nil {
-		return fmt.Errorf("failed to BatchDelete: %+v", e)
+		return fmt.Errorf("failed to BatchDelete for keys %+v: %+v", keyList, e)
 	}
 	if len(keyList) != c {
 		return fmt.Errorf("deleted account %v , different from expected account %v ", c, len(keyList))
@@ -195,7 +195,7 @@ func (s *EbpfProgramStruct) DeleteMapAffinity(keyList []bpf_cgroupMapkeyAffinity
 	}
 	c, e := s.BpfObjCgroup.MapAffinity.BatchDelete(keyList, &ebpf.BatchOptions{})
 	if e != nil {
-		return fmt.Errorf("failed to BatchDelete: %+v", e)
+		return fmt.Errorf("failed to BatchDelete for keys %+v: %+v", keyList, e)
 	}
 	if len(keyList) != c {
 		return fmt.Errorf("deleted account %v , different from expected account %v ", c, len(keyList))
@@ -209,7 +209,7 @@ func (s *EbpfProgramStruct) DeleteMapNatRecord(keyList []bpf_cgroupMapkeyNatReco
 	}
 	c, e := s.BpfObjCgroup.MapNatRecord.BatchDelete(keyList, &ebpf.BatchOptions{})
 	if e != nil {
-		return fmt.Errorf("failed to BatchDelete: %+v", e)
+		return fmt.Errorf("failed to BatchDelete for keys %+v: %+v", keyList, e)
 	}
 	if len(keyList) != c {
 		return fmt.Errorf("deleted account %v , different from expected account %v ", c, len(keyList))

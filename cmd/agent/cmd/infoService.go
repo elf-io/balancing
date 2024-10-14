@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
+	"github.com/elf-io/balancing/pkg/utils"
 	"github.com/google/go-cmp/cmp"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
@@ -48,11 +49,35 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 
 	logger.Sugar().Infof("HandlerAdd process sevice %+v", name)
 	// update service
-	s.writer.UpdateServiceByService(logger, svc, false)
+	if true {
+		newSvc := corev1.Service{}
+		if e := utils.DeepCopy(svc, &newSvc); e != nil {
+			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
+			return
+		}
+		// use a copied service incase modification
+		s.writer.UpdateServiceByService(logger, newSvc, false)
+	}
 	// update localRedirect
-	s.writer.UpdateRedirectByService(logger, svc)
+	if true {
+		newSvc := corev1.Service{}
+		if e := utils.DeepCopy(svc, &newSvc); e != nil {
+			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
+			return
+		}
+		// use a copied service incase modification
+		s.writer.UpdateRedirectByService(logger, svc)
+	}
 	// update balancing
-	s.writer.UpdateBalancingByService(logger, svc)
+	if true {
+		newSvc := corev1.Service{}
+		if e := utils.DeepCopy(svc, &newSvc); e != nil {
+			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
+			return
+		}
+		// use a copied service incase modification
+		s.writer.UpdateBalancingByService(logger, svc)
+	}
 
 	return
 }
@@ -89,12 +114,36 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	if reflect.DeepEqual(oldSvc.Spec, newSvc.Spec) && reflect.DeepEqual(oldSvc.Status, newSvc.Status) {
 		onlyUpdateTime = true
 	}
-	s.writer.UpdateServiceByService(logger, newSvc, onlyUpdateTime)
+	if true {
+		newSvc := corev1.Service{}
+		if e := utils.DeepCopy(newSvc, &newSvc); e != nil {
+			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
+			return
+		}
+		// use a copied service incase modification
+		s.writer.UpdateRedirectByService(logger, newSvc)
+	}
 
 	// update localRedirect
-	s.writer.UpdateRedirectByService(logger, newSvc)
+	if true {
+		newSvc := corev1.Service{}
+		if e := utils.DeepCopy(newSvc, &newSvc); e != nil {
+			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
+			return
+		}
+		// use a copied service incase modification
+		s.writer.UpdateRedirectByService(logger, newSvc)
+	}
 	// update balancing
-	s.writer.UpdateBalancingByService(logger, newSvc)
+	if true {
+		newSvc := corev1.Service{}
+		if e := utils.DeepCopy(newSvc, &newSvc); e != nil {
+			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
+			return
+		}
+		// use a copied service incase modification
+		s.writer.UpdateBalancingByService(logger, newSvc)
+	}
 
 	return
 }
