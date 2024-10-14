@@ -56,7 +56,7 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			return
 		}
 		// use a copied service incase modification
-		s.writer.UpdateServiceByService(logger, newSvc, false)
+		s.writer.UpdateServiceByService(logger, &newSvc, false)
 	}
 	// update localRedirect
 	if true {
@@ -66,7 +66,7 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			return
 		}
 		// use a copied service incase modification
-		s.writer.UpdateRedirectByService(logger, svc)
+		s.writer.UpdateRedirectByService(logger, &svc)
 	}
 	// update balancing
 	if true {
@@ -76,7 +76,7 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			return
 		}
 		// use a copied service incase modification
-		s.writer.UpdateBalancingByService(logger, svc)
+		s.writer.UpdateBalancingByService(logger, &svc)
 	}
 
 	return
@@ -115,34 +115,34 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		onlyUpdateTime = true
 	}
 	if true {
-		newSvc := corev1.Service{}
-		if e := utils.DeepCopy(newSvc, &newSvc); e != nil {
+		svc := corev1.Service{}
+		if e := utils.DeepCopy(newSvc, &svc); e != nil {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
 		// use a copied service incase modification
-		s.writer.UpdateRedirectByService(logger, newSvc)
+		s.writer.UpdateRedirectByService(logger, &svc)
 	}
 
 	// update localRedirect
 	if true {
-		newSvc := corev1.Service{}
-		if e := utils.DeepCopy(newSvc, &newSvc); e != nil {
+		svc := corev1.Service{}
+		if e := utils.DeepCopy(newSvc, &svc); e != nil {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
 		// use a copied service incase modification
-		s.writer.UpdateRedirectByService(logger, newSvc)
+		s.writer.UpdateRedirectByService(logger, &svc)
 	}
 	// update balancing
 	if true {
-		newSvc := corev1.Service{}
-		if e := utils.DeepCopy(newSvc, &newSvc); e != nil {
+		svc := corev1.Service{}
+		if e := utils.DeepCopy(newSvc, &svc); e != nil {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
 		// use a copied service incase modification
-		s.writer.UpdateBalancingByService(logger, newSvc)
+		s.writer.UpdateBalancingByService(logger, &svc)
 	}
 
 	return
