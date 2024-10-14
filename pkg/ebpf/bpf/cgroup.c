@@ -47,8 +47,6 @@ static __always_inline  bool ctx_in_hostns(void *ctx )
 static __always_inline bool get_service( __be32 dest_ip, __u16 dst_port, __u8 ip_proto  , struct mapkey_service *svckey , struct mapvalue_service *svcval ,  __u32 debug_level ) {
     struct mapvalue_service *t ;
 
-    // search NAT_TYPE_BALANCING
-    svckey->nat_type = NAT_TYPE_BALANCING ;
     svckey->address = dest_ip ;
     svckey->dport = dst_port ;
     svckey->proto = ip_proto ;
@@ -56,19 +54,20 @@ static __always_inline bool get_service( __be32 dest_ip, __u16 dst_port, __u8 ip
     svckey->pad[0] = 0 ;
     svckey->pad[1] = 0 ;
     svckey->pad[2] = 0 ;
-    //debugf(DEBUG_INFO, "search : %pI4:%d  proto=%d \n" , &dest_ip, dst_port , ip_proto );
-    //debugf(DEBUG_INFO, "search : nat_type=%d    \n" , svckey->nat_type  );
-    t = bpf_map_lookup_elem( &map_service , svckey);
-    if (t) {
-        debugf(DEBUG_INFO, "get NAT_TYPE_BALANCING record \n" );
-        goto succeed;
-    }
 
     // search NAT_TYPE_REDIRECT
     svckey->nat_type = NAT_TYPE_REDIRECT ;
     t = bpf_map_lookup_elem( &map_service , svckey);
     if (t){
         debugf(DEBUG_INFO, "get NAT_TYPE_REDIRECT record \n" );
+        goto succeed;
+    }
+
+    // search NAT_TYPE_BALANCING
+    svckey->nat_type = NAT_TYPE_BALANCING ;
+    t = bpf_map_lookup_elem( &map_service , svckey);
+    if (t) {
+        debugf(DEBUG_INFO, "get NAT_TYPE_BALANCING record \n" );
         goto succeed;
     }
 

@@ -52,6 +52,57 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: $NAME-balacning-pod-v4
+  namespace: ${NAMESPACE}
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 80
+    name: http1
+  - port: 8080
+    targetPort: 80
+    name: http2
+  selector:
+    app: $NAME
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: $NAME-balacning-hostport-v4
+  namespace: ${NAMESPACE}
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 80
+    name: http1
+  - port: 8080
+    targetPort: 80
+    name: http2
+  selector:
+    app: $NAME
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: $NAME-balacning-nodeproxy-v4
+  namespace: ${NAMESPACE}
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 80
+    name: http1
+  - port: 8080
+    targetPort: 80
+    name: http2
+  selector:
+    app: $NAME
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: $NAME-affinity-v4
   namespace: ${NAMESPACE}
 spec:
