@@ -52,7 +52,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: $NAME-balacning-pod-v4
+  name: $NAME-balancing-pod-v4
   namespace: ${NAMESPACE}
 spec:
   type: LoadBalancer
@@ -69,7 +69,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: $NAME-balacning-hostport-v4
+  name: $NAME-balancing-hostport-v4
   namespace: ${NAMESPACE}
 spec:
   type: LoadBalancer
@@ -86,7 +86,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: $NAME-balacning-nodeproxy-v4
+  name: $NAME-balancing-nodeproxy-v4
   namespace: ${NAMESPACE}
 spec:
   type: LoadBalancer

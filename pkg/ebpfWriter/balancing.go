@@ -65,6 +65,10 @@ func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1b
 				s.ebpfServiceLock.Unlock()
 				return fmt.Errorf("failed to DeepCopy service: %v", e)
 			}
+		} else {
+			s.ebpfServiceLock.Unlock()
+			l.Sugar().Errorf("did not find service %s for policy %v", index, policy.Name)
+			goto PROCESS_EDS_LABEL
 		}
 		s.ebpfServiceLock.Unlock()
 
@@ -91,6 +95,7 @@ func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1b
 		}
 	}
 
+PROCESS_EDS_LABEL:
 	if eds, e := s.fakeEndpointSliceForBalancingPolicy(policy); e != nil {
 		l.Sugar().Errorf("Failed to fakeEndpointSliceForBalancingPolicy for BalancingPolicy %s: %v", index, e)
 	} else if eds != nil && len(eds.Endpoints) > 0 {
@@ -203,7 +208,7 @@ func (s *ebpfWriter) DeleteBalancingByService(l *zap.Logger, svc *corev1.Service
 
 	for policyName, data := range s.balancingPolicyData {
 		if data.Policy.Spec.BalancingFrontend.ServiceMatcher != nil {
-			if data.Policy.Spec.BalancingFrontend.ServiceMatcher.ServiceName == svc.Name && data.Policy.Spec.BalancingFrontend.ServiceMatcher.Namespace == svc.Namespace {
+			if data.Svc != nil && data.Policy.Spec.BalancingFrontend.ServiceMatcher.ServiceName == svc.Name && data.Policy.Spec.BalancingFrontend.ServiceMatcher.Namespace == svc.Namespace {
 				oldSvc := data.Svc
 				s.balancingPolicyData[policyName].Svc = nil
 				t := map[string]*discovery.EndpointSlice{}
@@ -267,6 +272,11 @@ func (s *ebpfWriter) UpdateBalancingByPod(l *zap.Logger, pod *corev1.Pod) error 
 			l.Sugar().Debugf("the changing pod %s/%s influences balancing policy %s, newEndpoints: nil", pod.Namespace, pod.Name, policyName)
 		}
 
+		if data.Svc == nil {
+			l.Sugar().Infof("the service is nil, skip ")
+			continue
+		}
+
 		// no need to update svcId here, because the svcId does not change for balancing policy
 		if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_BALANCING, data.Svc, data.Svc, oldEpList, newEpList); e != nil {
 			l.Sugar().Errorf("failed to update ebpf map for balancing policy %v when pod %s/%s is changing: %v", policyName, pod.Namespace, pod.Name, e)
@@ -325,6 +335,11 @@ func (s *ebpfWriter) UpdateBalancingByNode(l *zap.Logger, node *corev1.Node) err
 			l.Sugar().Debugf("the changing node %s influences balancing policy %s, newEndpoints: %v", node.Name, policyName, newEps.Endpoints)
 		} else {
 			l.Sugar().Debugf("the changing node %s influences balancing policy %s, newEndpoints: nil", node.Name, policyName)
+		}
+
+		if data.Svc == nil {
+			l.Sugar().Infof("the service is nil, skip ")
+			continue
 		}
 
 		// no need to update svcId here, because the svcId does not change for balancing policy
