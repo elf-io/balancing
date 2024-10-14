@@ -65,6 +65,10 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 				l.Sugar().Errorf("failed to DeepCopy service %s: %v", e, svcData.Svc.Name)
 				s.ebpfServiceLock.Unlock()
 				return fmt.Errorf("failed to DeepCopy service: %v", e)
+			} else {
+				s.ebpfServiceLock.Unlock()
+				l.Sugar().Errorf("did not find service %s for policy %v", index, policy.Name)
+				goto PROCESS_EDS_LABEL
 			}
 			policyData.Svc = &svc
 			svc.Annotations[types.AnnotationServiceID] = policy.Annotations[types.AnnotationServiceID]
@@ -82,6 +86,7 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 		}
 	}
 
+PROCESS_EDS_LABEL:
 	if eds, e := fakeEndpointSliceForRedirectPolicy(policy); e != nil {
 		l.Sugar().Errorf("Failed to fakeEndpointSliceForRedirectPolicy for RedirectPolicy %s: %v", index, e)
 	} else if eds != nil && len(eds.Endpoints) > 0 {
@@ -254,13 +259,19 @@ func (s *ebpfWriter) UpdateRedirectByPod(l *zap.Logger, pod *corev1.Pod) error {
 			l.Sugar().Debugf("the changing pod %s/%s influences redirect policy %s, newEndpoints: nil", pod.Namespace, pod.Name, policyName)
 		}
 
-		// no need to update svcId here, because the svcId does not change for redirect policy
-		if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, data.Svc, data.Svc, oldEpList, newEpList); e != nil {
-			l.Sugar().Errorf("failed to update ebpf map for redirect policy %v when pod %s/%s is changing: %v", policyName, pod.Namespace, pod.Name, e)
+		if data.Svc == nil {
+			l.Sugar().Infof("the service is nil, skip ")
+			data.Epslice = newEps
+			continue
 		} else {
-			l.Sugar().Infof("succeeded to update ebpf map for redirect policy %v when pod %s/%s is changing ", policyName, pod.Namespace, pod.Name)
+			// no need to update svcId here, because the svcId does not change for redirect policy
+			if e := s.ebpfhandler.UpdateEbpfMapForService(l, ebpf.NAT_TYPE_REDIRECT, data.Svc, data.Svc, oldEpList, newEpList); e != nil {
+				l.Sugar().Errorf("failed to update ebpf map for redirect policy %v when pod %s/%s is changing: %v", policyName, pod.Namespace, pod.Name, e)
+			} else {
+				l.Sugar().Infof("succeeded to update ebpf map for redirect policy %v when pod %s/%s is changing ", policyName, pod.Namespace, pod.Name)
+			}
+			data.Epslice = newEps
 		}
-		data.Epslice = newEps
 	}
 	return nil
 }
