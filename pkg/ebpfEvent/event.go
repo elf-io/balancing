@@ -55,6 +55,7 @@ type EventInfo struct {
 }
 
 func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
+	var err error
 	go func() {
 		eventCh := s.ebpfHandler.GetMapDataEvent()
 
@@ -82,20 +83,9 @@ func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
 					NatMode:   ebpf.GetNatModeStr(event.NatMode),
 				}
 
-				podName, namespace, containerId, podUuid, hostFlag, err := podId.PodIdHander.LookupPodByPid(event.Pid)
+				eventInfo.ClientPodName, eventInfo.ClientNamespace, eventInfo.ClientContainerId, eventInfo.ClientPodUuid, eventInfo.IsHostApp, err = podId.PodIdHander.LookupPodByPid(event.Pid)
 				if err != nil {
 					s.l.Sugar().Errorf("failed to get podName for pid %d: %v", event.Pid, err)
-					eventInfo.ClientPodName = "unknown"
-					eventInfo.ClientNamespace = "unknown"
-					eventInfo.ClientPodUuid = "unknown"
-					eventInfo.ClientContainerId = "unknown"
-					eventInfo.IsHostApp = false
-				} else {
-					eventInfo.ClientPodName = podName
-					eventInfo.ClientNamespace = namespace
-					eventInfo.ClientPodUuid = podUuid
-					eventInfo.ClientContainerId = containerId
-					eventInfo.IsHostApp = hostFlag
 				}
 
 				if event.IsIpv4 != 0 {
