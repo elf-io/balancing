@@ -70,16 +70,13 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	}
 	if !reflect.DeepEqual(oldNode.Status.Addresses, newNode.Status.Addresses) {
 		NoChange = false
+		logger.Sugar().Infof("node address changed, new: %+v, old: %+v", newNode.Status.Addresses, oldNode.Status.Addresses)
 	}
 	if checkNodeProxyIPChanged(oldNode, newNode, types.NodeAnnotaitonNodeProxyIPv4) || checkNodeProxyIPChanged(oldNode, newNode, types.NodeAnnotaitonNodeProxyIPv6) {
 		NoChange = false
+		logger.Sugar().Infof("node NodeProxyIP changed, new: %+v, old: %+v", newNode.Annotations, oldNode.Annotations)
 		// update nodeId mapping to nodeName
 		nodeId.NodeIdManagerHander.BuildNodeId(newNode)
-	}
-	if !NoChange {
-		logger.Sugar().Infof("HandlerUpdate process changed node %+v", newNode.Name)
-	} else {
-		logger.Sugar().Debugf("HandlerUpdate process node %+v", newNode.Name)
 	}
 
 	s.writer.UpdateNode(logger, newNode, NoChange)
