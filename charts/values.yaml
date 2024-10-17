@@ -404,7 +404,7 @@ balancingController:
     method: auto
 
     ## @param balancingController.tls.secretName the secret name for storing TLS certificates
-    secretName: "balancing-controller-server-certs"
+    secretName: "balancing-webhook-certs"
 
     ## for certmanager method
     certmanager:
