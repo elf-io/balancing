@@ -12,7 +12,6 @@ type ControllerConfigStruct struct {
 	PyroscopeServerAddress string
 	PodName                string
 	PodNamespace           string
-	GolangMaxProcs         int32
 
 	// ----------  from flags
 	ConfigMapPath     string
@@ -35,5 +34,4 @@ var ControllerEnvMapping = []EnvMapping{
 	{"ENV_PYROSCOPE_PUSH_SERVER_ADDRESS", "", &ControllerConfig.PyroscopeServerAddress},
 	{"ENV_POD_NAME", "", &ControllerConfig.PodName},
 	{"ENV_POD_NAMESPACE", "", &ControllerConfig.PodNamespace},
-	{"ENV_GOLANG_MAXPROCS", "8", &ControllerConfig.GolangMaxProcs},
 }

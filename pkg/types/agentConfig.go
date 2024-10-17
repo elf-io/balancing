@@ -12,7 +12,6 @@ type AgentConfigStruct struct {
 	PyroscopeServerAddress string
 	PodName                string
 	PodNamespace           string
-	GolangMaxProcs         int32
 	LocalNodeName          string
 	EbpfLogLevel           string
 
@@ -38,6 +37,5 @@ var AgentEnvMapping = []EnvMapping{
 	{"ENV_POD_NAME", "", &AgentConfig.PodName},
 	{"ENV_POD_NAMESPACE", "", &AgentConfig.PodNamespace},
 	{"ENV_LOCAL_NODE_NAME", "", &AgentConfig.LocalNodeName},
-	{"ENV_GOLANG_MAXPROCS", "8", &AgentConfig.GolangMaxProcs},
 	{"ENV_EBPF_LOG_LEVEL", "verbose", &AgentConfig.EbpfLogLevel},
 }

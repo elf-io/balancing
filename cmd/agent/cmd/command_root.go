@@ -4,14 +4,12 @@
 package cmd
 
 import (
-	"github.com/elf-io/balancing/pkg/types"
 	"github.com/spf13/cobra"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 	"os"
 	"os/signal"
 	"path/filepath"
-	"runtime"
 	"runtime/debug"
 	"syscall"
 )
@@ -46,21 +44,13 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	currentP := runtime.GOMAXPROCS(-1)
-	rootLogger.Sugar().Infof("%v: default max golang procs %v \n", BinName, currentP)
-	if currentP > int(types.AgentConfig.GolangMaxProcs) {
-		runtime.GOMAXPROCS(int(types.AgentConfig.GolangMaxProcs))
-		currentP = runtime.GOMAXPROCS(-1)
-		rootLogger.Sugar().Infof("%v: change max golang procs %v \n", BinName, currentP)
-	}
 
-	// Set golang max procs.
 	if _, err := maxprocs.Set(
 		maxprocs.Logger(func(s string, i ...interface{}) {
 			rootLogger.Sugar().Infof(s, i...)
 		}),
 	); err != nil {
-		rootLogger.Sugar().Warnf("failed to set GOMAXPROCS")
+		rootLogger.Sugar().Warn("failed to set GOMAXPROCS")
 	}
 
 	if err := rootCmd.Execute(); err != nil {
