@@ -31,6 +31,7 @@ ARG NOOPT
 
 COPY . /src
 WORKDIR /src
+RUN  make installDevTool
 RUN  make GOARCH=${TARGETARCH}   \
         RACE=${RACE} NOSTRIP=${NOSTRIP} NOOPT=${NOOPT} \
         DESTDIR_BIN=/tmp/install/${TARGETOS}/${TARGETARCH}/bin \
@@ -39,8 +40,6 @@ RUN  make GOARCH=${TARGETARCH}   \
         RACE=${RACE} NOSTRIP=${NOSTRIP} NOOPT=${NOOPT} \
         DESTDIR_BIN=/tmp/install/${TARGETOS}/${TARGETARCH}/bin \
         build_inspect_bin
-
-
 
 #====== release image =======
 
