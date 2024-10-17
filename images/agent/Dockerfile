@@ -7,7 +7,7 @@ ARG GOLANG_IMAGE=docker.io/library/golang:1.23.1
 
 #========= build gops ===============
 FROM --platform=${TARGETPLATFORM} ${GOLANG_IMAGE} as gops-cni-builder
-COPY /images/agent/build-gops.sh /build-gops.sh
+COPY /images/build-gops.sh /build-gops.sh
 
 #with debian 11 os
 RUN apt-get update && apt-get install -y binutils-aarch64-linux-gnu binutils-x86-64-linux-gnu

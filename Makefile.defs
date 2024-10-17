@@ -83,6 +83,7 @@ GO_CLEAN_FLAGS += -mod=vendor
 
 
 GO_BUILD = CGO_ENABLED=0 $(GO) build
+GO_GENERATE = $(GO) generate
 # Currently crosscompiling only enabled for arm64 targets
 CGO_CC =
 ifeq ($(GOARCH),arm64)
