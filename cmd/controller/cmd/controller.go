@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path"
 	"syscall"
 
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
@@ -13,6 +14,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	controllerzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
+	runtimeWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
 var scheme = runtime.NewScheme()
@@ -45,6 +47,15 @@ func SetupController() {
 		LeaderElection:          true,
 		LeaderElectionID:        "balacning-leader",
 		LeaderElectionNamespace: types.ControllerConfig.PodNamespace,
+		WebhookServer: runtimeWebhook.NewServer(runtimeWebhook.Options{
+			Port:     types.ControllerConfig.WebhookPort,
+			CertDir:  path.Dir(types.ControllerConfig.TlsCaCertPath),
+			CertName: path.Base(types.ControllerConfig.TlsCaCertPath),
+			KeyName:  path.Base(types.ControllerConfig.TlsServerKeyPath),
+			// ClientCAName is the CA certificate name which server used to verify remote(client)'s certificate.
+			// Defaults to "", which means server does not verify client's certificate.
+			ClientCAName: "",
+		}),
 	})
 	if err != nil {
 		rootLogger.Sugar().Fatalf("unable to NewManager: %v", err)
