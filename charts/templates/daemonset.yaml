@@ -159,7 +159,7 @@ spec:
             {{- end }}
           {{- with .Values.balancingAgent.securityContext }}
           securityContext:
-          {{- toYaml . | nindent 10 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: config-path

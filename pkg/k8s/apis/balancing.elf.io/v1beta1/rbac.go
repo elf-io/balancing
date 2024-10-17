@@ -13,7 +13,7 @@
 
 // for k8s object, check 'kubectl api-resources -o wide'
 // +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="",resources=nodes;services;pods;namespace,verbs=get;list;watch;update
+// +kubebuilder:rbac:groups="",resources=nodes;services;pods;namespaces,verbs=get;list;watch;update
 // +kubebuilder:rbac:groups="discovery.k8s.io",resources=endpointslices,verbs=get;list;watch;update
 // +kubebuilder:rbac:groups="coordination.k8s.io",resources=leases,verbs=create;get;update
 // +kubebuilder:rbac:groups=admissionregistration.k8s.io,resources=mutatingwebhookconfigurations;validatingwebhookconfigurations,verbs=get;list;watch;create;update;patch;delete

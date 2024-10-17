@@ -20,7 +20,7 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - namespace
+  - namespaces
   - nodes
   - pods
   - services
