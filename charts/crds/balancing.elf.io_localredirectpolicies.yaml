@@ -5,12 +5,12 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: (unknown)
   creationTimestamp: null
-  name: localredirectpolicies.balancing.balancing.io
+  name: localredirectpolicies.balancing.elf.io
 spec:
-  group: balancing.balancing.io
+  group: balancing.elf.io
   names:
     categories:
-    - balancing
+    - elf
     kind: LocalRedirectPolicy
     listKind: LocalRedirectPolicyList
     plural: localredirectpolicies
@@ -143,7 +143,7 @@ spec:
                 type: object
                 x-kubernetes-validations:
                 - message: backend is immutable
-                  rule: sbalancing == oldSbalancing
+                  rule: self == oldSelf
               enabled:
                 default: true
                 description: enable this policy
@@ -248,7 +248,7 @@ spec:
                 type: object
                 x-kubernetes-validations:
                 - message: frontend is immutable
-                  rule: sbalancing == oldSbalancing
+                  rule: self == oldSelf
             required:
             - backend
             - frontend

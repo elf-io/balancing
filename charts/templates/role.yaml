@@ -42,7 +42,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - balancing.balancing.io
+  - balancing.elf.io
   resources:
   - balancingpolicies
   verbs:
@@ -54,7 +54,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - balancing.balancing.io
+  - balancing.elf.io
   resources:
   - balancingpolicies/status
   verbs:
@@ -62,7 +62,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - balancing.balancing.io
+  - balancing.elf.io
   resources:
   - localredirectpolicies
   verbs:
@@ -74,7 +74,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - balancing.balancing.io
+  - balancing.elf.io
   resources:
   - localredirectpolicies/status
   verbs:
