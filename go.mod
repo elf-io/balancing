@@ -2,8 +2,6 @@ module github.com/elf-io/balancing
 
 go 1.23
 
-toolchain go1.23.1
-
 require (
 	github.com/cilium/ebpf v0.16.0
 	github.com/google/go-cmp v0.6.0
