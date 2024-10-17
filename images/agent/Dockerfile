@@ -29,6 +29,14 @@ ARG RACE
 ARG NOSTRIP
 ARG NOOPT
 
+ARG USE_PROXY_SOURCE
+#use alibaba debian source
+COPY /image/sources.list /sources.list
+RUN [ "$USE_PROXY_SOURCE" != "true" ] && exit 0 ; \
+      rm -f /etc/apt/sources.list ; \
+      cp /sources.list /etc/apt/sources.list ;  \
+      apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
+
 COPY . /src
 WORKDIR /src
 RUN  make installDevTool
