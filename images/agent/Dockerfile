@@ -51,6 +51,8 @@ LABEL maintainer="maintainer@elf-io"
 ARG TARGETOS
 # TARGETARCH is an automatic platform ARG enabled by Docker BuildKit.
 ARG TARGETARCH
+# linux/amd64
+ARG TARGETPLATFORM
 
 ARG GIT_COMMIT_VERSION
 ENV ENV_GIT_COMMIT_VERSION=${GIT_COMMIT_VERSION}
