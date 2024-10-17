@@ -104,7 +104,7 @@ spec:
           {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.Version }}
           startupProbe:
             httpGet:
-              path: /healthy/startup
+              path: /readyz
               port: {{ .Values.balancingAgent.httpServer.port }}
               scheme: HTTP
             failureThreshold: {{ .Values.balancingAgent.httpServer.startupProbe.failureThreshold }}
