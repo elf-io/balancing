@@ -5,6 +5,17 @@
 ARG BASE_IMAGE=ghcr.io/elf-io/elf-agent-base:f67530f1b0d3f29321c8901c036a217b521cd782
 ARG GOLANG_IMAGE=docker.io/library/golang:1.23.1
 
+#========= build gops ===============
+FROM --platform=${TARGETPLATFORM} ${GOLANG_IMAGE} as gops-cni-builder
+COPY /build-gops.sh /build-gops.sh
+
+#with debian 11 os
+RUN apt-get update && apt-get install -y binutils-aarch64-linux-gnu binutils-x86-64-linux-gnu
+
+# build-gops.sh will build both archs at the same time
+WORKDIR /
+RUN chmod +x /build-gops.sh && /build-gops.sh
+
 #======= build bin ==========
 # use BUILDPLATFORM to cross build
 FROM --platform=${BUILDPLATFORM} ${GOLANG_IMAGE} as builder
@@ -50,6 +61,7 @@ ARG VERSION
 ENV ENV_VERSION=${VERSION}
 
 COPY --from=builder /tmp/install/${TARGETOS}/${TARGETARCH}/bin/*   /usr/bin/
+COPY --from=gops-cni-builder /out/${TARGETPLATFORM}/bin/gops /bin/gops
 
 #====modify====
 CMD ["/usr/bin/agent"]

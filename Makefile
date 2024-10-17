@@ -86,47 +86,6 @@ build_local_controller_image:
 	$(BUILD_FINAL_IMAGE)
 
 
-#---------
-
-define BUILD_BASE_IMAGE
-IMAGE_DIR=` dirname $(DOCKERFILE_PATH) ` ; \
-		sed -i '2 a \ARG TARGETPLATFORM' $(DOCKERFILE_PATH) ; \
-		sed -i '2 a \ARG BUILDPLATFORM' $(DOCKERFILE_PATH) ; \
-		TAG=` git ls-tree --full-tree HEAD -- $${IMAGE_DIR} | awk '{ print $$3 }' ` ; \
-		echo "Build base image $(BASE_IMAGE_NAME):$${TAG}" ; \
-		docker build  \
-				--build-arg USE_PROXY_SOURCE=true \
-				--build-arg TARGETPLATFORM="linux/$(TARGETARCH)" \
-				--build-arg BUILDPLATFORM="linux/$(TARGETARCH)" \
-				--build-arg TARGETARCH=$(TARGETARCH) \
-				--build-arg TARGETOS=linux \
-				--file $(DOCKERFILE_PATH) \
-				--output type=docker \
-				--tag $(BASE_IMAGE_NAME):$${TAG}   $${IMAGE_DIR} ; \
-		(($$?==0)) || { echo "error , failed to build base image" ; exit 1 ;} ; \
-		echo "build success $(BASE_IMAGE_NAME):$${TAG} " ; \
-		sed -i '3 d' $(DOCKERFILE_PATH) ; \
-		sed -i '3 d' $(DOCKERFILE_PATH)
-endef
-
-.PHONY: build_local_base_image
-build_local_base_image: build_local_agent_base_image build_local_controller_base_image
-
-
-.PHONY: build_local_agent_base_image
-build_local_agent_base_image: DOCKERFILE_PATH := $(ROOT_DIR)/images/agent-base/Dockerfile
-build_local_agent_base_image: BASE_IMAGE_NAME := ${REGISTER}/${GIT_REPO}-agent-base
-build_local_agent_base_image:
-	$(BUILD_BASE_IMAGE)
-
-
-.PHONY: build_local_controller_base_image
-build_local_controller_base_image: DOCKERFILE_PATH := $(ROOT_DIR)/images/controller-base/Dockerfile
-build_local_controller_base_image: BASE_IMAGE_NAME := ${REGISTER}/${GIT_REPO}-controller-base
-build_local_controller_base_image:
-	$(BUILD_BASE_IMAGE)
-
-
 #================= update golang
 
 ## Update Go version for all the components
