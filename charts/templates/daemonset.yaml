@@ -47,6 +47,10 @@ spec:
       {{- end }}
       {{- end }}
       serviceAccountName: {{ .Values.balancingAgent.name | trunc 63 | trimSuffix "-" }}
+      {{- with .Values.balancingAgent.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       priorityClassName: {{ default "system-node-critical" .Values.balancingAgent.priorityClassName }}
       {{- if .Values.balancingAgent.hostnetwork }}
       hostNetwork: true
@@ -157,10 +161,6 @@ spec:
             {{- with .Values.balancingAgent.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- with .Values.balancingAgent.securityContext }}
-          securityContext:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
           volumeMounts:
             - name: config-path
               mountPath: /tmp/config-map
