@@ -6,7 +6,6 @@ package cmd
 import (
 	"github.com/elf-io/balancing/pkg/debug"
 	"github.com/elf-io/balancing/pkg/types"
-	"time"
 )
 
 func SetupUtility() {
@@ -28,7 +27,6 @@ func DaemonMain() {
 
 	SetupUtility()
 
-	// ------------
-	rootLogger.Info("hello world")
-	time.Sleep(time.Hour)
+	SetupController()
+
 }

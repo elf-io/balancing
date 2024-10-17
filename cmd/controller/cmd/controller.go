@@ -2,6 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
 	"github.com/elf-io/balancing/pkg/types"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -16,6 +21,15 @@ func init() {
 	utilruntime.Must(balancingv1beta1.AddToScheme(scheme))
 }
 
+func HealthCheckHandler(req *http.Request) error {
+	if finishSetUp {
+		return nil
+	}
+	return fmt.Errorf("setting up")
+}
+
+var finishSetUp = false
+
 // for CRD
 func SetupController() {
 
@@ -27,13 +41,23 @@ func SetupController() {
 		Scheme: scheme,
 		// Readiness probe endpoint name, defaults to "readyz"
 		// Liveness probe endpoint name, defaults to "healthz"
-		HealthProbeBindAddress:  fmt.Sprintf("0.0.0.0:%d", types.ControllerConfig.HttpPort),
+		HealthProbeBindAddress:  fmt.Sprintf(":%d", types.ControllerConfig.HttpPort),
 		LeaderElection:          true,
 		LeaderElectionID:        "balacning-leader",
 		LeaderElectionNamespace: types.ControllerConfig.PodNamespace,
 	})
 	if err != nil {
 		rootLogger.Sugar().Fatalf("unable to NewManager: %v", err)
+	}
+
+	// for liveness check, with url "/healthz"
+	if err := mgr.AddHealthzCheck("healthz", HealthCheckHandler); err != nil {
+		rootLogger.Sugar().Fatalf("unable to set up liveness check: %v", err)
+	}
+
+	// for readiness check, with url "/readyz"
+	if err := mgr.AddReadyzCheck("readyz", HealthCheckHandler); err != nil {
+		rootLogger.Sugar().Fatalf("unable to set up readiness check: %v", err)
 	}
 
 	t := &webhookBalacning{}
@@ -56,8 +80,17 @@ func SetupController() {
 		rootLogger.Sugar().Fatalf("unable to NewWebhookManagedBy for LocalRedirectPolicy : %v", err)
 	}
 
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		rootLogger.Sugar().Fatalf("problem running manager: %v", err)
-	}
+	go func() {
+		if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+			rootLogger.Sugar().Fatalf("problem running manager: %v", err)
+		}
+	}()
+	finishSetUp = true
 
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
+	for sig := range sigCh {
+		rootLogger.Sugar().Warnf("Received singal %+v ", sig)
+		os.Exit(1)
+	}
 }
