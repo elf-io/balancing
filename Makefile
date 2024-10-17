@@ -60,7 +60,7 @@ echo "Build Image $(IMAGE_NAME):$(IMAGE_TAG)" ; \
 				--build-arg TARGETARCH=$(TARGETARCH) \
 				--build-arg TARGETOS=linux \
 				--file $(DOCKERFILE_PATH) \
-				--tag ${IMAGE_NAME}:$(IMAGE_TAG) . ; \
+				--tag ${IMAGE_NAME}:$(IMAGE_TAG) .  || { sed -i '3 d' $(DOCKERFILE_PATH) ; sed -i '3 d' $(DOCKERFILE_PATH) ; exit 1 ;} ; \
 		echo "build success for ${IMAGE_NAME}:$(IMAGE_TAG) " ; \
 		sed -i '3 d' $(DOCKERFILE_PATH) ; \
 		sed -i '3 d' $(DOCKERFILE_PATH)
