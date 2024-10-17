@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # ====modify====
-ARG BASE_IMAGE=ghcr.io/elf-io/elf-agent-base:f67530f1b0d3f29321c8901c036a217b521cd782
+ARG BASE_IMAGE=docker.io/library/ubuntu:24.10
 ARG GOLANG_IMAGE=docker.io/library/golang:1.23.1
 
 #========= build gops ===============
