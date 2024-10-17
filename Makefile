@@ -59,7 +59,7 @@ echo "Build Image $(IMAGE_NAME):$(IMAGE_TAG)" ; \
 				--build-arg TARGETPLATFORM="linux/$(TARGETARCH)" \
 				--build-arg TARGETARCH=$(TARGETARCH) \
 				--build-arg TARGETOS=linux \
-				--build-arg USE_PROXY_SOURCE=true \
+				--build-arg APT_HTTP_PROXY=$(APT_HTTP_PROXY) \
 				--file $(DOCKERFILE_PATH) \
 				--tag ${IMAGE_NAME}:$(IMAGE_TAG) .  || { sed -i '3 d' $(DOCKERFILE_PATH) ; sed -i '3 d' $(DOCKERFILE_PATH) ; exit 1 ;} ; \
 		echo "build success for ${IMAGE_NAME}:$(IMAGE_TAG) " ; \
@@ -76,6 +76,7 @@ build_local_image: build_local_agent_image build_local_controller_image
 build_local_agent_image: IMAGE_NAME := ${REGISTER}/${GIT_REPO}-agent
 build_local_agent_image: DOCKERFILE_PATH := $(ROOT_DIR)/images/agent/Dockerfile
 build_local_agent_image: IMAGE_TAG := $(GIT_COMMIT_VERSION)
+build_local_agent_image: APT_HTTP_PROXY :=
 build_local_agent_image:
 	$(BUILD_FINAL_IMAGE)
 
@@ -84,6 +85,7 @@ build_local_agent_image:
 build_local_controller_image: IMAGE_NAME := ${REGISTER}/${GIT_REPO}-controller
 build_local_controller_image: DOCKERFILE_PATH := $(ROOT_DIR)/images/controller/Dockerfile
 build_local_controller_image: IMAGE_TAG := $(GIT_COMMIT_VERSION)
+build_local_controller_image: APT_HTTP_PROXY :=
 build_local_controller_image:
 	$(BUILD_FINAL_IMAGE)
 

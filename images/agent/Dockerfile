@@ -28,6 +28,7 @@ ARG TARGETARCH
 ARG RACE
 ARG NOSTRIP
 ARG NOOPT
+ARG APT_HTTP_PROXY
 
 ARG USE_PROXY_SOURCE
 #use alibaba debian source
@@ -39,7 +40,7 @@ RUN [ "$USE_PROXY_SOURCE" != "true" ] && exit 0 ; \
 
 COPY . /src
 WORKDIR /src
-RUN  make installDevTool
+RUN  [ -z "${APT_HTTP_PROXY}" ] || { echo "use APT_HTTP_PROXY=${APT_HTTP_PROXY}" ; export http_proxy=${APT_HTTP_PROXY} ; } ; make installDevTool
 RUN  make GOARCH=${TARGETARCH}   \
         RACE=${RACE} NOSTRIP=${NOSTRIP} NOOPT=${NOOPT} \
         DESTDIR_BIN=/tmp/install/${TARGETOS}/${TARGETARCH}/bin \
