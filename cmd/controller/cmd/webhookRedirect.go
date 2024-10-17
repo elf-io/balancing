@@ -46,7 +46,7 @@ func (s *webhookRedirect) ValidateUpdate(ctx context.Context, oldObj, newObj run
 		zap.String("crdName", oldBp.Name),
 	)
 
-	logger.Sugar().Infof("ValidateUpdate")
+	logger.Sugar().Infof("ValidateUpdate %+v", newBp)
 
 	return nil, nil
 }
