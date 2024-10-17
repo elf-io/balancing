@@ -28,7 +28,7 @@ var ControllerConfig ControllerConfigStruct
 var ControllerEnvMapping = []EnvMapping{
 	{"ENV_ENABLED_METRIC", "false", &ControllerConfig.EnableMetric},
 	{"ENV_METRIC_HTTP_PORT", "", &ControllerConfig.MetricPort},
-	{"ENV_HTTP_PORT", "5720", &ControllerConfig.HttpPort},
+	{"ENV_HTTP_PORT", "5820", &ControllerConfig.HttpPort},
 	{"ENV_GOPS_LISTEN_PORT", "", &ControllerConfig.GopsPort},
 	{"ENV_WEBHOOK_PORT", "", &ControllerConfig.WebhookPort},
 	{"ENV_PYROSCOPE_PUSH_SERVER_ADDRESS", "", &ControllerConfig.PyroscopeServerAddress},
