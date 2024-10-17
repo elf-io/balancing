@@ -13,7 +13,7 @@ for SUBCMD_BIN_DIR in $(CMD_BIN_DIR); do  \
     echo "begin to build $${BIN_NAME} under $${SUBCMD_BIN_DIR}" ; \
     mkdir -p $(DESTDIR_BIN) ; \
 	rm -f $(DESTDIR_BIN)/$${BIN_NAME} ; \
-	$(GO_GENERATE) ./... ; \
+	[ -z "${RUN_GO_GENERATE}" ] || $(GO_GENERATE) ./... ; \
 	$(GO_BUILD) -o $(DESTDIR_BIN)/$${BIN_NAME}  $${SUBCMD_BIN_DIR}/main.go ; \
 	(($$?!=0)) && echo "error, failed to build $${BIN_NAME}" && exit 1 ; \
 	echo "succeeded to build '$${BIN_NAME}' to $(DESTDIR_BIN)/$${BIN_NAME}" ; \
@@ -35,7 +35,7 @@ build_controller_bin:
 .PHONY: build_agent_bin
 build_agent_bin: CMD_BIN_DIR := $(ROOT_DIR)/cmd/agent
 build_agent_bin:
-	$(BUILD_BIN)
+	RUN_GO_GENERATE=true ; $(BUILD_BIN)
 
 .PHONY: build_inspect_bin
 build_inspect_bin: CMD_BIN_DIR := $(ROOT_DIR)/cmd/inspect
