@@ -111,16 +111,16 @@ spec:
             periodSeconds: {{ .Values.balancingAgent.httpServer.startupProbe.periodSeconds }}
             successThreshold: 1
           {{- end }}
-          livenessProbe:
-            httpGet:
-              path: /healthy/liveness
-              port: {{ .Values.balancingAgent.httpServer.port }}
-              scheme: HTTP
-            initialDelaySeconds: 60
-            periodSeconds: {{ .Values.balancingAgent.httpServer.livenessProbe.periodSeconds }}
-            successThreshold: 1
-            failureThreshold: {{ .Values.balancingAgent.httpServer.livenessProbe.failureThreshold }}
-            timeoutSeconds: 5
+#          livenessProbe:
+#            httpGet:
+#              path: /healthy/liveness
+#              port: {{ .Values.balancingAgent.httpServer.port }}
+#              scheme: HTTP
+#            initialDelaySeconds: 60
+#            periodSeconds: {{ .Values.balancingAgent.httpServer.livenessProbe.periodSeconds }}
+#            successThreshold: 1
+#            failureThreshold: {{ .Values.balancingAgent.httpServer.livenessProbe.failureThreshold }}
+#            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /healthy/readiness

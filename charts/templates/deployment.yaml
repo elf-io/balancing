@@ -101,16 +101,16 @@ spec:
             periodSeconds: {{ .Values.balancingController.httpServer.startupProbe.periodSeconds }}
             successThreshold: 1
           {{- end }}
-          livenessProbe:
-            httpGet:
-              path: /healthy/liveness
-              port: {{ .Values.balancingController.httpServer.port }}
-              scheme: HTTP
-            initialDelaySeconds: 60
-            periodSeconds: {{ .Values.balancingController.httpServer.livenessProbe.periodSeconds }}
-            successThreshold: 1
-            failureThreshold: {{ .Values.balancingController.httpServer.livenessProbe.failureThreshold }}
-            timeoutSeconds: 5
+#          livenessProbe:
+#            httpGet:
+#              path: /healthy/liveness
+#              port: {{ .Values.balancingController.httpServer.port }}
+#              scheme: HTTP
+#            initialDelaySeconds: 60
+#            periodSeconds: {{ .Values.balancingController.httpServer.livenessProbe.periodSeconds }}
+#            successThreshold: 1
+#            failureThreshold: {{ .Values.balancingController.httpServer.livenessProbe.failureThreshold }}
+#            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /healthy/readiness
