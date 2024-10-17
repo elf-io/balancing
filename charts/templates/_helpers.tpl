@@ -13,11 +13,11 @@ Expand the name of project .
 {{- end }}
 
 {{/*
-elfAgent Common labels
+balancingAgent Common labels
 */}}
-{{- define "project.elfAgent.labels" -}}
+{{- define "project.balancingAgent.labels" -}}
 helm.sh/chart: {{ include "project.chart" . }}
-{{ include "project.elfAgent.selectorLabels" . }}
+{{ include "project.balancingAgent.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -25,11 +25,11 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-elfAgent Common labels
+balancingAgent Common labels
 */}}
-{{- define "project.elfController.labels" -}}
+{{- define "project.balancingController.labels" -}}
 helm.sh/chart: {{ include "project.chart" . }}
-{{ include "project.elfController.selectorLabels" . }}
+{{ include "project.balancingController.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -37,21 +37,21 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-elfAgent Selector labels
+balancingAgent Selector labels
 */}}
-{{- define "project.elfAgent.selectorLabels" -}}
+{{- define "project.balancingAgent.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "project.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/component: {{ .Values.elfAgent.name | trunc 63 | trimSuffix "-" }}
+app.kubernetes.io/component: {{ .Values.balancingAgent.name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
-elfAgent Selector labels
+balancingAgent Selector labels
 */}}
-{{- define "project.elfController.selectorLabels" -}}
+{{- define "project.balancingController.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "project.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/component: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
+app.kubernetes.io/component: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 
@@ -107,11 +107,11 @@ Return the appropriate apiVersion for RBAC resources.
 {{- end -}}
 
 {{/*
-return the elfAgent image
+return the balancingAgent image
 */}}
-{{- define "project.elfAgent.image" -}}
-{{- $registryName := .Values.elfAgent.image.registry -}}
-{{- $repositoryName := .Values.elfAgent.image.repository -}}
+{{- define "project.balancingAgent.image" -}}
+{{- $registryName := .Values.balancingAgent.image.registry -}}
+{{- $repositoryName := .Values.balancingAgent.image.repository -}}
 {{- if .Values.global.imageRegistryOverride }}
     {{- printf "%s/%s" .Values.global.imageRegistryOverride $repositoryName -}}
 {{ else if $registryName }}
@@ -119,12 +119,12 @@ return the elfAgent image
 {{- else -}}
     {{- printf "%s" $repositoryName -}}
 {{- end -}}
-{{- if .Values.elfAgent.image.digest }}
-    {{- print "@" .Values.elfAgent.image.digest -}}
+{{- if .Values.balancingAgent.image.digest }}
+    {{- print "@" .Values.balancingAgent.image.digest -}}
 {{- else if .Values.global.imageTagOverride -}}
     {{- printf ":%s" .Values.global.imageTagOverride -}}
-{{- else if .Values.elfAgent.image.tag -}}
-    {{- printf ":%s" .Values.elfAgent.image.tag -}}
+{{- else if .Values.balancingAgent.image.tag -}}
+    {{- printf ":%s" .Values.balancingAgent.image.tag -}}
 {{- else -}}
     {{- printf ":v%s" .Chart.AppVersion -}}
 {{- end -}}
@@ -132,11 +132,11 @@ return the elfAgent image
 
 
 {{/*
-return the elfController image
+return the balancingController image
 */}}
-{{- define "project.elfController.image" -}}
-{{- $registryName := .Values.elfController.image.registry -}}
-{{- $repositoryName := .Values.elfController.image.repository -}}
+{{- define "project.balancingController.image" -}}
+{{- $registryName := .Values.balancingController.image.registry -}}
+{{- $repositoryName := .Values.balancingController.image.repository -}}
 {{- if .Values.global.imageRegistryOverride }}
     {{- printf "%s/%s" .Values.global.imageRegistryOverride $repositoryName -}}
 {{ else if $registryName }}
@@ -144,12 +144,12 @@ return the elfController image
 {{- else -}}
     {{- printf "%s" $repositoryName -}}
 {{- end -}}
-{{- if .Values.elfController.image.digest }}
-    {{- print "@" .Values.elfController.image.digest -}}
+{{- if .Values.balancingController.image.digest }}
+    {{- print "@" .Values.balancingController.image.digest -}}
 {{- else if .Values.global.imageTagOverride -}}
     {{- printf ":%s" .Values.global.imageTagOverride -}}
-{{- else if .Values.elfController.image.tag -}}
-    {{- printf ":%s" .Values.elfController.image.tag -}}
+{{- else if .Values.balancingController.image.tag -}}
+    {{- printf ":%s" .Values.balancingController.image.tag -}}
 {{- else -}}
     {{- printf ":v%s" .Chart.AppVersion -}}
 {{- end -}}
@@ -160,6 +160,6 @@ return the elfController image
 generate the CA cert
 */}}
 {{- define "generate-ca-certs" }}
-    {{- $ca := genCA "elf.io" (.Values.elfController.tls.auto.caExpiration | int) -}}
+    {{- $ca := genCA "balancing.io" (.Values.balancingController.tls.auto.caExpiration | int) -}}
     {{- $_ := set . "ca" $ca -}}
 {{- end }}

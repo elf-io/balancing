@@ -1,24 +1,24 @@
-{{- if .Values.elfAgent.prometheus.grafanaDashboard.install -}}
+{{- if .Values.balancingAgent.prometheus.grafanaDashboard.install -}}
 apiVersion: integreatly.org/v1alpha1
 kind: GrafanaDashboard
 metadata:
-  name: {{ .Values.elfAgent.name | trunc 63 | trimSuffix "-" }}
-  namespace: {{ default .Release.Namespace .Values.elfAgent.prometheus.grafanaDashboard.namespace }}
+  name: {{ .Values.balancingAgent.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ default .Release.Namespace .Values.balancingAgent.prometheus.grafanaDashboard.namespace }}
   labels:
-    {{- include "project.elfAgent.labels" . | nindent 4 }}
+    {{- include "project.balancingAgent.labels" . | nindent 4 }}
     {{- if .Values.global.commonLabels }}
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- if .Values.elfAgent.prometheus.grafanaDashboard.labels }}
-    {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.prometheus.grafanaDashboard.labels "context" $ ) | nindent 4 }}
+    {{- if .Values.balancingAgent.prometheus.grafanaDashboard.labels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.prometheus.grafanaDashboard.labels "context" $ ) | nindent 4 }}
     {{- end }}
-  {{- if or .Values.global.commonAnnotations .Values.elfAgent.prometheus.grafanaDashboard.annotations }}
+  {{- if or .Values.global.commonAnnotations .Values.balancingAgent.prometheus.grafanaDashboard.annotations }}
   annotations:
     {{- if .Values.global.commonAnnotations }}
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- if .Values.elfAgent.prometheus.grafanaDashboard.annotations }}
-    {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.prometheus.grafanaDashboard.annotations "context" $ ) | nindent 4 }}
+    {{- if .Values.balancingAgent.prometheus.grafanaDashboard.annotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.prometheus.grafanaDashboard.annotations "context" $ ) | nindent 4 }}
     {{- end }}
   {{- end }}
 spec:
@@ -27,27 +27,27 @@ spec:
 {{- end }}
 
 ---
-{{- if .Values.elfController.prometheus.grafanaDashboard.install -}}
+{{- if .Values.balancingController.prometheus.grafanaDashboard.install -}}
 apiVersion: integreatly.org/v1alpha1
 kind: GrafanaDashboard
 metadata:
-  name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
-  namespace: {{ default .Release.Namespace .Values.elfController.prometheus.grafanaDashboard.namespace }}
+  name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ default .Release.Namespace .Values.balancingController.prometheus.grafanaDashboard.namespace }}
   labels:
-    {{- include "project.elfController.labels" . | nindent 4 }}
+    {{- include "project.balancingController.labels" . | nindent 4 }}
     {{- if .Values.global.commonLabels }}
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- if .Values.elfController.prometheus.grafanaDashboard.labels }}
-    {{- include "tplvalues.render" ( dict "value" .Values.elfController.prometheus.grafanaDashboard.labels "context" $ ) | nindent 4 }}
+    {{- if .Values.balancingController.prometheus.grafanaDashboard.labels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingController.prometheus.grafanaDashboard.labels "context" $ ) | nindent 4 }}
     {{- end }}
-  {{- if or .Values.global.commonAnnotations .Values.elfController.prometheus.grafanaDashboard.annotations }}
+  {{- if or .Values.global.commonAnnotations .Values.balancingController.prometheus.grafanaDashboard.annotations }}
   annotations:
     {{- if .Values.global.commonAnnotations }}
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- if .Values.elfController.prometheus.grafanaDashboard.annotations }}
-    {{- include "tplvalues.render" ( dict "value" .Values.elfController.prometheus.grafanaDashboard.annotations "context" $ ) | nindent 4 }}
+    {{- if .Values.balancingController.prometheus.grafanaDashboard.annotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingController.prometheus.grafanaDashboard.annotations "context" $ ) | nindent 4 }}
     {{- end }}
   {{- end }}
 spec:

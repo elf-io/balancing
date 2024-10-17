@@ -1,65 +1,65 @@
-{{- if .Values.elfAgent.prometheus.enabled }}
+{{- if .Values.balancingAgent.prometheus.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.elfAgent.name | trunc 63 | trimSuffix "-" }}
+  name: {{ .Values.balancingAgent.name | trunc 63 | trimSuffix "-" }}
   namespace: {{ .Release.Namespace | quote }}
-  {{- if or .Values.global.commonAnnotations .Values.elfAgent.service.annotations }}
+  {{- if or .Values.global.commonAnnotations .Values.balancingAgent.service.annotations }}
   annotations:
     {{- if .Values.global.commonAnnotations }}
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- if .Values.elfAgent.service.annotations }}
-    {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.service.annotations "context" $ ) | nindent 4 }}
+    {{- if .Values.balancingAgent.service.annotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.service.annotations "context" $ ) | nindent 4 }}
     {{- end }}
   {{- end }}
   labels:
     {{- if .Values.global.commonLabels }}
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- include "project.elfAgent.labels" . | nindent 4 }}
+    {{- include "project.balancingAgent.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.elfAgent.service.type }}
+  type: {{ .Values.balancingAgent.service.type }}
   ports:
     - name: metrics
-      port: {{ .Values.elfAgent.prometheus.port }}
+      port: {{ .Values.balancingAgent.prometheus.port }}
       targetPort: metrics
       protocol: TCP
   selector:
-    {{- include "project.elfAgent.selectorLabels" . | nindent 4 }}
+    {{- include "project.balancingAgent.selectorLabels" . | nindent 4 }}
 {{- end }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
+  name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
   namespace: {{ .Release.Namespace | quote }}
-  {{- if or .Values.global.commonAnnotations .Values.elfController.service.annotations }}
+  {{- if or .Values.global.commonAnnotations .Values.balancingController.service.annotations }}
   annotations:
     {{- if .Values.global.commonAnnotations }}
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- if .Values.elfController.service.annotations }}
-    {{- include "tplvalues.render" ( dict "value" .Values.elfController.service.annotations "context" $ ) | nindent 4 }}
+    {{- if .Values.balancingController.service.annotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingController.service.annotations "context" $ ) | nindent 4 }}
     {{- end }}
   {{- end }}
   labels:
     {{- if .Values.global.commonLabels }}
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- include "project.elfController.labels" . | nindent 4 }}
+    {{- include "project.balancingController.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.elfController.service.type }}
+  type: {{ .Values.balancingController.service.type }}
   ports:
-    {{- if .Values.elfController.prometheus.enabled }}
+    {{- if .Values.balancingController.prometheus.enabled }}
     - name: metrics
-      port: {{ .Values.elfController.prometheus.port }}
+      port: {{ .Values.balancingController.prometheus.port }}
       targetPort: metrics
       protocol: TCP
     {{- end }}
     - name: webhook
-      port: {{ .Values.elfController.webhookPort }}
+      port: {{ .Values.balancingController.webhookPort }}
       targetPort: webhook
       protocol: TCP
   selector:
-    {{- include "project.elfController.selectorLabels" . | nindent 4 }}
+    {{- include "project.balancingController.selectorLabels" . | nindent 4 }}

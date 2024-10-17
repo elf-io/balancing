@@ -1,10 +1,10 @@
 apiVersion: {{ include "capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
-  name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
+  name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
   namespace: {{ .Release.Namespace | quote }}
   labels:
-    {{- include "project.elfController.labels" . | nindent 4 }}
+    {{- include "project.balancingController.labels" . | nindent 4 }}
       {{- if .Values.global.commonLabels }}
       {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
       {{- end }}
@@ -13,39 +13,39 @@ metadata:
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.elfController.replicas }}
+  replicas: {{ .Values.balancingController.replicas }}
   selector:
     matchLabels:
-      {{- include "project.elfController.selectorLabels" . | nindent 6 }}
+      {{- include "project.balancingController.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- if or .Values.elfController.podAnnotations .Values.global.commonAnnotations }}
+      {{- if or .Values.balancingController.podAnnotations .Values.global.commonAnnotations }}
       annotations:
         {{- if .Values.global.commonAnnotations }}
         {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
-        {{- if .Values.elfController.podAnnotations }}
-        {{- include "tplvalues.render" ( dict "value" .Values.elfController.podAnnotations "context" $ ) | nindent 8 }}
+        {{- if .Values.balancingController.podAnnotations }}
+        {{- include "tplvalues.render" ( dict "value" .Values.balancingController.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
         {{- end }}
       labels:
-        {{- include "project.elfController.selectorLabels" . | nindent 8 }}
+        {{- include "project.balancingController.selectorLabels" . | nindent 8 }}
         {{- if .Values.global.commonLabels }}
         {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 8 }}
         {{- end }}
-        {{- if .Values.elfController.podLabels }}
-        {{- include "tplvalues.render" ( dict "value" .Values.elfController.podLabels "context" $ ) | nindent 8 }}
+        {{- if .Values.balancingController.podLabels }}
+        {{- include "tplvalues.render" ( dict "value" .Values.balancingController.podLabels "context" $ ) | nindent 8 }}
         {{- end }}
     spec:
-      {{- if .Values.elfController.image.imagePullSecrets }}
+      {{- if .Values.balancingController.image.imagePullSecrets }}
       imagePullSecrets:
-      {{- with .Values.elfController.image.imagePullSecrets }}
+      {{- with .Values.balancingController.image.imagePullSecrets }}
       {{- toYaml . | trim | nindent 6 }}
       {{- end }}
       {{- end }}
-      serviceAccountName: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
-      priorityClassName: {{ default "system-node-critical" .Values.elfController.priorityClassName }}
-      {{- if .Values.elfController.hostnetwork }}
+      serviceAccountName: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
+      priorityClassName: {{ default "system-node-critical" .Values.balancingController.priorityClassName }}
+      {{- if .Values.balancingController.hostnetwork }}
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       {{- else }}
@@ -53,91 +53,91 @@ spec:
       dnsPolicy: ClusterFirst
       {{- end }}
       restartPolicy: Always
-      {{- with .Values.elfController.tolerations }}
+      {{- with .Values.balancingController.tolerations }}
       tolerations:
       {{- toYaml . | nindent 6 }}
       {{- end }}
-      {{- with .Values.elfController.nodeSelector }}
+      {{- with .Values.balancingController.nodeSelector }}
       nodeSelector:
       {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.elfController.affinity }}
+      {{- if .Values.balancingController.affinity }}
       affinity:
-      {{- include "tplvalues.render" (dict "value" .Values.elfController.affinity "context" $) | nindent 6 }}
+      {{- include "tplvalues.render" (dict "value" .Values.balancingController.affinity "context" $) | nindent 6 }}
       {{- end }}
       containers:
-        - name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
-          image: {{ include "project.elfController.image" . | quote }}
-          imagePullPolicy: {{ .Values.elfController.image.pullPolicy }}
+        - name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
+          image: {{ include "project.balancingController.image" . | quote }}
+          imagePullPolicy: {{ .Values.balancingController.image.pullPolicy }}
           command:
-            - {{ .Values.elfController.cmdBinName }}
+            - {{ .Values.balancingController.cmdBinName }}
           args:
             - --config-path=/tmp/config-map/conf.yml
             - --tls-ca-cert=/etc/tls/ca.crt
             - --tls-server-cert=/etc/tls/tls.crt
             - --tls-server-key=/etc/tls/tls.key
-          {{- with .Values.elfController.extraArgs }}
+          {{- with .Values.balancingController.extraArgs }}
           {{- toYaml . | trim | nindent 8 }}
           {{- end }}
           ports:
-          {{- if .Values.elfController.prometheus.enabled }}
+          {{- if .Values.balancingController.prometheus.enabled }}
           - name: metrics
-            containerPort: {{ .Values.elfController.prometheus.port }}
+            containerPort: {{ .Values.balancingController.prometheus.port }}
             protocol: TCP
           {{- end }}
           - name: http
-            containerPort: {{ .Values.elfController.httpServer.port }}
+            containerPort: {{ .Values.balancingController.httpServer.port }}
             protocol: TCP
           - name: webhook
-            containerPort: {{ .Values.elfController.webhookPort }}
+            containerPort: {{ .Values.balancingController.webhookPort }}
             protocol: TCP
           {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.Version }}
           startupProbe:
             httpGet:
               path: /healthy/startup
-              port: {{ .Values.elfController.httpServer.port }}
+              port: {{ .Values.balancingController.httpServer.port }}
               scheme: HTTP
-            failureThreshold: {{ .Values.elfController.httpServer.startupProbe.failureThreshold }}
-            periodSeconds: {{ .Values.elfController.httpServer.startupProbe.periodSeconds }}
+            failureThreshold: {{ .Values.balancingController.httpServer.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.balancingController.httpServer.startupProbe.periodSeconds }}
             successThreshold: 1
           {{- end }}
           livenessProbe:
             httpGet:
               path: /healthy/liveness
-              port: {{ .Values.elfController.httpServer.port }}
+              port: {{ .Values.balancingController.httpServer.port }}
               scheme: HTTP
             initialDelaySeconds: 60
-            periodSeconds: {{ .Values.elfController.httpServer.livenessProbe.periodSeconds }}
+            periodSeconds: {{ .Values.balancingController.httpServer.livenessProbe.periodSeconds }}
             successThreshold: 1
-            failureThreshold: {{ .Values.elfController.httpServer.livenessProbe.failureThreshold }}
+            failureThreshold: {{ .Values.balancingController.httpServer.livenessProbe.failureThreshold }}
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /healthy/readiness
-              port: {{ .Values.elfController.httpServer.port }}
+              port: {{ .Values.balancingController.httpServer.port }}
               scheme: HTTP
             initialDelaySeconds: 5
-            periodSeconds: {{ .Values.elfController.httpServer.readinessProbe.periodSeconds }}
+            periodSeconds: {{ .Values.balancingController.httpServer.readinessProbe.periodSeconds }}
             successThreshold: 1
-            failureThreshold: {{ .Values.elfController.httpServer.readinessProbe.failureThreshold }}
+            failureThreshold: {{ .Values.balancingController.httpServer.readinessProbe.failureThreshold }}
             timeoutSeconds: 5
-          {{- with .Values.elfController.resources }}
+          {{- with .Values.balancingController.resources }}
           resources:
           {{- toYaml . | trim | nindent 12 }}
           {{- end }}
           env:
             - name: ENV_LOG_LEVEL
-              value: {{ .Values.elfController.debug.logLevel | quote }}
+              value: {{ .Values.balancingController.debug.logLevel | quote }}
             - name: ENV_ENABLED_METRIC
-              value: {{ .Values.elfController.prometheus.enabled | quote }}
+              value: {{ .Values.balancingController.prometheus.enabled | quote }}
             - name: ENV_METRIC_HTTP_PORT
-              value: {{ .Values.elfController.prometheus.port | quote }}
+              value: {{ .Values.balancingController.prometheus.port | quote }}
             - name: ENV_GOPS_LISTEN_PORT
-              value: {{ .Values.elfController.debug.gopsPort | quote }}
+              value: {{ .Values.balancingController.debug.gopsPort | quote }}
             - name: ENV_WEBHOOK_PORT
-              value: {{ .Values.elfController.webhookPort | quote }}
+              value: {{ .Values.balancingController.webhookPort | quote }}
             - name: ENV_HTTP_PORT
-              value: {{ .Values.elfController.httpServer.port | quote }}
+              value: {{ .Values.balancingController.httpServer.port | quote }}
             - name: ENV_POD_NAME
               valueFrom:
                 fieldRef:
@@ -146,10 +146,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            {{- with .Values.elfController.extraEnv }}
+            {{- with .Values.balancingController.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- with .Values.elfController.securityContext }}
+          {{- with .Values.balancingController.securityContext }}
           securityContext:
           {{- toYaml . | nindent 10 }}
           {{- end }}
@@ -160,8 +160,8 @@ spec:
             - name: tls
               mountPath: /etc/tls
               readOnly: true
-            {{- if .Values.elfController.extraVolumes }}
-            {{- include "tplvalues.render" ( dict "value" .Values.elfController.extraVolumeMounts "context" $ ) | nindent 12 }}
+            {{- if .Values.balancingController.extraVolumes }}
+            {{- include "tplvalues.render" ( dict "value" .Values.balancingController.extraVolumeMounts "context" $ ) | nindent 12 }}
             {{- end }}
       volumes:
         # To read the configuration from the config map
@@ -173,7 +173,7 @@ spec:
             defaultMode: 0400
             sources:
               - secret:
-                  name: {{ .Values.elfController.tls.secretName | trunc 63 | trimSuffix "-" }}
+                  name: {{ .Values.balancingController.tls.secretName | trunc 63 | trimSuffix "-" }}
                   items:
                     - key: tls.crt
                       path: tls.crt
@@ -181,6 +181,6 @@ spec:
                       path: tls.key
                     - key: ca.crt
                       path: ca.crt
-      {{- if .Values.elfController.extraVolumeMounts }}
-      {{- include "tplvalues.render" ( dict "value" .Values.elfController.extraVolumeMounts "context" $ ) | nindent 6 }}
+      {{- if .Values.balancingController.extraVolumeMounts }}
+      {{- include "tplvalues.render" ( dict "value" .Values.balancingController.extraVolumeMounts "context" $ ) | nindent 6 }}
       {{- end }}

@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name:  {{ .Values.elfAgent.name | trunc 63 | trimSuffix "-" }}
+  name:  {{ .Values.balancingAgent.name | trunc 63 | trimSuffix "-" }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "project.elfAgent.labels" . | nindent 4 }}
+    {{- include "project.balancingAgent.labels" . | nindent 4 }}
     {{- if .Values.global.commonLabels }}
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
@@ -15,40 +15,40 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "project.elfAgent.selectorLabels" . | nindent 6 }}
-  {{- with .Values.elfAgent.updateStrategy }}
+      {{- include "project.balancingAgent.selectorLabels" . | nindent 6 }}
+  {{- with .Values.balancingAgent.updateStrategy }}
   updateStrategy:
     {{- toYaml . | trim | nindent 4 }}
   {{- end }}
   template:
     metadata:
-      {{- if or .Values.elfAgent.podAnnotations .Values.global.commonAnnotations }}
+      {{- if or .Values.balancingAgent.podAnnotations .Values.global.commonAnnotations }}
       annotations:
         {{- if .Values.global.commonAnnotations }}
         {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
-        {{- if .Values.elfAgent.podAnnotations }}
-        {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.podAnnotations "context" $ ) | nindent 8 }}
+        {{- if .Values.balancingAgent.podAnnotations }}
+        {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
         {{- end }}
       labels:
-        {{- include "project.elfAgent.selectorLabels" . | nindent 8 }}
+        {{- include "project.balancingAgent.selectorLabels" . | nindent 8 }}
         {{- if .Values.global.commonLabels }}
         {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 8 }}
         {{- end }}
-        {{- if .Values.elfAgent.podLabels }}
-        {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.podLabels "context" $ ) | nindent 8 }}
+        {{- if .Values.balancingAgent.podLabels }}
+        {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.podLabels "context" $ ) | nindent 8 }}
         {{- end }}
     spec:
-      {{- if .Values.elfAgent.image.imagePullSecrets }}
+      {{- if .Values.balancingAgent.image.imagePullSecrets }}
       imagePullSecrets:
-      {{- with .Values.elfAgent.image.imagePullSecrets }}
+      {{- with .Values.balancingAgent.image.imagePullSecrets }}
       {{- toYaml . | trim | nindent 6 }}
       {{- end }}
       {{- end }}
-      serviceAccountName: {{ .Values.elfAgent.name | trunc 63 | trimSuffix "-" }}
-      priorityClassName: {{ default "system-node-critical" .Values.elfAgent.priorityClassName }}
-      {{- if .Values.elfAgent.hostnetwork }}
+      serviceAccountName: {{ .Values.balancingAgent.name | trunc 63 | trimSuffix "-" }}
+      priorityClassName: {{ default "system-node-critical" .Values.balancingAgent.priorityClassName }}
+      {{- if .Values.balancingAgent.hostnetwork }}
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       {{- else }}
@@ -56,17 +56,17 @@ spec:
       dnsPolicy: ClusterFirst
       {{- end }}
       restartPolicy: Always
-      {{- with .Values.elfAgent.tolerations }}
+      {{- with .Values.balancingAgent.tolerations }}
       tolerations:
       {{- toYaml . | nindent 6 }}
       {{- end }}
-      {{- with .Values.elfAgent.nodeSelector }}
+      {{- with .Values.balancingAgent.nodeSelector }}
       nodeSelector:
       {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.elfAgent.affinity }}
+      {{- if .Values.balancingAgent.affinity }}
       affinity:
-      {{- include "tplvalues.render" (dict "value" .Values.elfAgent.affinity "context" $) | nindent 6 }}
+      {{- include "tplvalues.render" (dict "value" .Values.balancingAgent.affinity "context" $) | nindent 6 }}
       {{- else }}
       affinity:
         nodeAffinity:
@@ -85,67 +85,67 @@ spec:
                       - linux
       {{- end }}
       containers:
-        - name: {{ .Values.elfAgent.name | trunc 63 | trimSuffix "-" }}
-          image: {{ include "project.elfAgent.image" . | quote }}
-          imagePullPolicy: {{ .Values.elfAgent.image.pullPolicy }}
+        - name: {{ .Values.balancingAgent.name | trunc 63 | trimSuffix "-" }}
+          image: {{ include "project.balancingAgent.image" . | quote }}
+          imagePullPolicy: {{ .Values.balancingAgent.image.pullPolicy }}
           command:
-            - {{ .Values.elfAgent.cmdBinName }}
+            - {{ .Values.balancingAgent.cmdBinName }}
           args:
             - --config-path=/tmp/config-map/conf.yml
-          {{- with .Values.elfAgent.extraArgs }}
+          {{- with .Values.balancingAgent.extraArgs }}
           {{- toYaml . | trim | nindent 8 }}
           {{- end }}
-          {{- if .Values.elfAgent.prometheus.enabled }}
+          {{- if .Values.balancingAgent.prometheus.enabled }}
           ports:
             - name: metrics
-              containerPort: {{ .Values.elfAgent.prometheus.port }}
+              containerPort: {{ .Values.balancingAgent.prometheus.port }}
               protocol: TCP
           {{- end }}
           {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.Version }}
           startupProbe:
             httpGet:
               path: /healthy/startup
-              port: {{ .Values.elfAgent.httpServer.port }}
+              port: {{ .Values.balancingAgent.httpServer.port }}
               scheme: HTTP
-            failureThreshold: {{ .Values.elfAgent.httpServer.startupProbe.failureThreshold }}
-            periodSeconds: {{ .Values.elfAgent.httpServer.startupProbe.periodSeconds }}
+            failureThreshold: {{ .Values.balancingAgent.httpServer.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.balancingAgent.httpServer.startupProbe.periodSeconds }}
             successThreshold: 1
           {{- end }}
           livenessProbe:
             httpGet:
               path: /healthy/liveness
-              port: {{ .Values.elfAgent.httpServer.port }}
+              port: {{ .Values.balancingAgent.httpServer.port }}
               scheme: HTTP
             initialDelaySeconds: 60
-            periodSeconds: {{ .Values.elfAgent.httpServer.livenessProbe.periodSeconds }}
+            periodSeconds: {{ .Values.balancingAgent.httpServer.livenessProbe.periodSeconds }}
             successThreshold: 1
-            failureThreshold: {{ .Values.elfAgent.httpServer.livenessProbe.failureThreshold }}
+            failureThreshold: {{ .Values.balancingAgent.httpServer.livenessProbe.failureThreshold }}
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /healthy/readiness
-              port: {{ .Values.elfAgent.httpServer.port }}
+              port: {{ .Values.balancingAgent.httpServer.port }}
               scheme: HTTP
             initialDelaySeconds: 5
-            periodSeconds: {{ .Values.elfAgent.httpServer.readinessProbe.periodSeconds }}
+            periodSeconds: {{ .Values.balancingAgent.httpServer.readinessProbe.periodSeconds }}
             successThreshold: 1
-            failureThreshold: {{ .Values.elfAgent.httpServer.readinessProbe.failureThreshold }}
+            failureThreshold: {{ .Values.balancingAgent.httpServer.readinessProbe.failureThreshold }}
             timeoutSeconds: 5
-          {{- with .Values.elfAgent.resources }}
+          {{- with .Values.balancingAgent.resources }}
           resources:
           {{- toYaml . | trim | nindent 12 }}
           {{- end }}
           env:
             - name: ENV_LOG_LEVEL
-              value: {{ .Values.elfAgent.debug.logLevel | quote }}
+              value: {{ .Values.balancingAgent.debug.logLevel | quote }}
             - name: ENV_ENABLED_METRIC
-              value: {{ .Values.elfAgent.prometheus.enabled | quote }}
+              value: {{ .Values.balancingAgent.prometheus.enabled | quote }}
             - name: ENV_METRIC_HTTP_PORT
-              value: {{ .Values.elfAgent.prometheus.port | quote }}
+              value: {{ .Values.balancingAgent.prometheus.port | quote }}
             - name: ENV_HTTP_PORT
-              value: {{ .Values.elfAgent.httpServer.port | quote }}
+              value: {{ .Values.balancingAgent.httpServer.port | quote }}
             - name: ENV_GOPS_LISTEN_PORT
-              value: {{ .Values.elfAgent.debug.gopsPort | quote }}
+              value: {{ .Values.balancingAgent.debug.gopsPort | quote }}
             - name: ENV_POD_NAME
               valueFrom:
                 fieldRef:
@@ -154,10 +154,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            {{- with .Values.elfAgent.extraEnv }}
+            {{- with .Values.balancingAgent.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- with .Values.elfAgent.securityContext }}
+          {{- with .Values.balancingAgent.securityContext }}
           securityContext:
           {{- toYaml . | nindent 10 }}
           {{- end }}
@@ -170,9 +170,9 @@ spec:
             - name: ebpf-map
               mountPath: /sys/fs
             - name: cgroup-fs
-              mountPath: /run/elf
-            {{- if .Values.elfAgent.extraVolumes }}
-            {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.extraVolumeMounts "context" $ ) | nindent 12 }}
+              mountPath: /run/balancing
+            {{- if .Values.balancingAgent.extraVolumes }}
+            {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.extraVolumeMounts "context" $ ) | nindent 12 }}
             {{- end }}
       volumes:
         # To read the configuration from the config map
@@ -189,7 +189,7 @@ spec:
             path: /sys/fs
         - name: cgroup-fs
           hostPath:
-            path: /var/run/elf
-      {{- if .Values.elfAgent.extraVolumeMounts }}
-      {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.extraVolumeMounts "context" $ ) | nindent 6 }}
+            path: /var/run/balancing
+      {{- if .Values.balancingAgent.extraVolumeMounts }}
+      {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.extraVolumeMounts "context" $ ) | nindent 6 }}
       {{- end }}

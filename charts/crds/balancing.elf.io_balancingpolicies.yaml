@@ -5,12 +5,12 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: (unknown)
   creationTimestamp: null
-  name: balancingpolicies.balancing.elf.io
+  name: balancingpolicies.balancing.balancing.io
 spec:
-  group: balancing.elf.io
+  group: balancing.balancing.io
   names:
     categories:
-    - elf
+    - balancing
     kind: BalancingPolicy
     listKind: BalancingPolicyList
     plural: balancingpolicies
@@ -204,7 +204,7 @@ spec:
                 type: object
                 x-kubernetes-validations:
                 - message: backend is immutable
-                  rule: self == oldSelf
+                  rule: sbalancing == oldSbalancing
               enabled:
                 default: true
                 description: enable this policy
@@ -309,7 +309,7 @@ spec:
                 type: object
                 x-kubernetes-validations:
                 - message: frontend is immutable
-                  rule: self == oldSelf
+                  rule: sbalancing == oldSbalancing
             required:
             - backend
             - frontend

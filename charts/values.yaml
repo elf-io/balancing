@@ -9,8 +9,8 @@ global:
   imageTagOverride: ""
 
   ## @param global.name instance name
-  ## default elf
-  name: "elf"
+  ## default balancing
+  name: "balancing"
 
   ## @param global.clusterDnsDomain cluster dns domain
   clusterDnsDomain: "cluster.local"
@@ -24,7 +24,7 @@ global:
   #  labele: v2
 
   ## @param global.configName the configmap name
-  configName: "elf"
+  configName: "balancing"
 
 ## @section feature parameters
 feature:
@@ -34,94 +34,94 @@ feature:
   ## @param feature.enableIPv6 enable ipv6
   enableIPv6: false
 
-## @section elfAgent parameters
+## @section balancingAgent parameters
 ##
-elfAgent:
-  ## @param elfAgent.name the elfAgent name
-  name: "elf-agent"
+balancingAgent:
+  ## @param balancingAgent.name the balancingAgent name
+  name: "balancing-agent"
 
-  ## @param elfAgent.cmdBinName the binary name of elfAgent
+  ## @param balancingAgent.cmdBinName the binary name of balancingAgent
   cmdBinName: "/usr/bin/agent"
 
-  ## @param elfAgent.hostnetwork enable hostnetwork mode of elfAgent pod
+  ## @param balancingAgent.hostnetwork enable hostnetwork mode of balancingAgent pod
   hostnetwork: true
 
   image:
-    ## @param elfAgent.image.registry the image registry of elfAgent
+    ## @param balancingAgent.image.registry the image registry of balancingAgent
     registry: ghcr.io
 
-    ## @param elfAgent.image.repository the image repository of elfAgent
-    repository: elf-io/elf-agent
+    ## @param balancingAgent.image.repository the image repository of balancingAgent
+    repository: elf-io/balancing-agent
 
-    ## @param elfAgent.image.pullPolicy the image pullPolicy of elfAgent
+    ## @param balancingAgent.image.pullPolicy the image pullPolicy of balancingAgent
     pullPolicy: IfNotPresent
 
-    ## @param elfAgent.image.digest the image digest of elfAgent, which takes preference over tag
+    ## @param balancingAgent.image.digest the image digest of balancingAgent, which takes preference over tag
     digest: ""
 
-    ## @param elfAgent.image.tag the image tag of elfAgent, overrides the image tag whose default is the chart appVersion.
+    ## @param balancingAgent.image.tag the image tag of balancingAgent, overrides the image tag whose default is the chart appVersion.
     tag: ""
 
-    ## @param elfAgent.image.imagePullSecrets the image imagePullSecrets of elfAgent
+    ## @param balancingAgent.image.imagePullSecrets the image imagePullSecrets of balancingAgent
     imagePullSecrets: []
     # - name: "image-pull-secret"
 
-  ## @skip elfAgent.nodeSelector.kubernetes.io/os
+  ## @skip balancingAgent.nodeSelector.kubernetes.io/os
   nodeSelector:
     kubernetes.io/os: linux
 
   serviceAccount:
-    ## @param elfAgent.serviceAccount.create create the service account for the elfAgent
+    ## @param balancingAgent.serviceAccount.create create the service account for the balancingAgent
     create: true
-    ## @param elfAgent.serviceAccount.annotations the annotations of elfAgent service account
+    ## @param balancingAgent.serviceAccount.annotations the annotations of balancingAgent service account
     annotations: {}
 
-  ## @skip elfAgent.updateStrategy.rollingUpdate.maxUnavailable
-  ## @skip elfAgent.updateStrategy.type
+  ## @skip balancingAgent.updateStrategy.rollingUpdate.maxUnavailable
+  ## @skip balancingAgent.updateStrategy.type
   updateStrategy:
     rollingUpdate:
       maxUnavailable: 2
     type: RollingUpdate
 
   service:
-    ## @param elfAgent.service.annotations the annotations for elfAgent service
+    ## @param balancingAgent.service.annotations the annotations for balancingAgent service
     annotations: {}
-    ## @param elfAgent.service.type the type for elfAgent service
+    ## @param balancingAgent.service.type the type for balancingAgent service
     type: ClusterIP
 
-  ## @skip elfAgent.tolerations
+  ## @skip balancingAgent.tolerations
   tolerations:
     - operator: Exists
 
-  ## @param elfAgent.priorityClassName the priority Class Name for elfAgent
+  ## @param balancingAgent.priorityClassName the priority Class Name for balancingAgent
   priorityClassName: "system-node-critical"
 
-  ## @param elfAgent.affinity the affinity of elfAgent
+  ## @param balancingAgent.affinity the affinity of balancingAgent
   affinity: {}
 
-  ## @param elfAgent.extraArgs the additional arguments of elfAgent container
+  ## @param balancingAgent.extraArgs the additional arguments of balancingAgent container
   extraArgs: []
 
-  ## @param elfAgent.extraEnv the additional environment variables of elfAgent container
+  ## @param balancingAgent.extraEnv the additional environment variables of balancingAgent container
   extraEnv: []
 
-  ## @param elfAgent.extraVolumes the additional volumes of elfAgent container
+  ## @param balancingAgent.extraVolumes the additional volumes of balancingAgent container
   extraVolumes: []
 
-  ## @param elfAgent.extraVolumeMounts the additional hostPath mounts of elfAgent container
+  ## @param balancingAgent.extraVolumeMounts the additional hostPath mounts of balancingAgent container
   extraVolumeMounts: []
 
-  ## @param elfAgent.podAnnotations the additional annotations of elfAgent pod
+  ## @param balancingAgent.podAnnotations the additional annotations of balancingAgent pod
   podAnnotations: {}
 
-  ## @param elfAgent.podLabels the additional label of elfAgent pod
+  ## @param balancingAgent.podLabels the additional label of balancingAgent pod
   podLabels: {}
 
   resources:
-    ## @param elfAgent.resources.limits.cpu the cpu limit of elfAgent pod
-    ## @param elfAgent.resources.limits.memory the memory limit of elfAgent pod
-    ## @param elfAgent.resources.requests.cpu the cpu requests of elfAgent pod
-    ## @param elfAgent.resources.requests.memory the memory requests of elfAgent pod
+    ## @param balancingAgent.resources.limits.cpu the cpu limit of balancingAgent pod
+    ## @param balancingAgent.resources.limits.memory the memory limit of balancingAgent pod
+    ## @param balancingAgent.resources.requests.cpu the cpu requests of balancingAgent pod
+    ## @param balancingAgent.resources.requests.memory the memory requests of balancingAgent pod
     limits:
       cpu: 1000m
       memory: 1024Mi
@@ -129,177 +129,177 @@ elfAgent:
       cpu: 100m
       memory: 128Mi
 
-  ## @param elfAgent.securityContext the security Context of elfAgent pod
+  ## @param balancingAgent.securityContext the security Context of balancingAgent pod
   securityContext:
     privileged: true
 
   httpServer:
-    ## @param elfAgent.httpServer.port the http Port for elfAgent, for health checking
+    ## @param balancingAgent.httpServer.port the http Port for balancingAgent, for health checking
     port: 5810
 
     startupProbe:
-      ## @param elfAgent.httpServer.startupProbe.failureThreshold the failure threshold of startup probe for elfAgent health checking
+      ## @param balancingAgent.httpServer.startupProbe.failureThreshold the failure threshold of startup probe for balancingAgent health checking
       failureThreshold: 60
-      ## @param elfAgent.httpServer.startupProbe.periodSeconds the period seconds of startup probe for elfAgent health checking
+      ## @param balancingAgent.httpServer.startupProbe.periodSeconds the period seconds of startup probe for balancingAgent health checking
       periodSeconds: 2
 
     livenessProbe:
-      ## @param elfAgent.httpServer.livenessProbe.failureThreshold the failure threshold of startup probe for elfAgent health checking
+      ## @param balancingAgent.httpServer.livenessProbe.failureThreshold the failure threshold of startup probe for balancingAgent health checking
       failureThreshold: 6
-      ## @param elfAgent.httpServer.livenessProbe.periodSeconds the period seconds of startup probe for elfAgent health checking
+      ## @param balancingAgent.httpServer.livenessProbe.periodSeconds the period seconds of startup probe for balancingAgent health checking
       periodSeconds: 10
 
     readinessProbe:
-      ## @param elfAgent.httpServer.readinessProbe.failureThreshold the failure threshold of startup probe for elfAgent health checking
+      ## @param balancingAgent.httpServer.readinessProbe.failureThreshold the failure threshold of startup probe for balancingAgent health checking
       failureThreshold: 3
-      ## @param elfAgent.httpServer.readinessProbe.periodSeconds the period seconds of startup probe for elfAgent health checking
+      ## @param balancingAgent.httpServer.readinessProbe.periodSeconds the period seconds of startup probe for balancingAgent health checking
       periodSeconds: 10
 
   prometheus:
-    ## @param elfAgent.prometheus.enabled enable template agent to collect metrics
+    ## @param balancingAgent.prometheus.enabled enable template agent to collect metrics
     enabled: false
 
-    ## @param elfAgent.prometheus.port the metrics port of template agent
+    ## @param balancingAgent.prometheus.port the metrics port of template agent
     port: 5811
 
     serviceMonitor:
-      ## @param elfAgent.prometheus.serviceMonitor.install install serviceMonitor for template agent. This requires the prometheus CRDs to be available
+      ## @param balancingAgent.prometheus.serviceMonitor.install install serviceMonitor for template agent. This requires the prometheus CRDs to be available
       install: false
 
-      ## @param elfAgent.prometheus.serviceMonitor.namespace the serviceMonitor namespace. Default to the namespace of helm instance
+      ## @param balancingAgent.prometheus.serviceMonitor.namespace the serviceMonitor namespace. Default to the namespace of helm instance
       namespace: ""
 
-      ## @param elfAgent.prometheus.serviceMonitor.annotations the additional annotations of elfAgent serviceMonitor
+      ## @param balancingAgent.prometheus.serviceMonitor.annotations the additional annotations of balancingAgent serviceMonitor
       annotations: {}
 
-      ## @param elfAgent.prometheus.serviceMonitor.labels the additional label of elfAgent serviceMonitor
+      ## @param balancingAgent.prometheus.serviceMonitor.labels the additional label of balancingAgent serviceMonitor
       labels: {}
 
     prometheusRule:
-      ## @param elfAgent.prometheus.prometheusRule.install install prometheusRule for template agent. This requires the prometheus CRDs to be available
+      ## @param balancingAgent.prometheus.prometheusRule.install install prometheusRule for template agent. This requires the prometheus CRDs to be available
       install: false
 
-      ## @param elfAgent.prometheus.prometheusRule.namespace the prometheusRule namespace. Default to the namespace of helm instance
+      ## @param balancingAgent.prometheus.prometheusRule.namespace the prometheusRule namespace. Default to the namespace of helm instance
       namespace: ""
 
-      ## @param elfAgent.prometheus.prometheusRule.annotations the additional annotations of elfAgent prometheusRule
+      ## @param balancingAgent.prometheus.prometheusRule.annotations the additional annotations of balancingAgent prometheusRule
       annotations: {}
 
-      ## @param elfAgent.prometheus.prometheusRule.labels the additional label of elfAgent prometheusRule
+      ## @param balancingAgent.prometheus.prometheusRule.labels the additional label of balancingAgent prometheusRule
       labels: {}
 
     grafanaDashboard:
-      ## @param elfAgent.prometheus.grafanaDashboard.install install grafanaDashboard for template agent. This requires the prometheus CRDs to be available
+      ## @param balancingAgent.prometheus.grafanaDashboard.install install grafanaDashboard for template agent. This requires the prometheus CRDs to be available
       install: false
 
-      ## @param elfAgent.prometheus.grafanaDashboard.namespace the grafanaDashboard namespace. Default to the namespace of helm instance
+      ## @param balancingAgent.prometheus.grafanaDashboard.namespace the grafanaDashboard namespace. Default to the namespace of helm instance
       namespace: ""
 
-      ## @param elfAgent.prometheus.grafanaDashboard.annotations the additional annotations of elfAgent grafanaDashboard
+      ## @param balancingAgent.prometheus.grafanaDashboard.annotations the additional annotations of balancingAgent grafanaDashboard
       annotations: {}
 
-      ## @param elfAgent.prometheus.grafanaDashboard.labels the additional label of elfAgent grafanaDashboard
+      ## @param balancingAgent.prometheus.grafanaDashboard.labels the additional label of balancingAgent grafanaDashboard
       labels: {}
 
   debug:
-    ## @param elfAgent.debug.logLevel the log level of template agent [debug, info, warn, error, fatal, panic]
+    ## @param balancingAgent.debug.logLevel the log level of template agent [debug, info, warn, error, fatal, panic]
     logLevel: "info"
-    ## @param elfAgent.debug.gopsPort the gops port of template agent
+    ## @param balancingAgent.debug.gopsPort the gops port of template agent
     gopsPort: 5812
 
-## @section elfController parameters
+## @section balancingController parameters
 ##
-elfController:
-  ## @param elfController.name the elfController name
-  name: "elf-controller"
+balancingController:
+  ## @param balancingController.name the balancingController name
+  name: "balancing-controller"
 
-  ## @param elfController.replicas the replicas number of elfController pod
+  ## @param balancingController.replicas the replicas number of balancingController pod
   replicas: 1
 
-  ## @param elfController.binName the binName name of elfController
+  ## @param balancingController.binName the binName name of balancingController
   cmdBinName: "/usr/bin/controller"
 
-  ## @param elfController.hostnetwork enable hostnetwork mode of elfController pod. Notice, if no CNI available before template installation, must enable this
+  ## @param balancingController.hostnetwork enable hostnetwork mode of balancingController pod. Notice, if no CNI available before template installation, must enable this
   hostnetwork: true
 
   image:
-    ## @param elfController.image.registry the image registry of elfController
+    ## @param balancingController.image.registry the image registry of balancingController
     registry: ghcr.io
 
-    ## @param elfController.image.repository the image repository of elfController
-    repository: elf-io/elf-controller
+    ## @param balancingController.image.repository the image repository of balancingController
+    repository: elf-io/balancing-controller
 
-    ## @param elfController.image.pullPolicy the image pullPolicy of elfController
+    ## @param balancingController.image.pullPolicy the image pullPolicy of balancingController
     pullPolicy: IfNotPresent
 
-    ## @param elfController.image.digest the image digest of elfController, which takes preference over tag
+    ## @param balancingController.image.digest the image digest of balancingController, which takes preference over tag
     digest: ""
 
-    ## @param elfController.image.tag the image tag of elfController, overrides the image tag whose default is the chart appVersion.
+    ## @param balancingController.image.tag the image tag of balancingController, overrides the image tag whose default is the chart appVersion.
     tag: ""
 
-    ## @param elfController.image.imagePullSecrets the image imagePullSecrets of elfController
+    ## @param balancingController.image.imagePullSecrets the image imagePullSecrets of balancingController
     imagePullSecrets: []
     # - name: "image-pull-secret"
 
-  ## @skip elfController.nodeSelector.kubernetes.io/os
+  ## @skip balancingController.nodeSelector.kubernetes.io/os
   nodeSelector:
     kubernetes.io/os: linux
 
   serviceAccount:
-    ## @param elfController.serviceAccount.create create the service account for the elfController
+    ## @param balancingController.serviceAccount.create create the service account for the balancingController
     create: true
-    ## @param elfController.serviceAccount.annotations the annotations of elfController service account
+    ## @param balancingController.serviceAccount.annotations the annotations of balancingController service account
     annotations: {}
 
   service:
-    ## @param elfController.service.annotations the annotations for elfController service
+    ## @param balancingController.service.annotations the annotations for balancingController service
     annotations: {}
-    ## @param elfController.service.type the type for elfController service
+    ## @param balancingController.service.type the type for balancingController service
     type: ClusterIP
 
-  ## @skip elfController.tolerations
+  ## @skip balancingController.tolerations
   tolerations:
     - operator: Exists
 
-  ## @param elfController.priorityClassName the priority Class Name for elfController
+  ## @param balancingController.priorityClassName the priority Class Name for balancingController
   priorityClassName: "system-node-critical"
 
-  ## @param elfController.affinity the affinity of elfController
+  ## @param balancingController.affinity the affinity of balancingController
   affinity: {}
 
-  ## @param elfController.extraArgs the additional arguments of elfController container
+  ## @param balancingController.extraArgs the additional arguments of balancingController container
   extraArgs: []
 
-  ## @param elfController.extraEnv the additional environment variables of elfController container
+  ## @param balancingController.extraEnv the additional environment variables of balancingController container
   extraEnv: []
 
-  ## @param elfController.extraVolumes the additional volumes of elfController container
+  ## @param balancingController.extraVolumes the additional volumes of balancingController container
   extraVolumes: []
     # - name: test-val
   #   mountPath: /host/tmp
 
-  ## @param elfController.extraVolumeMounts the additional hostPath mounts of elfController container
+  ## @param balancingController.extraVolumeMounts the additional hostPath mounts of balancingController container
   extraVolumeMounts: []
     # - name: test-val
   #   mountPath: /tmp
 
-  ## @param elfController.podAnnotations the additional annotations of elfController pod
+  ## @param balancingController.podAnnotations the additional annotations of balancingController pod
   podAnnotations: {}
   # test: 100
 
-  ## @param elfController.podLabels the additional label of elfController pod
+  ## @param balancingController.podLabels the additional label of balancingController pod
   podLabels: {}
 
-  ## @param elfController.securityContext the security Context of elfController pod
+  ## @param balancingController.securityContext the security Context of balancingController pod
   securityContext: {}
   # runAsUser: 0
 
   resources:
-    ## @param elfController.resources.limits.cpu the cpu limit of elfController pod
-    ## @param elfController.resources.limits.memory the memory limit of elfController pod
-    ## @param elfController.resources.requests.cpu the cpu requests of elfController pod
-    ## @param elfController.resources.requests.memory the memory requests of elfController pod
+    ## @param balancingController.resources.limits.cpu the cpu limit of balancingController pod
+    ## @param balancingController.resources.limits.memory the memory limit of balancingController pod
+    ## @param balancingController.resources.requests.cpu the cpu requests of balancingController pod
+    ## @param balancingController.resources.requests.memory the memory requests of balancingController pod
     limits:
       cpu: 500m
       memory: 1024Mi
@@ -308,139 +308,139 @@ elfController:
       memory: 128Mi
 
   podDisruptionBudget:
-    ## @param elfController.podDisruptionBudget.enabled enable podDisruptionBudget for elfController pod
+    ## @param balancingController.podDisruptionBudget.enabled enable podDisruptionBudget for balancingController pod
     enabled: false
 
-    ## @param elfController.podDisruptionBudget.minAvailable minimum number/percentage of pods that should remain scheduled.
+    ## @param balancingController.podDisruptionBudget.minAvailable minimum number/percentage of pods that should remain scheduled.
     minAvailable: 1
 
   httpServer:
-    ## @param elfController.port the http Port for elfController, for health checking and http service
+    ## @param balancingController.port the http Port for balancingController, for health checking and http service
     port: 5820
 
     startupProbe:
-      ## @param elfController.httpServer.startupProbe.failureThreshold the failure threshold of startup probe for elfController health checking
+      ## @param balancingController.httpServer.startupProbe.failureThreshold the failure threshold of startup probe for balancingController health checking
       failureThreshold: 30
 
-      ## @param elfController.httpServer.startupProbe.periodSeconds the period seconds of startup probe for elfController health checking
+      ## @param balancingController.httpServer.startupProbe.periodSeconds the period seconds of startup probe for balancingController health checking
       periodSeconds: 2
 
     livenessProbe:
-      ## @param elfController.httpServer.livenessProbe.failureThreshold the failure threshold of startup probe for elfController health checking
+      ## @param balancingController.httpServer.livenessProbe.failureThreshold the failure threshold of startup probe for balancingController health checking
       failureThreshold: 6
 
-      ## @param elfController.httpServer.livenessProbe.periodSeconds the period seconds of startup probe for elfController health checking
+      ## @param balancingController.httpServer.livenessProbe.periodSeconds the period seconds of startup probe for balancingController health checking
       periodSeconds: 10
 
     readinessProbe:
-      ## @param elfController.httpServer.readinessProbe.failureThreshold the failure threshold of startup probe for elfController health checking
+      ## @param balancingController.httpServer.readinessProbe.failureThreshold the failure threshold of startup probe for balancingController health checking
       failureThreshold: 3
 
-      ## @param elfController.httpServer.readinessProbe.periodSeconds the period seconds of startup probe for elfController health checking
+      ## @param balancingController.httpServer.readinessProbe.periodSeconds the period seconds of startup probe for balancingController health checking
       periodSeconds: 10
 
-  ## @param elfController.webhookPort the http port for elfController webhook
+  ## @param balancingController.webhookPort the http port for balancingController webhook
   webhookPort: 5822
 
   prometheus:
-    ## @param elfController.prometheus.enabled enable template Controller to collect metrics
+    ## @param balancingController.prometheus.enabled enable template Controller to collect metrics
     enabled: false
 
-    ## @param elfController.prometheus.port the metrics port of template Controller
+    ## @param balancingController.prometheus.port the metrics port of template Controller
     port: 5821
 
     serviceMonitor:
-      ## @param elfController.prometheus.serviceMonitor.install install serviceMonitor for template agent. This requires the prometheus CRDs to be available
+      ## @param balancingController.prometheus.serviceMonitor.install install serviceMonitor for template agent. This requires the prometheus CRDs to be available
       install: false
 
-      ## @param elfController.prometheus.serviceMonitor.namespace the serviceMonitor namespace. Default to the namespace of helm instance
+      ## @param balancingController.prometheus.serviceMonitor.namespace the serviceMonitor namespace. Default to the namespace of helm instance
       namespace: ""
 
-      ## @param elfController.prometheus.serviceMonitor.annotations the additional annotations of elfController serviceMonitor
+      ## @param balancingController.prometheus.serviceMonitor.annotations the additional annotations of balancingController serviceMonitor
       annotations: {}
 
-      ## @param elfController.prometheus.serviceMonitor.labels the additional label of elfController serviceMonitor
+      ## @param balancingController.prometheus.serviceMonitor.labels the additional label of balancingController serviceMonitor
       labels: {}
 
     prometheusRule:
-      ## @param elfController.prometheus.prometheusRule.install install prometheusRule for template agent. This requires the prometheus CRDs to be available
+      ## @param balancingController.prometheus.prometheusRule.install install prometheusRule for template agent. This requires the prometheus CRDs to be available
       install: false
 
-      ## @param elfController.prometheus.prometheusRule.namespace the prometheusRule namespace. Default to the namespace of helm instance
+      ## @param balancingController.prometheus.prometheusRule.namespace the prometheusRule namespace. Default to the namespace of helm instance
       namespace: ""
 
-      ## @param elfController.prometheus.prometheusRule.annotations the additional annotations of elfController prometheusRule
+      ## @param balancingController.prometheus.prometheusRule.annotations the additional annotations of balancingController prometheusRule
       annotations: {}
 
-      ## @param elfController.prometheus.prometheusRule.labels the additional label of elfController prometheusRule
+      ## @param balancingController.prometheus.prometheusRule.labels the additional label of balancingController prometheusRule
       labels: {}
 
     grafanaDashboard:
-      ## @param elfController.prometheus.grafanaDashboard.install install grafanaDashboard for template agent. This requires the prometheus CRDs to be available
+      ## @param balancingController.prometheus.grafanaDashboard.install install grafanaDashboard for template agent. This requires the prometheus CRDs to be available
       install: false
 
-      ## @param elfController.prometheus.grafanaDashboard.namespace the grafanaDashboard namespace. Default to the namespace of helm instance
+      ## @param balancingController.prometheus.grafanaDashboard.namespace the grafanaDashboard namespace. Default to the namespace of helm instance
       namespace: ""
 
-      ## @param elfController.prometheus.grafanaDashboard.annotations the additional annotations of elfController grafanaDashboard
+      ## @param balancingController.prometheus.grafanaDashboard.annotations the additional annotations of balancingController grafanaDashboard
       annotations: {}
 
-      ## @param elfController.prometheus.grafanaDashboard.labels the additional label of elfController grafanaDashboard
+      ## @param balancingController.prometheus.grafanaDashboard.labels the additional label of balancingController grafanaDashboard
       labels: {}
 
   debug:
-    ## @param elfController.debug.logLevel the log level of template Controller [debug, info, warn, error, fatal, panic]
+    ## @param balancingController.debug.logLevel the log level of template Controller [debug, info, warn, error, fatal, panic]
     logLevel: "info"
 
-    ## @param elfController.debug.gopsPort the gops port of template Controller
+    ## @param balancingController.debug.gopsPort the gops port of template Controller
     gopsPort: 5824
 
   ## TLS configuration for webhook
   tls:
-    ## @param elfController.tls.method the method for generating TLS certificates. [ provided , certmanager , auto]
+    ## @param balancingController.tls.method the method for generating TLS certificates. [ provided , certmanager , auto]
     ## - provided:     provide all certificates by helm options
     ## - certmanager:  This method use cert-manager to generate & rotate certificates.
     ## - auto:         Auto generate cert.
     method: auto
 
-    ## @param elfController.tls.secretName the secret name for storing TLS certificates
-    secretName: "elf-controller-server-certs"
+    ## @param balancingController.tls.secretName the secret name for storing TLS certificates
+    secretName: "balancing-controller-server-certs"
 
     ## for certmanager method
     certmanager:
-      ## @param elfController.tls.certmanager.certValidityDuration generated certificates validity duration in days for 'certmanager' method
+      ## @param balancingController.tls.certmanager.certValidityDuration generated certificates validity duration in days for 'certmanager' method
       certValidityDuration: 365
 
-      ## @param elfController.tls.certmanager.issuerName issuer name of cert manager 'certmanager'. If not specified, a CA issuer will be created.
+      ## @param balancingController.tls.certmanager.issuerName issuer name of cert manager 'certmanager'. If not specified, a CA issuer will be created.
       issuerName: ""
 
-      ## @param elfController.tls.certmanager.extraDnsNames extra DNS names added to certificate when it's auto generated
+      ## @param balancingController.tls.certmanager.extraDnsNames extra DNS names added to certificate when it's auto generated
       extraDnsNames: []
 
-      ## @param elfController.tls.certmanager.extraIPAddresses extra IP addresses added to certificate when it's auto generated
+      ## @param balancingController.tls.certmanager.extraIPAddresses extra IP addresses added to certificate when it's auto generated
       extraIPAddresses: []
 
     ## for provided method
     provided:
-      ## @param elfController.tls.provided.tlsCert encoded tls certificate for provided method
-      ## @param elfController.tls.provided.tlsKey encoded tls key for provided method
-      ## @param elfController.tls.provided.tlsCa encoded tls CA for provided method
+      ## @param balancingController.tls.provided.tlsCert encoded tls certificate for provided method
+      ## @param balancingController.tls.provided.tlsKey encoded tls key for provided method
+      ## @param balancingController.tls.provided.tlsCa encoded tls CA for provided method
       tlsCert: ""
       tlsKey: ""
       tlsCa: ""
 
     ## for auto method
     auto:
-      ## @param elfController.tls.auto.caExpiration ca expiration for auto method
+      ## @param balancingController.tls.auto.caExpiration ca expiration for auto method
       # in day , default 200 years
       caExpiration: '73000'
 
-      ## @param elfController.tls.auto.certExpiration server cert expiration for auto method
+      ## @param balancingController.tls.auto.certExpiration server cert expiration for auto method
       # in day, default 200 years
       certExpiration: '73000'
 
-      ## @param elfController.tls.auto.extraIpAddresses extra IP addresses of server certificate for auto method
+      ## @param balancingController.tls.auto.extraIpAddresses extra IP addresses of server certificate for auto method
       extraIpAddresses: []
 
-      ## @param elfController.tls.auto.extraDnsNames extra DNS names of server cert for auto method
+      ## @param balancingController.tls.auto.extraDnsNames extra DNS names of server cert for auto method
       extraDnsNames: []

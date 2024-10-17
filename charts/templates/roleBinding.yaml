@@ -8,8 +8,8 @@ roleRef:
   name: {{ include "project.name" . }}
 subjects:
   - kind: ServiceAccount
-    name: {{ .Values.elfAgent.name | trunc 63 | trimSuffix "-" }}
+    name: {{ .Values.balancingAgent.name | trunc 63 | trimSuffix "-" }}
     namespace: {{ .Release.Namespace }}
   - kind: ServiceAccount
-    name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
+    name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
     namespace: {{ .Release.Namespace }}

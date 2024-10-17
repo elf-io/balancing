@@ -1,51 +1,51 @@
-{{- if .Values.elfAgent.prometheus.prometheusRule.install -}}
+{{- if .Values.balancingAgent.prometheus.prometheusRule.install -}}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: {{ .Values.elfAgent.name | trunc 63 | trimSuffix "-" }}
-  namespace: {{ default .Release.Namespace .Values.elfAgent.prometheus.prometheusRule.namespace }}
+  name: {{ .Values.balancingAgent.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ default .Release.Namespace .Values.balancingAgent.prometheus.prometheusRule.namespace }}
   labels:
-    {{- include "project.elfAgent.labels" . | nindent 4 }}
+    {{- include "project.balancingAgent.labels" . | nindent 4 }}
     {{- if .Values.global.commonLabels }}
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- if .Values.elfAgent.prometheus.prometheusRule.labels }}
-    {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.prometheus.prometheusRule.labels "context" $ ) | nindent 4 }}
+    {{- if .Values.balancingAgent.prometheus.prometheusRule.labels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.prometheus.prometheusRule.labels "context" $ ) | nindent 4 }}
     {{- end }}
-  {{- if or .Values.global.commonAnnotations .Values.elfAgent.prometheus.prometheusRule.annotations }}
+  {{- if or .Values.global.commonAnnotations .Values.balancingAgent.prometheus.prometheusRule.annotations }}
   annotations:
     {{- if .Values.global.commonAnnotations }}
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- if .Values.elfAgent.prometheus.prometheusRule.annotations }}
-    {{- include "tplvalues.render" ( dict "value" .Values.elfAgent.prometheus.prometheusRule.annotations "context" $ ) | nindent 4 }}
+    {{- if .Values.balancingAgent.prometheus.prometheusRule.annotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.prometheus.prometheusRule.annotations "context" $ ) | nindent 4 }}
     {{- end }}
   {{- end }}
 spec:
   groups: []
 {{- end }}
 ---
-{{- if .Values.elfController.prometheus.prometheusRule.install -}}
+{{- if .Values.balancingController.prometheus.prometheusRule.install -}}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: {{ .Values.elfController.name | trunc 63 | trimSuffix "-" }}
-  namespace: {{ default .Release.Namespace .Values.elfController.prometheus.prometheusRule.namespace }}
+  name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ default .Release.Namespace .Values.balancingController.prometheus.prometheusRule.namespace }}
   labels:
-    {{- include "project.elfController.labels" . | nindent 4 }}
+    {{- include "project.balancingController.labels" . | nindent 4 }}
     {{- if .Values.global.commonLabels }}
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- if .Values.elfController.prometheus.prometheusRule.labels }}
-    {{- include "tplvalues.render" ( dict "value" .Values.elfController.prometheus.prometheusRule.labels "context" $ ) | nindent 4 }}
+    {{- if .Values.balancingController.prometheus.prometheusRule.labels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingController.prometheus.prometheusRule.labels "context" $ ) | nindent 4 }}
     {{- end }}
-  {{- if or .Values.global.commonAnnotations .Values.elfController.prometheus.prometheusRule.annotations }}
+  {{- if or .Values.global.commonAnnotations .Values.balancingController.prometheus.prometheusRule.annotations }}
   annotations:
     {{- if .Values.global.commonAnnotations }}
     {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- if .Values.elfController.prometheus.prometheusRule.annotations }}
-    {{- include "tplvalues.render" ( dict "value" .Values.elfController.prometheus.prometheusRule.annotations "context" $ ) | nindent 4 }}
+    {{- if .Values.balancingController.prometheus.prometheusRule.annotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingController.prometheus.prometheusRule.annotations "context" $ ) | nindent 4 }}
     {{- end }}
   {{- end }}
 spec:
