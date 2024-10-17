@@ -48,7 +48,7 @@ func SetupController() {
 		LeaderElectionID:        "balacning-leader",
 		LeaderElectionNamespace: types.ControllerConfig.PodNamespace,
 		WebhookServer: runtimeWebhook.NewServer(runtimeWebhook.Options{
-			Port:     types.ControllerConfig.WebhookPort,
+			Port:     int(types.ControllerConfig.WebhookPort),
 			CertDir:  path.Dir(types.ControllerConfig.TlsCaCertPath),
 			CertName: path.Base(types.ControllerConfig.TlsCaCertPath),
 			KeyName:  path.Base(types.ControllerConfig.TlsServerKeyPath),
