@@ -27,6 +27,7 @@ func HealthCheckHandler(req *http.Request) error {
 	if finishSetUp {
 		return nil
 	}
+	rootLogger.Sugar().Warnf("health is not ready")
 	return fmt.Errorf("setting up")
 }
 
@@ -50,10 +51,11 @@ func SetupController() {
 		WebhookServer: runtimeWebhook.NewServer(runtimeWebhook.Options{
 			Port:     int(types.ControllerConfig.WebhookPort),
 			CertDir:  path.Dir(types.ControllerConfig.TlsCaCertPath),
-			CertName: path.Base(types.ControllerConfig.TlsCaCertPath),
+			CertName: path.Base(types.ControllerConfig.TlsServerCertPath),
 			KeyName:  path.Base(types.ControllerConfig.TlsServerKeyPath),
 			// ClientCAName is the CA certificate name which server used to verify remote(client)'s certificate.
 			// Defaults to "", which means server does not verify client's certificate.
+			// ClientCAName:  path.Base(types.ControllerConfig.TlsCaCertPath),
 			ClientCAName: "",
 		}),
 	})
@@ -92,6 +94,7 @@ func SetupController() {
 	}
 
 	go func() {
+		rootLogger.Sugar().Infof("begin to run controller")
 		if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 			rootLogger.Sugar().Fatalf("problem running manager: %v", err)
 		}

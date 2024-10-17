@@ -44,6 +44,7 @@ func HealthCheckHandler(req *http.Request) error {
 	if finishSetUp {
 		return nil
 	}
+	rootLogger.Sugar().Warnf("health is not ready")
 	return fmt.Errorf("setting up")
 }
 
@@ -166,7 +167,6 @@ func RunReconciles() {
 
 	rootLogger.Info("finish all setup ")
 	finishSetUp = true
-	time.Sleep(time.Hour)
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
