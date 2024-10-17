@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # ====modify====
-ARG BASE_IMAGE=docker.io/library/ubuntu:24.10
+ARG BASE_IMAGE=docker.io/library/ubuntu:24.04
 ARG GOLANG_IMAGE=docker.io/library/golang:1.23.1
 
 #========= build gops ===============
