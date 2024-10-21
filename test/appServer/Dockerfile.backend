@@ -4,27 +4,21 @@
 # 使用官方 Golang 镜像作为构建阶段
 FROM golang:1.23 AS builder
 
-# 设置工作目录
 WORKDIR /app
 
-# 将当前目录的所有文件复制到工作目录中
 COPY ./src .
-
-# 编译 HTTP 和 UDP 服务器
 RUN go build -o http_server http_server.go
 RUN go build -o udp_server udp_server.go
 
-# 使用 Ubuntu 作为基础镜像
+#================================
 FROM ubuntu:22.04
 
-# 安装必要的依赖
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
-# 从构建阶段复制编译后的二进制文件
 COPY --from=builder /app/http_server /app/udp_server /usr/sbin
 
-# 暴露 HTTP 和 UDP 服务器的端口
+RUN chmod +x /usr/sbin/udp_server && chmod +x /usr/sbin/http_server
+
 EXPOSE 8080
 
-# 启动 HTTP 和 UDP 服务器
-CMD ["sh", "-c", "/usr/sbin/http_server & /usr/sbin/udp_server "]
+CMD ["sh", "-c", "/usr/sbin/udp_server & /usr/sbin/http_server "]

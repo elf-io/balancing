@@ -137,6 +137,13 @@ LINT_TRIVY_SEVERITY_LEVEL ?= CRITICAL
 
 OPENAPI_SDK_DIR :=  ${ROOT_DIR}/api/v1/http
 
+#==================== test image
+
+TEST_APP_IMAGE_TAG := $(shell git ls-tree --full-tree HEAD -- $(ROOT_DIR)/test/appServer | awk '{ print $3 }' )
+TEST_APP_PROXY_SERVER_IMAGE := ${REGISTER}/${GIT_REPO}-proxy_server:$(TEST_APP_IMAGE_TAG)
+TEST_APP_BACKEND_SERVER_IMAGE := ${REGISTER}/${GIT_REPO}-backend_server:$(TEST_APP_IMAGE_TAG)
+
+
 #===================== E2E
 
 

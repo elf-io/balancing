@@ -90,6 +90,13 @@ build_local_controller_image:
 	$(BUILD_FINAL_IMAGE)
 
 
+#=================
+.PHONY: build_local_test_app_image
+build_local_test_app_image:
+	cd ./test/appServer && docker build --file Dockerfile.proxy --tag $(TEST_APP_PROXY_SERVER_IMAGE) .
+	cd ./test/appServer && docker build --file Dockerfile.backend --tag $(TEST_APP_BACKEND_SERVER_IMAGE) .
+
+
 #================= update golang
 
 ## Update Go version for all the components
