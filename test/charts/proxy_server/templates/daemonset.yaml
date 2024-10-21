@@ -25,10 +25,10 @@ spec:
           image: {{ include "project.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
-            - {{ .Values.cmd.cmdBinName }}
+          - {{ .Values.cmd.cmdBinName }}
           {{- with .Values.cmd.extraArgs }}
           args:
-          {{- toYaml . | trim | nindent 8 }}
+          {{- toYaml . | trim | nindent 10 }}
           {{- end }}
           livenessProbe:
             httpGet:
