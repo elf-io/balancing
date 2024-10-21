@@ -25,7 +25,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-balancingAgent Common labels
+balancingController Common labels
 */}}
 {{- define "project.balancingController.labels" -}}
 helm.sh/chart: {{ include "project.chart" . }}

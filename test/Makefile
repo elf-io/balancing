@@ -41,15 +41,15 @@ init_one_kind: checkBin clean
 	- kubectl --kubeconfig $(KIND_KUBECONFIG) taint nodes --all node-role.kubernetes.io/control-plane- || true
 	@echo "===================== deploy prometheus CRD ========== "
 	# https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml ; } \
-	kubectl apply --kubeconfig $(KIND_KUBECONFIG)  -f ./yaml/monitoring.coreos.com_servicemonitors.yaml
+	kubectl apply --kubeconfig $(KIND_KUBECONFIG)  -f ./crd/monitoring.coreos.com_servicemonitors.yaml
 	# https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml ; } \
-	kubectl apply --kubeconfig $(KIND_KUBECONFIG) -f ./yaml/monitoring.coreos.com_podmonitors.yaml
+	kubectl apply --kubeconfig $(KIND_KUBECONFIG) -f ./crd/monitoring.coreos.com_podmonitors.yaml
 	# https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml ; } \
-	kubectl apply --kubeconfig $(KIND_KUBECONFIG) -f ./yaml/monitoring.coreos.com_prometheusrules.yaml
+	kubectl apply --kubeconfig $(KIND_KUBECONFIG) -f ./crd/monitoring.coreos.com_prometheusrules.yaml
 	# https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml  ; } \
-	kubectl apply --kubeconfig $(KIND_KUBECONFIG) -f ./yaml/monitoring.coreos.com_probes.yaml
+	kubectl apply --kubeconfig $(KIND_KUBECONFIG) -f ./crd/monitoring.coreos.com_probes.yaml
 	# https://raw.githubusercontent.com/grafana-operator/grafana-operator/master/deploy/manifests/latest/crds.yaml  ; } \
-	kubectl apply --kubeconfig $(KIND_KUBECONFIG) -f ./yaml/grafanadashboards.yaml
+	kubectl apply --kubeconfig $(KIND_KUBECONFIG) -f ./crd/grafanadashboards.yaml
 	echo "show kubernetes node image " && docker ps
 	@echo "========================================================"
 	@echo "   deploy kind cluster $(KIND_CLUSTER_NAME)             "
@@ -153,7 +153,7 @@ install_example_app: KIND_KUBECONFIG ?= $(E2E_KIND_KUBECONFIG_PATH)
 install_example_app: KIND_CLUSTER_NAME ?= $(E2E_KIND_CLUSTER_NAME)
 install_example_app:
 	@echo "---------- install example app"
-	kubectl --kubeconfig=$(KIND_KUBECONFIG) apply -f yaml/testpod.yaml
+	kubectl --kubeconfig=$(KIND_KUBECONFIG) apply -f yaml/appServer.yaml
 	@ if ! kubectl rollout status  deployment/test --kubeconfig $(KIND_KUBECONFIG) -w --timeout=120s ; then \
 			echo "error, failed to create a test pod" ; \
 			exit 1 ; \

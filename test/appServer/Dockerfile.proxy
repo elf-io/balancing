@@ -1,0 +1,30 @@
+# docker build -t myproxy -f Dockerfile.proxy .
+# docker run -p 8090:8090 myproxy
+
+# 使用官方 Golang 镜像作为构建阶段
+FROM golang:1.23 AS builder
+
+# 设置工作目录
+WORKDIR /app
+
+# 将当前目录的所有文件复制到工作目录中
+COPY ./src .
+
+# 编译 Proxy 服务器
+RUN go build -o proxy_server proxy_server.go
+
+# 使用 Ubuntu 作为基础镜像
+FROM ubuntu:22.04
+
+# 安装必要的依赖
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
+# 从构建阶段复制编译后的二进制文件
+COPY --from=builder /app/proxy_server /usr/sbin
+
+# 暴露 Proxy 服务器的端口
+EXPOSE 8090
+
+# 启动 Proxy 服务器
+CMD ["/usr/sbin/proxy_server"]
+

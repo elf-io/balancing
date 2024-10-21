@@ -16,4 +16,14 @@ kubeadmConfigPatches:
 
 nodes:
   - role: control-plane
+    extraPortMappings:
+      # for proxy server
+      - containerPort: 20090
+        hostPort: 20090
+        protocol: TCP
   - role: worker
+    extraPortMappings:
+      # for proxy server
+      - containerPort: 20090
+        hostPort: 20090
+        protocol: TCP
