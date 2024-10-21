@@ -18,12 +18,14 @@ nodes:
   - role: control-plane
     extraPortMappings:
       # for proxy server
-      - containerPort: 20090
-        hostPort: 20090
+      - containerPort: 10080
+        hostPort: 10080
         protocol: TCP
+        listenAddress: "0.0.0.0"
   - role: worker
     extraPortMappings:
       # for proxy server
-      - containerPort: 20090
-        hostPort: 20090
+      - containerPort: 10080
+        hostPort: 10080
         protocol: TCP
+        listenAddress: "0.0.0.0"
