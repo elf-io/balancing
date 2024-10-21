@@ -1,0 +1,199 @@
+{{- if (eq .Values.balancingController.tls.method "auto") }}
+{{- $_ := include "generate-ca-certs" . }}
+{{- end }}
+
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
+  annotations:
+    {{- if (eq .Values.balancingController.tls.method "certmanager") }}
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}-server-certs
+    {{- end }}
+webhooks:
+  - admissionReviewVersions:
+      - v1beta1
+    clientConfig:
+      service:
+        name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
+        namespace: {{ .Release.Namespace }}
+        path: "/mutate-balancing-elf-io-v1beta1-balancingpolicy"
+        port: {{ .Values.balancingController.webhookPort }}
+      {{- if (eq .Values.balancingController.tls.method "provided") }}
+      caBundle: {{ .Values.balancingController.tls.provided.tlsCa | required "missing tls.provided.tlsCa" }}
+      {{- else if (eq .Values.balancingController.tls.method "auto") }}
+      caBundle: {{ .ca.Cert | b64enc }}
+      {{- end }}
+    failurePolicy: Fail
+    name: balancingpolicy.balancing.balancing.io
+    rules:
+      - apiGroups:
+          - balancing.balancing.io
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+          - DELETE
+        resources:
+          - balancingpolicys
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1beta1
+    clientConfig:
+      service:
+        name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
+        namespace: {{ .Release.Namespace }}
+        path: "/mutate-balancing-elf-io-v1beta1-localredirectpolicy"
+        port: {{ .Values.balancingController.webhookPort }}
+      {{- if (eq .Values.balancingController.tls.method "provided") }}
+      caBundle: {{ .Values.balancingController.tls.provided.tlsCa | required "missing tls.provided.tlsCa" }}
+      {{- else if (eq .Values.balancingController.tls.method "auto") }}
+      caBundle: {{ .ca.Cert | b64enc }}
+      {{- end }}
+    failurePolicy: Fail
+    name: localredirectpolicy.balancing.balancing.io
+    rules:
+      - apiGroups:
+          - balancing.balancing.io
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+          - DELETE
+        resources:
+          - localredirectpolicys
+    sideEffects: None
+
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
+  annotations:
+    {{- if (eq .Values.balancingController.tls.method "certmanager") }}
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}-server-certs
+    {{- end }}
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
+        namespace: {{ .Release.Namespace }}
+        path: "/validate-balancing-elf-io-v1beta1-balancingpolicy"
+        port: {{ .Values.balancingController.webhookPort }}
+      {{- if (eq .Values.balancingController.tls.method "provided") }}
+      caBundle: {{ .Values.balancingController.tls.provided.tlsCa | required "missing tls.provided.tlsCa" }}
+      {{- else if (eq .Values.balancingController.tls.method "auto") }}
+      caBundle: {{ .ca.Cert | b64enc }}
+      {{- end }}
+    failurePolicy: Fail
+    name: balancingpolicy.balancing.balancing.io
+    rules:
+      - apiGroups:
+          - balancing.balancing.io
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+          - DELETE
+        resources:
+          - balancingpolicys
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
+        namespace: {{ .Release.Namespace }}
+        path: "/validate-balancing-elf-io-v1beta1-localredirectpolicy"
+        port: {{ .Values.balancingController.webhookPort }}
+      {{- if (eq .Values.balancingController.tls.method "provided") }}
+      caBundle: {{ .Values.balancingController.tls.provided.tlsCa | required "missing tls.provided.tlsCa" }}
+      {{- else if (eq .Values.balancingController.tls.method "auto") }}
+      caBundle: {{ .ca.Cert | b64enc }}
+      {{- end }}
+    failurePolicy: Fail
+    name: localredirectpolicy.balancing.balancing.io
+    rules:
+      - apiGroups:
+          - balancing.balancing.io
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+          - DELETE
+        resources:
+          - localredirectpolicys
+    sideEffects: None
+
+{{- if eq .Values.balancingController.tls.method "certmanager" -}}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}-server-certs
+  namespace: {{ .Release.Namespace }}
+spec:
+  issuerRef:
+    name: {{ .Values.balancingController.tls.certmanager.issuerName | trunc 63 | trimSuffix "-" }}
+  secretName: {{ .Values.balancingController.tls.secretName | trunc 63 | trimSuffix "-" }}
+  commonName: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}.{{ .Release.Namespace }}.svc
+  dnsNames:
+    - {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
+    - {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}.{{ .Release.Namespace }}
+    - {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}.{{ .Release.Namespace }}.svc
+    - {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}.{{ .Release.Namespace }}.svc.{{ .Values.global.clusterDnsDomain }}
+  {{- range $dns := .Values.balancingController.tls.certmanager.extraDnsNames }}
+  - {{ $dns | quote }}
+  {{- end }}
+  {{- if .Values.balancingController.tls.certmanager.extraIPAddresses }}
+  ipAddresses:
+  {{- range $ip := .Values.balancingController.tls.certmanager.extraIPAddresses }}
+  - {{ $ip | quote }}
+  {{- end }}
+  {{- end }}
+  duration: {{ printf "%dh" (mul .Values.balancingController.tls.certmanager.certValidityDuration 24) }}
+  {{- end }}
+
+{{- if (eq .Values.balancingController.tls.method "provided") }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.balancingController.tls.secretName | trunc 63 | trimSuffix "-" }}
+  namespace: {{ .Release.Namespace }}
+type: kubernetes.io/tls
+data:
+  ca.crt:  {{ .Values.balancingController.tls.provided.tlsCa | required "missing tls.provided.tlsCa" }}
+  tls.crt: {{ .Values.balancingController.tls.provided.tlsCert | required "missing tls.provided.tlsCert" }}
+  tls.key: {{ .Values.balancingController.tls.provided.tlsKey  | required "missing tls.provided.tlsKey"  }}
+  {{- end }}
+
+{{- if eq .Values.balancingController.tls.method "auto" }}
+---
+{{- $cn := printf "balancing.io" }}
+{{- $ip := .Values.balancingController.tls.auto.extraIpAddresses }}
+{{- $dns1 := printf "%s.%s" .Values.balancingController.name .Release.Namespace }}
+{{- $dns2 := printf "%s.%s.svc" .Values.balancingController.name .Release.Namespace }}
+{{- $dns3 := printf "%s.%s.svc.%s" .Values.balancingController.name .Release.Namespace .Values.global.clusterDnsDomain }}
+{{- $dns := prepend .Values.balancingController.tls.auto.extraDnsNames $dns1 }}
+{{- $dns = prepend $dns $dns2 }}
+{{- $dns = prepend $dns $dns3 }}
+{{- $dns = prepend $dns $cn }}
+{{- $cert := genSignedCert $cn $ip $dns (.Values.balancingController.tls.auto.certExpiration | int) .ca }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.balancingController.tls.secretName | trunc 63 | trimSuffix "-" }}
+  namespace: {{ .Release.Namespace }}
+type: kubernetes.io/tls
+data:
+  ca.crt:  {{ .ca.Cert | b64enc }}
+  tls.crt: {{ $cert.Cert | b64enc }}
+  tls.key: {{ $cert.Key  | b64enc }}
+{{- end }}

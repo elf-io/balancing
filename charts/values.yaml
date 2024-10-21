@@ -1,0 +1,446 @@
+
+## @section Global parameters
+##
+global:
+  ## @param global.imageRegistryOverride Global Docker image registry
+  imageRegistryOverride: ""
+
+  ## @param global.imageTagOverride Global Docker image tag
+  imageTagOverride: ""
+
+  ## @param global.name instance name
+  ## default balancing
+  name: "balancing"
+
+  ## @param global.clusterDnsDomain cluster dns domain
+  clusterDnsDomain: "cluster.local"
+
+  ## @param global.commonAnnotations Annotations to add to all deployed objects
+  commonAnnotations: {}
+
+  ## @param global.commonLabels Labels to add to all deployed objects
+  commonLabels: {}
+  #  label1: v1
+  #  labele: v2
+
+  ## @param global.configName the configmap name
+  configName: "balancing"
+
+## @section feature parameters
+feature:
+  ## @param feature.enableIPv4 enable ipv4
+  enableIPv4: true
+
+  ## @param feature.enableIPv6 enable ipv6
+  enableIPv6: false
+
+## @section balancingAgent parameters
+##
+balancingAgent:
+  ## @param balancingAgent.name the balancingAgent name
+  name: "balancing-agent"
+
+  ## @param balancingAgent.cmdBinName the binary name of balancingAgent
+  cmdBinName: "/usr/bin/agent"
+
+  ## @param balancingAgent.hostnetwork enable hostnetwork mode of balancingAgent pod
+  hostnetwork: true
+
+  image:
+    ## @param balancingAgent.image.registry the image registry of balancingAgent
+    registry: ghcr.io
+
+    ## @param balancingAgent.image.repository the image repository of balancingAgent
+    repository: elf-io/balancing-agent
+
+    ## @param balancingAgent.image.pullPolicy the image pullPolicy of balancingAgent
+    pullPolicy: IfNotPresent
+
+    ## @param balancingAgent.image.digest the image digest of balancingAgent, which takes preference over tag
+    digest: ""
+
+    ## @param balancingAgent.image.tag the image tag of balancingAgent, overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+    ## @param balancingAgent.image.imagePullSecrets the image imagePullSecrets of balancingAgent
+    imagePullSecrets: []
+    # - name: "image-pull-secret"
+
+  ## @skip balancingAgent.nodeSelector.kubernetes.io/os
+  nodeSelector:
+    kubernetes.io/os: linux
+
+  serviceAccount:
+    ## @param balancingAgent.serviceAccount.create create the service account for the balancingAgent
+    create: true
+    ## @param balancingAgent.serviceAccount.annotations the annotations of balancingAgent service account
+    annotations: {}
+
+  ## @skip balancingAgent.updateStrategy.rollingUpdate.maxUnavailable
+  ## @skip balancingAgent.updateStrategy.type
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 2
+    type: RollingUpdate
+
+  service:
+    ## @param balancingAgent.service.annotations the annotations for balancingAgent service
+    annotations: {}
+    ## @param balancingAgent.service.type the type for balancingAgent service
+    type: ClusterIP
+
+  ## @skip balancingAgent.tolerations
+  tolerations:
+    - operator: Exists
+
+  ## @param balancingAgent.priorityClassName the priority Class Name for balancingAgent
+  priorityClassName: "system-node-critical"
+
+  ## @param balancingAgent.affinity the affinity of balancingAgent
+  affinity: {}
+
+  ## @param balancingAgent.extraArgs the additional arguments of balancingAgent container
+  extraArgs: []
+
+  ## @param balancingAgent.extraEnv the additional environment variables of balancingAgent container
+  extraEnv: []
+
+  ## @param balancingAgent.extraVolumes the additional volumes of balancingAgent container
+  extraVolumes: []
+
+  ## @param balancingAgent.extraVolumeMounts the additional hostPath mounts of balancingAgent container
+  extraVolumeMounts: []
+
+  ## @param balancingAgent.podAnnotations the additional annotations of balancingAgent pod
+  podAnnotations: {}
+
+  ## @param balancingAgent.podLabels the additional label of balancingAgent pod
+  podLabels: {}
+
+  resources:
+    ## @param balancingAgent.resources.limits.cpu the cpu limit of balancingAgent pod
+    ## @param balancingAgent.resources.limits.memory the memory limit of balancingAgent pod
+    ## @param balancingAgent.resources.requests.cpu the cpu requests of balancingAgent pod
+    ## @param balancingAgent.resources.requests.memory the memory requests of balancingAgent pod
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  ## @param balancingAgent.securityContext the security Context of balancingAgent pod
+  securityContext:
+    privileged: true
+
+  httpServer:
+    ## @param balancingAgent.httpServer.port the http Port for balancingAgent, for health checking
+    port: 5810
+
+    startupProbe:
+      ## @param balancingAgent.httpServer.startupProbe.failureThreshold the failure threshold of startup probe for balancingAgent health checking
+      failureThreshold: 60
+      ## @param balancingAgent.httpServer.startupProbe.periodSeconds the period seconds of startup probe for balancingAgent health checking
+      periodSeconds: 2
+
+    livenessProbe:
+      ## @param balancingAgent.httpServer.livenessProbe.failureThreshold the failure threshold of startup probe for balancingAgent health checking
+      failureThreshold: 6
+      ## @param balancingAgent.httpServer.livenessProbe.periodSeconds the period seconds of startup probe for balancingAgent health checking
+      periodSeconds: 10
+
+    readinessProbe:
+      ## @param balancingAgent.httpServer.readinessProbe.failureThreshold the failure threshold of startup probe for balancingAgent health checking
+      failureThreshold: 3
+      ## @param balancingAgent.httpServer.readinessProbe.periodSeconds the period seconds of startup probe for balancingAgent health checking
+      periodSeconds: 10
+
+  prometheus:
+    ## @param balancingAgent.prometheus.enabled enable template agent to collect metrics
+    enabled: false
+
+    ## @param balancingAgent.prometheus.port the metrics port of template agent
+    port: 5811
+
+    serviceMonitor:
+      ## @param balancingAgent.prometheus.serviceMonitor.install install serviceMonitor for template agent. This requires the prometheus CRDs to be available
+      install: false
+
+      ## @param balancingAgent.prometheus.serviceMonitor.namespace the serviceMonitor namespace. Default to the namespace of helm instance
+      namespace: ""
+
+      ## @param balancingAgent.prometheus.serviceMonitor.annotations the additional annotations of balancingAgent serviceMonitor
+      annotations: {}
+
+      ## @param balancingAgent.prometheus.serviceMonitor.labels the additional label of balancingAgent serviceMonitor
+      labels: {}
+
+    prometheusRule:
+      ## @param balancingAgent.prometheus.prometheusRule.install install prometheusRule for template agent. This requires the prometheus CRDs to be available
+      install: false
+
+      ## @param balancingAgent.prometheus.prometheusRule.namespace the prometheusRule namespace. Default to the namespace of helm instance
+      namespace: ""
+
+      ## @param balancingAgent.prometheus.prometheusRule.annotations the additional annotations of balancingAgent prometheusRule
+      annotations: {}
+
+      ## @param balancingAgent.prometheus.prometheusRule.labels the additional label of balancingAgent prometheusRule
+      labels: {}
+
+    grafanaDashboard:
+      ## @param balancingAgent.prometheus.grafanaDashboard.install install grafanaDashboard for template agent. This requires the prometheus CRDs to be available
+      install: false
+
+      ## @param balancingAgent.prometheus.grafanaDashboard.namespace the grafanaDashboard namespace. Default to the namespace of helm instance
+      namespace: ""
+
+      ## @param balancingAgent.prometheus.grafanaDashboard.annotations the additional annotations of balancingAgent grafanaDashboard
+      annotations: {}
+
+      ## @param balancingAgent.prometheus.grafanaDashboard.labels the additional label of balancingAgent grafanaDashboard
+      labels: {}
+
+  debug:
+    ## @param balancingAgent.debug.logLevel the log level of template agent [debug, info, warn, error, fatal, panic]
+    logLevel: "info"
+    ## @param balancingAgent.debug.gopsPort the gops port of template agent
+    gopsPort: 5812
+
+## @section balancingController parameters
+##
+balancingController:
+  ## @param balancingController.name the balancingController name
+  name: "balancing-controller"
+
+  ## @param balancingController.replicas the replicas number of balancingController pod
+  replicas: 1
+
+  ## @param balancingController.binName the binName name of balancingController
+  cmdBinName: "/usr/bin/controller"
+
+  ## @param balancingController.hostnetwork enable hostnetwork mode of balancingController pod. Notice, if no CNI available before template installation, must enable this
+  hostnetwork: true
+
+  image:
+    ## @param balancingController.image.registry the image registry of balancingController
+    registry: ghcr.io
+
+    ## @param balancingController.image.repository the image repository of balancingController
+    repository: elf-io/balancing-controller
+
+    ## @param balancingController.image.pullPolicy the image pullPolicy of balancingController
+    pullPolicy: IfNotPresent
+
+    ## @param balancingController.image.digest the image digest of balancingController, which takes preference over tag
+    digest: ""
+
+    ## @param balancingController.image.tag the image tag of balancingController, overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+    ## @param balancingController.image.imagePullSecrets the image imagePullSecrets of balancingController
+    imagePullSecrets: []
+    # - name: "image-pull-secret"
+
+  ## @skip balancingController.nodeSelector.kubernetes.io/os
+  nodeSelector:
+    kubernetes.io/os: linux
+
+  serviceAccount:
+    ## @param balancingController.serviceAccount.create create the service account for the balancingController
+    create: true
+    ## @param balancingController.serviceAccount.annotations the annotations of balancingController service account
+    annotations: {}
+
+  service:
+    ## @param balancingController.service.annotations the annotations for balancingController service
+    annotations: {}
+    ## @param balancingController.service.type the type for balancingController service
+    type: ClusterIP
+
+  ## @skip balancingController.tolerations
+  tolerations:
+    - operator: Exists
+
+  ## @param balancingController.priorityClassName the priority Class Name for balancingController
+  priorityClassName: "system-node-critical"
+
+  ## @param balancingController.affinity the affinity of balancingController
+  affinity: {}
+
+  ## @param balancingController.extraArgs the additional arguments of balancingController container
+  extraArgs: []
+
+  ## @param balancingController.extraEnv the additional environment variables of balancingController container
+  extraEnv: []
+
+  ## @param balancingController.extraVolumes the additional volumes of balancingController container
+  extraVolumes: []
+    # - name: test-val
+  #   mountPath: /host/tmp
+
+  ## @param balancingController.extraVolumeMounts the additional hostPath mounts of balancingController container
+  extraVolumeMounts: []
+    # - name: test-val
+  #   mountPath: /tmp
+
+  ## @param balancingController.podAnnotations the additional annotations of balancingController pod
+  podAnnotations: {}
+  # test: 100
+
+  ## @param balancingController.podLabels the additional label of balancingController pod
+  podLabels: {}
+
+  ## @param balancingController.securityContext the security Context of balancingController pod
+  securityContext: {}
+  # runAsUser: 0
+
+  resources:
+    ## @param balancingController.resources.limits.cpu the cpu limit of balancingController pod
+    ## @param balancingController.resources.limits.memory the memory limit of balancingController pod
+    ## @param balancingController.resources.requests.cpu the cpu requests of balancingController pod
+    ## @param balancingController.resources.requests.memory the memory requests of balancingController pod
+    limits:
+      cpu: 500m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  podDisruptionBudget:
+    ## @param balancingController.podDisruptionBudget.enabled enable podDisruptionBudget for balancingController pod
+    enabled: false
+
+    ## @param balancingController.podDisruptionBudget.minAvailable minimum number/percentage of pods that should remain scheduled.
+    minAvailable: 1
+
+  httpServer:
+    ## @param balancingController.port the http Port for balancingController, for health checking and http service
+    port: 5820
+
+    startupProbe:
+      ## @param balancingController.httpServer.startupProbe.failureThreshold the failure threshold of startup probe for balancingController health checking
+      failureThreshold: 30
+
+      ## @param balancingController.httpServer.startupProbe.periodSeconds the period seconds of startup probe for balancingController health checking
+      periodSeconds: 2
+
+    livenessProbe:
+      ## @param balancingController.httpServer.livenessProbe.failureThreshold the failure threshold of startup probe for balancingController health checking
+      failureThreshold: 6
+
+      ## @param balancingController.httpServer.livenessProbe.periodSeconds the period seconds of startup probe for balancingController health checking
+      periodSeconds: 10
+
+    readinessProbe:
+      ## @param balancingController.httpServer.readinessProbe.failureThreshold the failure threshold of startup probe for balancingController health checking
+      failureThreshold: 3
+
+      ## @param balancingController.httpServer.readinessProbe.periodSeconds the period seconds of startup probe for balancingController health checking
+      periodSeconds: 10
+
+  ## @param balancingController.webhookPort the http port for balancingController webhook
+  webhookPort: 5822
+
+  prometheus:
+    ## @param balancingController.prometheus.enabled enable template Controller to collect metrics
+    enabled: false
+
+    ## @param balancingController.prometheus.port the metrics port of template Controller
+    port: 5821
+
+    serviceMonitor:
+      ## @param balancingController.prometheus.serviceMonitor.install install serviceMonitor for template agent. This requires the prometheus CRDs to be available
+      install: false
+
+      ## @param balancingController.prometheus.serviceMonitor.namespace the serviceMonitor namespace. Default to the namespace of helm instance
+      namespace: ""
+
+      ## @param balancingController.prometheus.serviceMonitor.annotations the additional annotations of balancingController serviceMonitor
+      annotations: {}
+
+      ## @param balancingController.prometheus.serviceMonitor.labels the additional label of balancingController serviceMonitor
+      labels: {}
+
+    prometheusRule:
+      ## @param balancingController.prometheus.prometheusRule.install install prometheusRule for template agent. This requires the prometheus CRDs to be available
+      install: false
+
+      ## @param balancingController.prometheus.prometheusRule.namespace the prometheusRule namespace. Default to the namespace of helm instance
+      namespace: ""
+
+      ## @param balancingController.prometheus.prometheusRule.annotations the additional annotations of balancingController prometheusRule
+      annotations: {}
+
+      ## @param balancingController.prometheus.prometheusRule.labels the additional label of balancingController prometheusRule
+      labels: {}
+
+    grafanaDashboard:
+      ## @param balancingController.prometheus.grafanaDashboard.install install grafanaDashboard for template agent. This requires the prometheus CRDs to be available
+      install: false
+
+      ## @param balancingController.prometheus.grafanaDashboard.namespace the grafanaDashboard namespace. Default to the namespace of helm instance
+      namespace: ""
+
+      ## @param balancingController.prometheus.grafanaDashboard.annotations the additional annotations of balancingController grafanaDashboard
+      annotations: {}
+
+      ## @param balancingController.prometheus.grafanaDashboard.labels the additional label of balancingController grafanaDashboard
+      labels: {}
+
+  debug:
+    ## @param balancingController.debug.logLevel the log level of template Controller [debug, info, warn, error, fatal, panic]
+    logLevel: "info"
+
+    ## @param balancingController.debug.gopsPort the gops port of template Controller
+    gopsPort: 5824
+
+  ## TLS configuration for webhook
+  tls:
+    ## @param balancingController.tls.method the method for generating TLS certificates. [ provided , certmanager , auto]
+    ## - provided:     provide all certificates by helm options
+    ## - certmanager:  This method use cert-manager to generate & rotate certificates.
+    ## - auto:         Auto generate cert.
+    method: auto
+
+    ## @param balancingController.tls.secretName the secret name for storing TLS certificates
+    secretName: "balancing-webhook-certs"
+
+    ## for certmanager method
+    certmanager:
+      ## @param balancingController.tls.certmanager.certValidityDuration generated certificates validity duration in days for 'certmanager' method
+      certValidityDuration: 365
+
+      ## @param balancingController.tls.certmanager.issuerName issuer name of cert manager 'certmanager'. If not specified, a CA issuer will be created.
+      issuerName: ""
+
+      ## @param balancingController.tls.certmanager.extraDnsNames extra DNS names added to certificate when it's auto generated
+      extraDnsNames: []
+
+      ## @param balancingController.tls.certmanager.extraIPAddresses extra IP addresses added to certificate when it's auto generated
+      extraIPAddresses: []
+
+    ## for provided method
+    provided:
+      ## @param balancingController.tls.provided.tlsCert encoded tls certificate for provided method
+      ## @param balancingController.tls.provided.tlsKey encoded tls key for provided method
+      ## @param balancingController.tls.provided.tlsCa encoded tls CA for provided method
+      tlsCert: ""
+      tlsKey: ""
+      tlsCa: ""
+
+    ## for auto method
+    auto:
+      ## @param balancingController.tls.auto.caExpiration ca expiration for auto method
+      # in day , default 200 years
+      caExpiration: '73000'
+
+      ## @param balancingController.tls.auto.certExpiration server cert expiration for auto method
+      # in day, default 200 years
+      certExpiration: '73000'
+
+      ## @param balancingController.tls.auto.extraIpAddresses extra IP addresses of server certificate for auto method
+      extraIpAddresses: []
+
+      ## @param balancingController.tls.auto.extraDnsNames extra DNS names of server cert for auto method
+      extraDnsNames: []

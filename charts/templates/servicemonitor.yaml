@@ -1,0 +1,83 @@
+{{- if .Values.balancingAgent.prometheus.serviceMonitor.install -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Values.balancingAgent.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ default .Release.Namespace .Values.balancingAgent.prometheus.serviceMonitor.namespace }}
+  labels:
+    {{- include "project.balancingAgent.labels" . | nindent 4 }}
+    {{- if .Values.global.commonLabels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.balancingAgent.prometheus.serviceMonitor.labels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.prometheus.serviceMonitor.labels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.global.commonAnnotations .Values.balancingAgent.prometheus.serviceMonitor.annotations }}
+  annotations:
+    {{- if .Values.global.commonAnnotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.balancingAgent.prometheus.serviceMonitor.annotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.prometheus.serviceMonitor.annotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  endpoints:
+    - interval: 30s
+      path: /metrics
+      port: metrics
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace | quote }}
+  selector:
+    matchLabels:
+      {{- include "project.balancingAgent.selectorLabels" . | nindent 6 }}
+      {{- if .Values.global.commonLabels }}
+      {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 6 }}
+      {{- end }}
+      {{- if .Values.balancingAgent.podLabels }}
+      {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.podLabels "context" $ ) | nindent 6 }}
+      {{- end }}
+  {{- end }}
+---
+{{- if .Values.balancingController.prometheus.serviceMonitor.install -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Values.balancingController.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ default .Release.Namespace .Values.balancingController.prometheus.serviceMonitor.namespace }}
+  labels:
+    {{- include "project.balancingController.labels" . | nindent 4 }}
+    {{- if .Values.global.commonLabels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.balancingController.prometheus.serviceMonitor.labels }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingController.prometheus.serviceMonitor.labels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.global.commonAnnotations .Values.balancingController.prometheus.serviceMonitor.annotations }}
+  annotations:
+    {{- if .Values.global.commonAnnotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.global.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.balancingController.prometheus.serviceMonitor.annotations }}
+    {{- include "tplvalues.render" ( dict "value" .Values.balancingController.prometheus.serviceMonitor.annotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  endpoints:
+    - interval: 30s
+      path: /metrics
+      port: metrics
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace | quote }}
+  selector:
+    matchLabels:
+      {{- include "project.balancingController.selectorLabels" . | nindent 6 }}
+      {{- if .Values.global.commonLabels }}
+      {{- include "tplvalues.render" ( dict "value" .Values.global.commonLabels "context" $ ) | nindent 6 }}
+      {{- end }}
+      {{- if .Values.balancingController.podLabels }}
+      {{- include "tplvalues.render" ( dict "value" .Values.balancingController.podLabels "context" $ ) | nindent 6 }}
+      {{- end }}
+{{- end }}
