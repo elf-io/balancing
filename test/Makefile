@@ -80,7 +80,7 @@ install_proscope:
 
 .PHONY: check_test_app_images_ready
 check_test_app_images_ready:
-	CHART_LIST=" $(ROOT_DIR)/test/charts/back_server $(ROOT_DIR)/test/charts/proxy_server $(ROOT_DIR)/test/charts/redirect_server " ;\
+	CHART_LIST=" $(ROOT_DIR)/test/charts/backend_server $(ROOT_DIR)/test/charts/proxy_server $(ROOT_DIR)/test/charts/redirect_server " ;\
 		for CHART_DIR in $${CHART_LIST} ; do \
 			echo "check image for $${CHART_DIR}  " ; \
 			IMAGE_LIST=` helm template test $${CHART_DIR} --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
