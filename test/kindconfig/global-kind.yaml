@@ -25,7 +25,7 @@ nodes:
   - role: worker
     extraPortMappings:
       # for proxy server
-      - containerPort: 20091
-        hostPort: 20090
+      - containerPort: 20090
+        hostPort: 20091
         protocol: TCP
         listenAddress: "0.0.0.0"
