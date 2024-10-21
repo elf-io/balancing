@@ -10,7 +10,7 @@ image:
   # - name: "image-pull-secret"
 
 server:
-  port: 8090
+  port: 80
 
 resources:
   requests:
@@ -20,5 +20,5 @@ resources:
 extraEnv: []
 
 cmd:
-  cmdBinName: "/usr/sbin/start_server"
-  extraArgs: []
+  cmdBinName: "/bin/bash"
+  extraArgs: ["-c", "/usr/sbin/udp_server -port=80 & /usr/sbin/http_server -port=80"]

@@ -4,13 +4,15 @@
 
 1. `make build_local_image -e  APT_HTTP_PROXY=http://10.64.0.14:7890`
 
-2. `make e2e_init`
+2. `make build_local_test_app_image`
 
-3. `make e2e_run`
+3. `make e2e_init`
 
-4. check proscope, browser visits http://NodeIP:4040
+4. `make e2e_run`
 
-5. check metric,
+5. check proscope, browser visits http://NodeIP:4040
+
+6. check metric,
 
 ## chart develop
 

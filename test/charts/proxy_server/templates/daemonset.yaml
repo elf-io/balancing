@@ -26,9 +26,8 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - {{ .Values.cmd.cmdBinName }}
-          args:
-            - -port={{ .Values.server.port }}
           {{- with .Values.cmd.extraArgs }}
+          args:
           {{- toYaml . | trim | nindent 8 }}
           {{- end }}
           livenessProbe:

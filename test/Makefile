@@ -78,6 +78,37 @@ install_proscope:
 
 #==================
 
+.PHONY: check_test_app_images_ready
+check_test_app_images_ready:
+	CHART_LIST=" $(ROOT_DIR)/test/charts/back_server $(ROOT_DIR)/test/charts/proxy_server $(ROOT_DIR)/test/charts/redirect_server " ;\
+		for CHART_DIR in $${CHART_LIST} ; do \
+			echo "check image for $${CHART_DIR}  " ; \
+			IMAGE_LIST=` helm template test $${CHART_DIR} --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
+			if [ -z "$${IMAGE_LIST}" ] ; then \
+				echo "warning, failed to find image from chart $${CHART_DIR}" ; \
+				exit 1 ;\
+			else \
+				echo "find image from chart : $${IMAGE_LIST} " ; \
+				for IMAGE in $${IMAGE_LIST} ; do \
+					echo "try to find image $${IMAGE} " ; \
+					EXIST=` docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${IMAGE}" ` || true ; \
+					if [ -z "$${EXIST}" ] ; then \
+							CI_IMAGE=$${IMAGE##*/} ; \
+							echo "try to find github CI image $${CI_IMAGE} " ; \
+							EXIST=` docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${CI_IMAGE}" ` || true ; \
+							if [ -z "$${EXIST}" ] ; then \
+								echo "error, failed to find image $${IMAGE}" ; \
+								echo "error, failed to find image $${CI_IMAGE}" ; \
+								exit 1 ; \
+							fi ; \
+							docker tag $${CI_IMAGE} $${IMAGE} ; \
+					fi ;\
+					echo "image exists: $${IMAGE}" ; \
+				done ; \
+				docker images ; \
+			fi \
+		done
+
 # this will auto tag github ci image : agent:xxx -> github.com/elf-io/balancing/agent:xxx
 .PHONY: check_images_ready
 check_images_ready:

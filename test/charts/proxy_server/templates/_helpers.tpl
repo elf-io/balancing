@@ -1,5 +1,5 @@
 {{/*
-balancingAgent Selector labels
+Selector labels
 */}}
 {{- define "project.selectorLabels" -}}
 app.kubernetes.io/instance: {{ .Release.Name }}

@@ -328,11 +328,13 @@ unitest_tests:
 .PHONY: e2e
 e2e:
 	make -C test check_images_ready
+	make -C test check_test_app_images_ready
 	make -C test e2e
 
 .PHONY: e2e_init
 e2e_init:
 	make -C test check_images_ready
+	make -C test check_test_app_images_ready
 	make -C test init_kind_env
 	make -C test deploy_project
 	make -C test install_example_app
