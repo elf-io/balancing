@@ -1,14 +1,14 @@
 # docker build -t myproxy -f Dockerfile.proxy .
 # docker run -p 8090:8090 myproxy
 
-FROM golang:1.23 AS builder
+FROM golang:1.23.1 AS builder
 
 WORKDIR /app
 COPY ./src .
 RUN go build -o proxy_server proxy_server.go
 
 #======================
-FROM ubuntu:22.04
+FROM ubuntu:24.10
 
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app/proxy_server /usr/sbin
