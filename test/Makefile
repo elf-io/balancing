@@ -184,12 +184,40 @@ install_example_app: KIND_KUBECONFIG ?= $(E2E_KIND_KUBECONFIG_PATH)
 install_example_app: KIND_CLUSTER_NAME ?= $(E2E_KIND_CLUSTER_NAME)
 install_example_app:
 	@echo "---------- install example app"
-	kubectl --kubeconfig=$(KIND_KUBECONFIG) apply -f yaml/appServer.yaml
-	@ if ! kubectl rollout status  deployment/test --kubeconfig $(KIND_KUBECONFIG) -w --timeout=120s ; then \
-			echo "error, failed to create a test pod" ; \
-			exit 1 ; \
-		fi ; \
-		echo "succeeded to deploy test deployment "
+	echo "get images ... " ; \
+		CHART_LIST=" $(ROOT_DIR)/test/charts/backend_server $(ROOT_DIR)/test/charts/proxy_server $(ROOT_DIR)/test/charts/redirect_server " ;\
+		for CHART_DIR in $${CHART_LIST} ; do \
+			echo "check image for $${CHART_DIR}  " ; \
+			IMAGE_LIST=` helm template test $${CHART_DIR} --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
+			if [ -z "$${IMAGE_LIST}" ] ; then \
+				echo "warning, failed to find image from chart $${CHART_DIR}" ; \
+				exit 1 ;\
+			else \
+				echo "find image from chart : $${IMAGE_LIST} " ; \
+				for IMAGE in $${IMAGE_LIST} ; do \
+					echo "try to find image $${IMAGE} " ; \
+					EXIST=` docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${IMAGE}" ` || true ; \
+					if [ -z "$${EXIST}" ] ; then \
+						  echo "docker pull $${IMAGE} to local" ; \
+						  docker pull $${IMAGE} ; \
+					fi ;\
+					echo "load local image $${IMAGE} " ; \
+					kind load docker-image $${IMAGE}  --name $(KIND_CLUSTER_NAME)  ; \
+				done ; \
+			fi \
+		done
+	echo "deploy proxy server " ; \
+			helm  --kubeconfig=$(KIND_KUBECONFIG) install  proxy_server ./charts/proxy_server \
+			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
+			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
+	echo "deploy backend server " ; \
+			helm  --kubeconfig=$(KIND_KUBECONFIG) install  backend_server ./charts/backend_server \
+			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
+			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
+	echo "deploy redirect server " ; \
+			helm  --kubeconfig=$(KIND_KUBECONFIG) install  redirect_server ./charts/redirect_server \
+			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
+			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
 	@echo "========================================================"
 	@echo "   deploy kind cluster $(KIND_CLUSTER_NAME)             "
 	@echo "   export KUBECONFIG=$(KIND_KUBECONFIG)                 "
