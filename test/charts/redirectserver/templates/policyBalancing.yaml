@@ -27,7 +27,7 @@ spec:
     serviceEndpoint:
       endpointSelector:
         matchLabels:
-          {{- include "project.selectorLabels" . | nindent 8 }}
+          {{- include "project.selectorLabels" . | nindent 10 }}
       # for podEndpoint: the destination IP is podIP, the destination port is pod port
       redirectMode: podEndpoint
       toPorts:
@@ -69,7 +69,7 @@ spec:
     serviceEndpoint:
       endpointSelector:
         matchLabels:
-          {{- include "project.selectorLabels" . | nindent 8 }}
+          {{- include "project.selectorLabels" . | nindent 10 }}
       # for hostPort: the destination IP is node IP, the destination port is hostPort
       # 对于 hostPort 部署的应用，同一个 node 上只会有一个 pod 启动成功，多余的 pod 会因为端口占用而启动失败
       redirectMode: hostPort
