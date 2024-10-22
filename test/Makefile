@@ -221,6 +221,7 @@ install_example_app:
 			helm  --kubeconfig=$(KIND_KUBECONFIG) install  redirectserver ./charts/redirectserver \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
+	./scripts/testAppConnectivity.sh || { echo "failed to test the connectivity" ; exit 1 ; }
 	@echo "========================================================"
 	@echo "   deploy kind cluster $(KIND_CLUSTER_NAME)             "
 	@echo "   export KUBECONFIG=$(KIND_KUBECONFIG)                 "

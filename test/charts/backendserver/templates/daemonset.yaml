@@ -32,7 +32,7 @@ spec:
           {{- end }}
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthy
               port: {{ .Values.server.port }}
               scheme: HTTP
             initialDelaySeconds: 5

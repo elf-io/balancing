@@ -58,6 +58,12 @@ func main() {
 		handleRequest(w, r, *port)
 	})
 
+	// 添加 /healthy 路由
+	http.HandleFunc("/healthy", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
 	// Start the HTTP server
 	address := fmt.Sprintf(":%s", *port)
 	fmt.Printf("Server is listening on port %s\n", *port)

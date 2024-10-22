@@ -59,6 +59,12 @@ func main() {
 		return
 	}
 
+	// 添加 /healthy 路由
+	http.HandleFunc("/healthy", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		mutex.Lock()
 		requestCount++
