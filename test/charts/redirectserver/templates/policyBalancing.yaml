@@ -75,10 +75,10 @@ spec:
       redirectMode: hostPort
       toPorts:
         # port is hostPort for hostPort mode
-        - port: {{ .Values.server.hostPort }}
+        - port: {{ .Values.server.hostPort | quote }}
           protocol: TCP
           name: p1
-        - port: {{ .Values.server.hostPort }}
+        - port: {{ .Values.server.hostPort | quote }}
           protocol: UDP
           name: p2
 ---
