@@ -66,4 +66,10 @@ spec:
             {{- end }}
           ports:
           - containerPort: {{ .Values.server.port }}
+            hostPort: {{ .Values.server.hostPort }}
             name: http
+            protocol: TCP
+          - containerPort: {{ .Values.server.port }}
+            hostPort: {{ .Values.server.hostPort }}
+            name: udp
+            protocol: UDP

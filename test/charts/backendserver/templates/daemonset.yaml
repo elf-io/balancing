@@ -67,3 +67,4 @@ spec:
           ports:
           - containerPort: {{ .Values.server.port }}
             name: http
+            protocol: TCP

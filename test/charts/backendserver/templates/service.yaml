@@ -4,14 +4,20 @@ metadata:
   name: {{ .Values.name | trunc 63 | trimSuffix "-" }}-balancing-pod
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.service.type }}
   ports:
     - port: 80
       targetPort: {{ .Values.server.port }}
       name: http1
+      protocol: TCP
+    - port: 80
+      targetPort: {{ .Values.server.port }}
+      name: udp
+      protocol: UDP
     - port: 8080
       targetPort: {{ .Values.server.port }}
       name: http2
+      protocol: TCP
   selector:
     {{- include "project.selectorLabels" . | nindent 6 }}
 ---
@@ -21,14 +27,20 @@ metadata:
   name: {{ .Values.name | trunc 63 | trimSuffix "-" }}-balancing-hostport
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.service.type }}
   ports:
     - port: 80
       targetPort: {{ .Values.server.port }}
       name: http1
+      protocol: TCP
+    - port: 80
+      targetPort: {{ .Values.server.port }}
+      name: udp
+      protocol: UDP
     - port: 8080
       targetPort: {{ .Values.server.port }}
       name: http2
+      protocol: TCP
   selector:
     {{- include "project.selectorLabels" . | nindent 6 }}
 ---
@@ -38,14 +50,20 @@ metadata:
   name: {{ .Values.name | trunc 63 | trimSuffix "-" }}-balancing-nodeproxy
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.service.type }}
   ports:
     - port: 80
       targetPort: {{ .Values.server.port }}
       name: http1
+      protocol: TCP
+    - port: 80
+      targetPort: {{ .Values.server.port }}
+      name: udp
+      protocol: UDP
     - port: 8080
       targetPort: {{ .Values.server.port }}
       name: http2
+      protocol: TCP
   selector:
     {{- include "project.selectorLabels" . | nindent 6 }}
 ---
@@ -55,7 +73,7 @@ metadata:
   name: {{ .Values.name | trunc 63 | trimSuffix "-" }}-service-affinity
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.service.type }}
   sessionAffinity: ClientIP
   sessionAffinityConfig:
     clientIP:
@@ -64,9 +82,15 @@ spec:
     - port: 80
       targetPort: {{ .Values.server.port }}
       name: http1
+      protocol: TCP
+    - port: 80
+      targetPort: {{ .Values.server.port }}
+      name: udp
+      protocol: UDP
     - port: 8080
       targetPort: {{ .Values.server.port }}
       name: http2
+      protocol: TCP
   selector:
     {{- include "project.selectorLabels" . | nindent 6 }}
 ---
@@ -76,14 +100,20 @@ metadata:
   name: {{ .Values.name | trunc 63 | trimSuffix "-" }}-service-normal
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.service.type }}
   ports:
     - port: 80
       targetPort: {{ .Values.server.port }}
       name: http1
+      protocol: TCP
+    - port: 80
+      targetPort: {{ .Values.server.port }}
+      name: udp
+      protocol: UDP
     - port: 8080
       targetPort: {{ .Values.server.port }}
       name: http2
+      protocol: TCP
   selector:
     {{- include "project.selectorLabels" . | nindent 6 }}
 ---
@@ -93,16 +123,22 @@ metadata:
   name: {{ .Values.name | trunc 63 | trimSuffix "-" }}-service-local
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.service.type }}
   externalTrafficPolicy: Local
   internalTrafficPolicy: Local
   ports:
     - port: 80
       targetPort: {{ .Values.server.port }}
       name: http1
+      protocol: TCP
+    - port: 80
+      targetPort: {{ .Values.server.port }}
+      name: udp
+      protocol: UDP
     - port: 8080
       targetPort: {{ .Values.server.port }}
       name: http2
+      protocol: TCP
   selector:
     {{- include "project.selectorLabels" . | nindent 6 }}
 ---
@@ -112,16 +148,22 @@ metadata:
   name: {{ .Values.name | trunc 63 | trimSuffix "-" }}-service-external
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.service.type }}
   externalIPs:
     - 192.168.255.250
   ports:
     - port: 80
       targetPort: {{ .Values.server.port }}
       name: http1
+      protocol: TCP
+    - port: 80
+      targetPort: {{ .Values.server.port }}
+      name: udp
+      protocol: UDP
     - port: 8080
       targetPort: {{ .Values.server.port }}
       name: http2
+      protocol: TCP
   selector:
     {{- include "project.selectorLabels" . | nindent 6 }}
 ---
@@ -131,13 +173,19 @@ metadata:
   name: {{ .Values.name | trunc 63 | trimSuffix "-" }}-redirect-service
   namespace: {{ .Release.Namespace | quote }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.service.type }}
   ports:
     - port: 80
       targetPort: {{ .Values.server.port }}
       name: http1
+      protocol: TCP
+    - port: 80
+      targetPort: {{ .Values.server.port }}
+      name: udp
+      protocol: UDP
     - port: 8080
       targetPort: {{ .Values.server.port }}
       name: http2
+      protocol: TCP
   selector:
     {{- include "project.selectorLabels" . | nindent 6 }}

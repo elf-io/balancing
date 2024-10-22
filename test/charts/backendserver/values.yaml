@@ -22,3 +22,6 @@ extraEnv: []
 cmd:
   cmdBinName: "/bin/bash"
   extraArgs: ["-c", "/usr/sbin/udp_server -port=80 & /usr/sbin/http_server -port=80"]
+
+service:
+  type: NodePort
