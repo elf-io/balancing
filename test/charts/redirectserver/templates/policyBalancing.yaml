@@ -139,6 +139,9 @@ spec:
         - port: "80"
           protocol: TCP
           name: p2
+        - port: "80"
+          protocol: UDP
+          name: p3
   backend:
     addressEndpoint:
       addresses:
@@ -153,3 +156,6 @@ spec:
         - port: "80"
           protocol: TCP
           name: p2
+        - port: "80"
+          protocol: UDP
+          name: p3
