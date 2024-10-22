@@ -27,7 +27,7 @@ spec:
   backend:
     endpointSelector:
       matchLabels:
-        app: http-redirect
+        {{- include "project.selectorLabels" . | nindent 8 }}
     toPorts:
       # 只能有一个 name: p1
       - port: "80"
@@ -67,7 +67,7 @@ spec:
   backend:
     endpointSelector:
       matchLabels:
-        app: http-redirect
+        {{- include "project.selectorLabels" . | nindent 8 }}
     toPorts:
       - port: "80"
         protocol: TCP

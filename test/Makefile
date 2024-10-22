@@ -99,6 +99,7 @@ check_test_app_images_ready:
 							if [ -z "$${EXIST}" ] ; then \
 								echo "error, failed to find image $${IMAGE}" ; \
 								echo "error, failed to find image $${CI_IMAGE}" ; \
+								echo "try to build image 'build_local_test_app_image' " ; \
 								exit 1 ; \
 							fi ; \
 							docker tag $${CI_IMAGE} $${IMAGE} ; \
@@ -221,7 +222,7 @@ install_example_app:
 			helm  --kubeconfig=$(KIND_KUBECONFIG) install  redirectserver ./charts/redirectserver \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
-	./scripts/testAppConnectivity.sh || { echo "failed to test the connectivity" ; exit 1 ; }
+	./scripts/testAppConnectivity.sh "$(KIND_KUBECONFIG)" || { echo "failed to test the connectivity" ; exit 1 ; }
 	@echo "========================================================"
 	@echo "   deploy kind cluster $(KIND_CLUSTER_NAME)             "
 	@echo "   export KUBECONFIG=$(KIND_KUBECONFIG)                 "

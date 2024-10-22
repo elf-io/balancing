@@ -107,7 +107,7 @@ spec:
     serviceEndpoint:
       endpointSelector:
         matchLabels:
-          app: http-redirect
+          {{- include "project.selectorLabels" . | nindent 10 }}
       # for hostPort: the destination IP is node porxy IP(tunnel ip), the destination port is nodeProxyPort taken effect by agent
       redirectMode: nodeProxy
       toPorts:

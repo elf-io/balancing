@@ -7,15 +7,17 @@ set -o nounset
 set -o pipefail
 #set -x
 
+
 CURRENT_FILENAME=$( basename $0 )
 CURRENT_DIR_PATH=$(cd $(dirname $0); pwd)
 PROJECT_ROOT_PATH=$( cd ${CURRENT_DIR_PATH}/../.. && pwd )
 
-E2E_KUBECONFIG="$1"
+E2E_KUBECONFIG="${1}"
 [ -z "$E2E_KUBECONFIG" ] && echo "error, miss E2E_KUBECONFIG " && exit 1
 [ ! -f "$E2E_KUBECONFIG" ] && echo "error, could not find file $E2E_KUBECONFIG " && exit 1
 echo "$CURRENT_FILENAME : E2E_KUBECONFIG $E2E_KUBECONFIG "
 
+which jq &>/dev/null || { echo "please install jq" ; exit 1 ; }
 
 VisitService(){
   LOCALVAR_URL="${1}"
@@ -24,19 +26,19 @@ VisitService(){
   echo ""
   echo "visit the ${LOCALVAR_METHOD} server ${LOCALVAR_URL} "
   MSG=$( curl -s 127.0.0.1:20090 -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
-     || { ehco "failed to visit the proxy server on master node" ; exit 1 ; }
-  echo "${MSG}"
+     || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
+  echo "${MSG}" | jq .
 
 }
 
 echo ""
 echo "------------- test proxy-server by hostPort ------------ "
 echo "visit the proxy server on master"
-curl -s 127.0.0.1:20090/healthy || { ehco "failed to visit the proxy server on master node" ; exit 1 ; }
+curl -s 127.0.0.1:20090/healthy || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
 
 echo ""
 echo "visit the proxy server on worker"
-curl -s 127.0.0.1:20091/healthy || { ehco "failed to visit the proxy server on worker node" ; exit 1 ; }
+curl -s 127.0.0.1:20091/healthy || { echo "failed to visit the proxy server on worker node" ; exit 1 ; }
 
 
 echo ""
@@ -76,9 +78,9 @@ echo "visit the nodeport of normal service "
 NODE_PORT_LIST=$( kubectl --kubeconfig ${E2E_KUBECONFIG} get service backendserver-service-normal | sed '1d' | awk '{print $5}' | tr ',' '\n' | awk -F ':' '{print $2}' | grep -Eo "[0-9]+" )
 NODE_PORT_IP=""
 for PORT in ${NODE_PORT_LIST}; do
-    NODE_PORT_IP="${NODE_PORT_IP} ${NODE_IP}:${PORT}"
-    VisitService "http://${NODE_PORT_IP}:80"  "http"
-    VisitService "${NODE_PORT_IP}:80"  "udp"
+    ADDR="${NODE_IP}:${PORT}"
+    VisitService "http://${ADDR}:80"  "http"
+    VisitService "${ADDR}:80"  "udp"
 done
 
 echo ""
