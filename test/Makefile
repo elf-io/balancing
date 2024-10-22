@@ -80,7 +80,7 @@ install_proscope:
 
 .PHONY: check_test_app_images_ready
 check_test_app_images_ready:
-	CHART_LIST=" $(ROOT_DIR)/test/charts/backend_server $(ROOT_DIR)/test/charts/proxy_server $(ROOT_DIR)/test/charts/redirect_server " ;\
+	CHART_LIST=" $(ROOT_DIR)/test/charts/backendserver $(ROOT_DIR)/test/charts/proxyserver $(ROOT_DIR)/test/charts/redirectserver " ;\
 		for CHART_DIR in $${CHART_LIST} ; do \
 			echo "check image for $${CHART_DIR}  " ; \
 			IMAGE_LIST=` helm template test $${CHART_DIR} --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
@@ -185,7 +185,7 @@ install_example_app: KIND_CLUSTER_NAME ?= $(E2E_KIND_CLUSTER_NAME)
 install_example_app:
 	@echo "---------- install example app"
 	echo "get images ... " ; \
-		CHART_LIST=" $(ROOT_DIR)/test/charts/backend_server $(ROOT_DIR)/test/charts/proxy_server $(ROOT_DIR)/test/charts/redirect_server " ;\
+		CHART_LIST=" $(ROOT_DIR)/test/charts/backendserver $(ROOT_DIR)/test/charts/proxyserver $(ROOT_DIR)/test/charts/redirectserver " ;\
 		for CHART_DIR in $${CHART_LIST} ; do \
 			echo "check image for $${CHART_DIR}  " ; \
 			IMAGE_LIST=` helm template test $${CHART_DIR} --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
@@ -208,17 +208,17 @@ install_example_app:
 		done
 	echo "deploy proxy server " ; \
 			helm  --kubeconfig=$(KIND_KUBECONFIG) uninstall  proxyserver &>/dev/null || true ; \
-			helm  --kubeconfig=$(KIND_KUBECONFIG) install  proxyserver ./charts/proxy_server \
+			helm  --kubeconfig=$(KIND_KUBECONFIG) install  proxyserver ./charts/proxyserver \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
 	echo "deploy backend server " ; \
 			helm  --kubeconfig=$(KIND_KUBECONFIG) uninstall  backendserver &>/dev/null || true ; \
-			helm  --kubeconfig=$(KIND_KUBECONFIG) install  backendserver ./charts/backend_server \
+			helm  --kubeconfig=$(KIND_KUBECONFIG) install  backendserver ./charts/backendserver \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
 	echo "deploy redirect server " ; \
 			helm  --kubeconfig=$(KIND_KUBECONFIG) uninstall  redirectserver &>/dev/null || true ; \
-			helm  --kubeconfig=$(KIND_KUBECONFIG) install  redirectserver ./charts/redirect_server \
+			helm  --kubeconfig=$(KIND_KUBECONFIG) install  redirectserver ./charts/redirectserver \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
 	@echo "========================================================"

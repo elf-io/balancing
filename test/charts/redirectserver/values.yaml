@@ -1,4 +1,4 @@
-name: redirect_server
+name: redirectserver
 hostnetwork: false
 
 image:
