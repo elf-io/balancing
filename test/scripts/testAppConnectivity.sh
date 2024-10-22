@@ -16,6 +16,19 @@ E2E_KUBECONFIG="$1"
 [ ! -f "$E2E_KUBECONFIG" ] && echo "error, could not find file $E2E_KUBECONFIG " && exit 1
 echo "$CURRENT_FILENAME : E2E_KUBECONFIG $E2E_KUBECONFIG "
 
+
+VisitService(){
+  LOCALVAR_URL="${1}"
+  LOCALVAR_METHOD="${2}"
+
+  echo ""
+  echo "visit the ${LOCALVAR_METHOD} server ${LOCALVAR_URL} "
+  MSG=$( curl -s 127.0.0.1:20090 -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
+     || { ehco "failed to visit the proxy server on master node" ; exit 1 ; }
+  echo "${MSG}"
+
+}
+
 echo ""
 echo "------------- test proxy-server by hostPort ------------ "
 echo "visit the proxy server on master"
@@ -33,17 +46,8 @@ POD_LABEL="app.kubernetes.io/instance=backendserver"
 POD_IP_LIST=$( kubectl get pods --no-headers --kubeconfig ${E2E_KUBECONFIG}  --namespace ${POD_NAMESPACE} --selector ${POD_LABEL} --output jsonpath={.items[*].status.podIP} )
 [ -z "${POD_IP_LIST}" ] && echo "error, failed to find the pod ip of backend server " && exit 1
 for POD_IP in $POD_IP_LIST  ; do
-      echo ""
-      echo "visit the http of backend server ${POD_IP} by proxy server"
-      MSG=$( curl -s 127.0.0.1:20090 -d '{"BackendUrl":"http://'${POD_IP}':80","Timeout":5,"ForwardType":"http", "EchoData":"Hello, HTTP!"}'  ) \
-         || { ehco "failed to visit the proxy server on master node" ; exit 1 ; }
-      echo "${MSG}"
-
-      echo ""
-      echo "visit the udp of backend server ${POD_IP} by proxy server"
-      MSG=$( curl -s 127.0.0.1:20090 -d '{"BackendUrl":"'${POD_IP}':80","Timeout":5,"ForwardType":"udp", "EchoData":"Hello, udp!"}'  ) \
-         || { ehco "failed to visit the proxy server on master node" ; exit 1 ; }
-      echo "${MSG}"
+      VisitService "http://${POD_IP}:80"  "http"
+      VisitService "${POD_IP}:80"  "udp"
 done
 
 echo ""
@@ -53,16 +57,86 @@ POD_LABEL="app.kubernetes.io/instance=redirectserver"
 POD_IP_LIST=$( kubectl get pods --no-headers --kubeconfig ${E2E_KUBECONFIG}  --namespace ${POD_NAMESPACE} --selector ${POD_LABEL} --output jsonpath={.items[*].status.podIP} )
 [ -z "${POD_IP_LIST}" ] && echo "error, failed to find the pod ip of backend server " && exit 1
 for POD_IP in $POD_IP_LIST  ; do
-      echo ""
-      echo "visit the http of redirect server ${POD_IP} by proxy server"
-      MSG=$( curl -s 127.0.0.1:20090 -d '{"BackendUrl":"http://'${POD_IP}':80","Timeout":5,"ForwardType":"http", "EchoData":"Hello, HTTP!"}'  ) \
-         || { ehco "failed to visit the proxy server on master node" ; exit 1 ; }
-      echo "${MSG}"
-
-      echo ""
-      echo "visit the udp of redirect server ${POD_IP} by proxy server"
-      MSG=$( curl -s 127.0.0.1:20090 -d '{"BackendUrl":"'${POD_IP}':80","Timeout":5,"ForwardType":"udp", "EchoData":"Hello, udp!"}'  ) \
-         || { ehco "failed to visit the proxy server on master node" ; exit 1 ; }
-      echo "${MSG}"
+      VisitService "http://${POD_IP}:80"  "http"
+      VisitService "${POD_IP}:80"  "udp"
 done
 
+
+echo "------------- test balancing: k8s service  ------------ "
+NODE_IP=$( kubectl --kubeconfig ${E2E_KUBECONFIG} get node -o wide | sed -n '2 p' | awk '{print $6}' )
+
+echo ""
+echo "visit the cluster ip of normal service "
+NORMAL_CLUSTER_IP=$( kubectl --kubeconfig ${E2E_KUBECONFIG} get service backendserver-service-normal | sed '1 d' | awk '{print $3}' )
+VisitService "http://${NORMAL_CLUSTER_IP}:80"  "http"
+VisitService "${NORMAL_CLUSTER_IP}:80"  "udp"
+
+echo ""
+echo "visit the nodeport of normal service "
+NODE_PORT_LIST=$( kubectl --kubeconfig ${E2E_KUBECONFIG} get service backendserver-service-normal | sed '1d' | awk '{print $5}' | tr ',' '\n' | awk -F ':' '{print $2}' | grep -Eo "[0-9]+" )
+NODE_PORT_IP=""
+for PORT in ${NODE_PORT_LIST}; do
+    NODE_PORT_IP="${NODE_PORT_IP} ${NODE_IP}:${PORT}"
+    VisitService "http://${NODE_PORT_IP}:80"  "http"
+    VisitService "${NODE_PORT_IP}:80"  "udp"
+done
+
+echo ""
+echo "visit the externalIp of normal service "
+EXTERNAL_IP=$( kubectl --kubeconfig ${E2E_KUBECONFIG} get service backendserver-service-external   | sed '1 d' | awk '{print $4}' )
+VisitService "http://${EXTERNAL_IP}:80"  "http"
+VisitService "${EXTERNAL_IP}:80"  "udp"
+
+echo ""
+echo "visit the clusterIp of local service "
+LOCAL_SERVICE_CLUSTER_IP=$( kubectl --kubeconfig ${E2E_KUBECONFIG} get service backendserver-service-local | sed '1 d' | awk '{print $3}' )
+VisitService "http://${LOCAL_SERVICE_CLUSTER_IP}:80"  "http"
+VisitService "${LOCAL_SERVICE_CLUSTER_IP}:80"  "udp"
+
+echo ""
+echo "visit the clusterIp of affinity service "
+AFFINITY_SERVICE_CLUSTER_IP=$( kubectl --kubeconfig ${E2E_KUBECONFIG} get service backendserver-service-affinity | sed '1 d' | awk '{print $3}' )
+VisitService "http://${AFFINITY_SERVICE_CLUSTER_IP}:80"  "http"
+VisitService "${AFFINITY_SERVICE_CLUSTER_IP}:80"  "udp"
+
+echo "------------- test balancing: localRedirect policy  ------------ "
+
+echo ""
+echo "visit the clusterIp of localRedirect service "
+SERVICE_CLUSTER_IP=$( kubectl --kubeconfig ${E2E_KUBECONFIG} get service backendserver-redirect-service | sed '1 d' | awk '{print $3}' )
+VisitService "http://${SERVICE_CLUSTER_IP}:80"  "http"
+VisitService "${SERVICE_CLUSTER_IP}:80"  "udp"
+
+echo ""
+echo "visit the specified address of localRedirect service "
+ADDRESS=$( kubectl --kubeconfig ${E2E_KUBECONFIG} get LocalRedirectPolicy example-matchaddress | sed '1d' | awk '{print $2}' )
+VisitService "http://${ADDRESS}:80"  "http"
+VisitService "${ADDRESS}:80"  "udp"
+
+
+echo "------------- test balancing: balancing policy  ------------ "
+
+echo ""
+echo "visit the specified address of balancing service "
+ADDRESS=$( kubectl --kubeconfig ${E2E_KUBECONFIG} get BalancingPolicy example-matchaddress | sed '1d' | awk '{print $2}' )
+VisitService "http://${ADDRESS}:80"  "http"
+VisitService "${ADDRESS}:80"  "udp"
+
+echo ""
+echo "visit the podEndpoint of balancing service "
+SERVICE_CLUSTER_IP=$( kubectl --kubeconfig ${E2E_KUBECONFIG} get service backendserver-balancing-pod | sed '1 d' | awk '{print $3}' )
+VisitService "http://${SERVICE_CLUSTER_IP}:80"  "http"
+VisitService "${SERVICE_CLUSTER_IP}:80"  "udp"
+
+
+echo ""
+echo "visit the hostPort of balancing service "
+SERVICE_CLUSTER_IP=$( kubectl --kubeconfig ${E2E_KUBECONFIG} get service backendserver-balancing-hostport | sed '1 d' | awk '{print $3}' )
+VisitService "http://${SERVICE_CLUSTER_IP}:80"  "http"
+VisitService "${SERVICE_CLUSTER_IP}:80"  "udp"
+
+echo ""
+echo "visit the nodeProxy of balancing service "
+SERVICE_CLUSTER_IP=$( kubectl --kubeconfig ${E2E_KUBECONFIG} get service backendserver-balancing-nodeproxy | sed '1 d' | awk '{print $3}' )
+VisitService "http://${SERVICE_CLUSTER_IP}:80"  "http"
+VisitService "${SERVICE_CLUSTER_IP}:80"  "udp"
