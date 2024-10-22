@@ -207,15 +207,15 @@ install_example_app:
 			fi \
 		done
 	echo "deploy proxy server " ; \
-			helm  --kubeconfig=$(KIND_KUBECONFIG) install  proxy_server ./charts/proxy_server \
+			helm  --kubeconfig=$(KIND_KUBECONFIG) install  proxyserver ./charts/proxy_server \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
 	echo "deploy backend server " ; \
-			helm  --kubeconfig=$(KIND_KUBECONFIG) install  backend_server ./charts/backend_server \
+			helm  --kubeconfig=$(KIND_KUBECONFIG) install  backendserver ./charts/backend_server \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
 	echo "deploy redirect server " ; \
-			helm  --kubeconfig=$(KIND_KUBECONFIG) install  redirect_server ./charts/redirect_server \
+			helm  --kubeconfig=$(KIND_KUBECONFIG) install  redirectserver ./charts/redirect_server \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
 	@echo "========================================================"
