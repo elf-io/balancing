@@ -151,27 +151,27 @@ deploy_project: KIND_KUBECONFIG ?= $(E2E_KIND_KUBECONFIG_PATH)
 deploy_project: KIND_CLUSTER_NAME ?= $(E2E_KIND_CLUSTER_NAME)
 deploy_project:
 	echo "try to load local image tag $(PROJECT_IMAGE_VERSION) " ; \
-	IMAGE_LIST=` helm template test $(ROOT_DIR)/charts --set global.imageTagOverride=$(PROJECT_IMAGE_VERSION)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
-	if [ -z "$${IMAGE_LIST}" ] ; then \
-		echo "warning, failed to find image from chart " ; \
-	else \
-		echo "found image from chart : $${IMAGE_LIST} " ; \
-		for IMAGE in $${IMAGE_LIST} ; do \
-			EXIST=` docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${IMAGE}" ` ; \
-			if [ -z "$${EXIST}" ] ; then \
-			  echo "docker pull $${IMAGE} to local" ; \
-			  docker pull $${IMAGE} ; \
-			fi ;\
-			echo "load local image $${IMAGE} " ; \
-			kind load docker-image $${IMAGE}  --name $(KIND_CLUSTER_NAME)  ; \
-			if grep "agent" <<< "$${IMAGE}" &>/dev/null ; then \
-					echo "deploy agent on host node " ; \
-					./scripts/runHostNode.sh "runAgent" "$${IMAGE}"  ; \
-			fi ; \
-		done ; \
-	fi
-	- helm --kubeconfig=$(KIND_KUBECONFIG) uninstall -n $(E2E_INSTALL_NAMESPACE) project || true
-	HELM_OPTION="" ; \
+		IMAGE_LIST=` helm template test $(ROOT_DIR)/charts --set global.imageTagOverride=$(PROJECT_IMAGE_VERSION)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
+		if [ -z "$${IMAGE_LIST}" ] ; then \
+			echo "warning, failed to find image from chart " ; \
+		else \
+			echo "found image from chart : $${IMAGE_LIST} " ; \
+			for IMAGE in $${IMAGE_LIST} ; do \
+				EXIST=` docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${IMAGE}" ` ; \
+				if [ -z "$${EXIST}" ] ; then \
+				  echo "docker pull $${IMAGE} to local" ; \
+				  docker pull $${IMAGE} ; \
+				fi ;\
+				echo "load local image $${IMAGE} " ; \
+				kind load docker-image $${IMAGE}  --name $(KIND_CLUSTER_NAME)  ; \
+				if grep "agent" <<< "$${IMAGE}" &>/dev/null ; then \
+						AGENT_IMAGE=$${IMAGE} ; \
+				fi ; \
+			done ; \
+		fi  ; \
+		echo "begin to deploy on kubernetes" ; \
+		helm --kubeconfig=$(KIND_KUBECONFIG) uninstall -n $(E2E_INSTALL_NAMESPACE) project || true  ;\
+		HELM_OPTION="" ; \
     	if [ -n "$(PYROSCOPE_LOCAL_PORT)" ] ; then \
 			echo "add env" ; \
 			ServerAddress=$$(docker network inspect kind -f {{\(index\ $$.IPAM.Config\ 0\).Gateway}}) ; \
@@ -186,6 +186,8 @@ deploy_project:
 				--set global.imageTagOverride=$(PROJECT_IMAGE_VERSION) \
 				$${HELM_OPTION} \
 				|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ; \
+		echo "begin to deploy agent on host node " ; \
+		./scripts/runHostNode.sh "runAgent" "$${AGENT_IMAGE}"  ; \
 		exit 0
 
 # test kind is ok

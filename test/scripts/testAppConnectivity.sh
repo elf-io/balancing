@@ -20,6 +20,18 @@ echo "$CURRENT_FILENAME : E2E_KUBECONFIG $E2E_KUBECONFIG "
 which jq &>/dev/null || { echo "please install jq" ; exit 1 ; }
 
 
+VisitServiceForK8s(){
+  LOCALVAR_URL="${1}"
+  LOCALVAR_METHOD="${2}"
+
+  echo ""
+  echo "visit the ${LOCALVAR_METHOD} server ${LOCALVAR_URL} from k8s pod"
+  MSG=$( curl -s 127.0.0.1:20090 -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
+     || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
+  echo "${MSG}" | jq .
+
+}
+
 VisitServiceForAll(){
   LOCALVAR_URL="${1}"
   LOCALVAR_METHOD="${2}"
@@ -47,6 +59,10 @@ echo ""
 echo "visit the proxy server on worker"
 curl -s 127.0.0.1:20091/healthy || { echo "failed to visit the proxy server on worker node" ; exit 1 ; }
 
+echo ""
+echo "visit the proxy server on host"
+curl -s 127.0.0.1:20080/healthy || { echo "failed to visit the proxy server on worker node" ; exit 1 ; }
+
 
 echo ""
 echo "------------- test backend-server  ------------ "
@@ -55,8 +71,8 @@ POD_LABEL="app.kubernetes.io/instance=backendserver"
 POD_IP_LIST=$( kubectl get pods --no-headers --kubeconfig ${E2E_KUBECONFIG}  --namespace ${POD_NAMESPACE} --selector ${POD_LABEL} --output jsonpath={.items[*].status.podIP} )
 [ -z "${POD_IP_LIST}" ] && echo "error, failed to find the pod ip of backend server " && exit 1
 for POD_IP in $POD_IP_LIST  ; do
-      VisitServiceForAll "http://${POD_IP}:80"  "http"
-      VisitServiceForAll "${POD_IP}:80"  "udp"
+      VisitServiceForK8s "http://${POD_IP}:80"  "http"
+      VisitServiceForK8s "${POD_IP}:80"  "udp"
 done
 
 echo ""
@@ -66,8 +82,8 @@ POD_LABEL="app.kubernetes.io/instance=redirectserver"
 POD_IP_LIST=$( kubectl get pods --no-headers --kubeconfig ${E2E_KUBECONFIG}  --namespace ${POD_NAMESPACE} --selector ${POD_LABEL} --output jsonpath={.items[*].status.podIP} )
 [ -z "${POD_IP_LIST}" ] && echo "error, failed to find the pod ip of backend server " && exit 1
 for POD_IP in $POD_IP_LIST  ; do
-      VisitServiceForAll "http://${POD_IP}:80"  "http"
-      VisitServiceForAll "${POD_IP}:80"  "udp"
+      VisitServiceForK8s "http://${POD_IP}:80"  "http"
+      VisitServiceForK8s "${POD_IP}:80"  "udp"
 done
 
 

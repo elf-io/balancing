@@ -31,7 +31,7 @@ if [ "$1" == "on" ] ; then
 
   docker run -d --network ${BRIDGE_ID} \
       --privileged \
-      -p ${CONTAINER_HOST_MAP_PORT}:80 \
+      -p ${CONTAINER_HOST_MAP_PORT}:80/tcp \
       -v /tmp/admin.conf:/admin.conf  \
       --name ${CONTAINER_NAME} \
       ubuntu:24.10 sleep infinity
@@ -47,7 +47,7 @@ elif [ "$1" == "runAgent" ] ; then
   docker rm temp-container
 
   docker cp /tmp/$( basename $SOURCE_BIN_PATH ) ${CONTAINER_NAME}:${SOURCE_BIN_PATH}
-  docker exec ${CONTAINER_NAME} bash -c "KUBECONFIG=/admin.conf ${SOURCE_BIN_PATH}"
+  docker exec ${CONTAINER_NAME} bash -c " export KUBECONFIG=/admin.conf  && setsid ${SOURCE_BIN_PATH} "
 
 elif [ "$1" == "runProxyServer" ] ; then
   SOURCE_IMAGE="$2"
@@ -60,7 +60,7 @@ elif [ "$1" == "runProxyServer" ] ; then
 
   docker cp /tmp/$( basename $SOURCE_BIN_PATH ) ${CONTAINER_NAME}:${SOURCE_BIN_PATH}
   # map to CONTAINER_HOST_MAP_PORT
-  docker exec ${CONTAINER_NAME} bash -c "${SOURCE_BIN_PATH} -port=80"
+  docker exec ${CONTAINER_NAME} bash -c "setsid ${SOURCE_BIN_PATH} -port=80 "
 
 elif [ "$1" == "off" ] ; then
     docker stop ${CONTAINER_NAME} &>/dev/null || true
