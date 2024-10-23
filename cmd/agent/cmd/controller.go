@@ -127,7 +127,7 @@ func RunReconciles() {
 	rootLogger.Sugar().Debugf("RunReconciles")
 
 	// get clientset
-	c, e1 := utils.AutoK8sConfig()
+	c, e1 := utils.AutoK8sConfig(types.AgentConfig.KubeconfigPath)
 	if e1 != nil {
 		rootLogger.Sugar().Fatalf("failed to find client-go config, make sure it is in a pod or ~/.kube/config exists: %v", e1)
 	}

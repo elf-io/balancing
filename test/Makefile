@@ -11,6 +11,7 @@ init_kind_env:
 init_one_kind: KIND_CONFIG_PATH ?=
 init_one_kind: KIND_CLUSTER_NAME ?=
 init_one_kind: KIND_KUBECONFIG ?=
+init_one_kind: APT_HTTP_PROXY ?=
 init_one_kind: checkBin clean
 	@echo "================== init kind cluster $(KIND_CLUSTER_NAME) KIND_CONFIG_PATH=$(KIND_CONFIG_PATH) KIND_KUBECONFIG=$(KIND_KUBECONFIG) E2E_IP_FAMILY=$(E2E_IP_FAMILY)"
 	[ -n $(KIND_CLUSTER_NAME) ] || { echo "error, miss KIND_CLUSTER_NAME " ; exit 1 ; }
@@ -39,6 +40,9 @@ init_one_kind: checkBin clean
  		kind create cluster --name  $(KIND_CLUSTER_NAME) --config $(E2E_RUNTIME_DIR)/kind_config_$(KIND_CLUSTER_NAME).yaml --kubeconfig $(KIND_KUBECONFIG) $${KIND_OPTION}
 	- kubectl --kubeconfig $(KIND_KUBECONFIG) taint nodes --all node-role.kubernetes.io/master- || true
 	- kubectl --kubeconfig $(KIND_KUBECONFIG) taint nodes --all node-role.kubernetes.io/control-plane- || true
+	@  echo "run a host node" ; \
+  		MASTER_NODE_NAME=$$( kubectl --kubeconfig $(KIND_KUBECONFIG) get node  | grep control-plane | awk '{print $$1}' ) ; \
+		./test/scripts/runHostNode.sh on ${MASTER_NODE_NAME} ${APT_HTTP_PROXY}
 	@echo "===================== deploy prometheus CRD ========== "
 	# https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml ; } \
 	kubectl apply --kubeconfig $(KIND_KUBECONFIG)  -f ./crd/monitoring.coreos.com_servicemonitors.yaml
@@ -159,6 +163,10 @@ deploy_project:
 			fi ;\
 			echo "load local image $${IMAGE} " ; \
 			kind load docker-image $${IMAGE}  --name $(KIND_CLUSTER_NAME)  ; \
+			if grep "agent" "$${IMAGE}" &>/dev/null ; then \
+					echo "deploy agent on host node " ; \
+					./test/scripts/runHostNode.sh "runAgent" "$${IMAGE}"  ; \
+			fi ; \
 		done ; \
 	fi
 	- helm --kubeconfig=$(KIND_KUBECONFIG) uninstall -n $(E2E_INSTALL_NAMESPACE) project || true
@@ -166,11 +174,12 @@ deploy_project:
     	if [ -n "$(PYROSCOPE_LOCAL_PORT)" ] ; then \
 			echo "add env" ; \
 			ServerAddress=$$(docker network inspect kind -f {{\(index\ $$.IPAM.Config\ 0\).Gateway}}) ; \
-			HELM_OPTION+=" --set elfAgent.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set elfAgent.extraEnv[0].value=http://$${ServerAddress}:$(PYROSCOPE_LOCAL_PORT) " ; \
-			HELM_OPTION+=" --set elfController.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set elfController.extraEnv[0].value=http://$${ServerAddress}:$(PYROSCOPE_LOCAL_PORT) " ; \
+			HELM_OPTION+=" --set balancingAgent.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingAgent.extraEnv[0].value=http://$${ServerAddress}:$(PYROSCOPE_LOCAL_PORT) " ; \
+			HELM_OPTION+=" --set balancingController.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingController.extraEnv[0].value=http://$${ServerAddress}:$(PYROSCOPE_LOCAL_PORT) " ; \
 		fi ; \
-		HELM_OPTION+=" --set elfAgent.debug.logLevel=debug --set elfController.debug.logLevel=debug " ; \
-		HELM_OPTION+=" --set elfAgent.prometheus.enabled=true --set elfController.prometheus.enabled=true  " ; \
+		HELM_OPTION+=" --set balancingAgent.debug.logLevel=debug --set balancingController.debug.logLevel=debug " ; \
+		HELM_OPTION+=" --set balancingAgent.prometheus.enabled=true --set balancingController.prometheus.enabled=true  " ; \
+		HELM_OPTION+=" --set balancingAgent.nodeEntryInterface=eth0 " ; \
 		helm --kubeconfig=$(KIND_KUBECONFIG) install project $(ROOT_DIR)/charts \
 				-n $(E2E_INSTALL_NAMESPACE) --create-namespace --wait --debug \
 				--set global.imageTagOverride=$(PROJECT_IMAGE_VERSION) \
@@ -178,13 +187,12 @@ deploy_project:
 				|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ; \
 		exit 0
 
-
 # test kind is ok
 .PHONY: install_example_app
 install_example_app: KIND_KUBECONFIG ?= $(E2E_KIND_KUBECONFIG_PATH)
 install_example_app: KIND_CLUSTER_NAME ?= $(E2E_KIND_CLUSTER_NAME)
 install_example_app:
-	@echo "---------- install example app"
+	@echo "---------- install applicatio on kubernetes"
 	echo "get images ... " ; \
 		CHART_LIST=" $(ROOT_DIR)/test/charts/backendserver $(ROOT_DIR)/test/charts/proxyserver $(ROOT_DIR)/test/charts/redirectserver " ;\
 		for CHART_DIR in $${CHART_LIST} ; do \
@@ -210,8 +218,11 @@ install_example_app:
 	echo "deploy proxy server " ; \
 			helm  --kubeconfig=$(KIND_KUBECONFIG) uninstall  proxyserver &>/dev/null || true ; \
 			helm  --kubeconfig=$(KIND_KUBECONFIG) install  proxyserver ./charts/proxyserver \
-			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
-			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
+					--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
+			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ;\
+			echo " deploy proxy on host node" ; \
+			IMAGE=` helm template test /charts/proxyserver --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
+			./test/scripts/runHostNode.sh "runProxyServer" "$${IMAGE}"
 	echo "deploy backend server " ; \
 			helm  --kubeconfig=$(KIND_KUBECONFIG) uninstall  backendserver &>/dev/null || true ; \
 			helm  --kubeconfig=$(KIND_KUBECONFIG) install  backendserver ./charts/backendserver \
@@ -222,6 +233,7 @@ install_example_app:
 			helm  --kubeconfig=$(KIND_KUBECONFIG) install  redirectserver ./charts/redirectserver \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
+	@echo "---------- install proxy-server application on host"
 	./scripts/testAppConnectivity.sh "$(KIND_KUBECONFIG)" || { echo "failed to test the connectivity" ; exit 1 ; }
 	@echo "========================================================"
 	@echo "   deploy kind cluster $(KIND_CLUSTER_NAME)             "
@@ -237,6 +249,7 @@ clean:
 	-@ rm -rf $(E2E_RUNTIME_DIR)
 	-@ docker stop $(PYROSCOPE_CONTAINER_NAME) &>/dev/null
 	-@ docker rm $(PYROSCOPE_CONTAINER_NAME) &>/dev/null
+	- ./test/scripts/runHostNode.sh off
 
 
 

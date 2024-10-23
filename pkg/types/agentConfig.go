@@ -16,6 +16,7 @@ type AgentConfigStruct struct {
 	LocalNodeName           string
 	EbpfLogLevel            string
 	LocalNodeEntryInterface string
+	KubeconfigPath          string
 
 	// ------------- from flags
 	ConfigMapPath     string
@@ -42,4 +43,5 @@ var AgentEnvMapping = []EnvMapping{
 	{"ENV_EBPF_LOG_LEVEL", "verbose", &AgentConfig.EbpfLogLevel},
 	{"ENV_ENABLE_IPV4", "", &AgentConfig.EnableIpv4},
 	{"ENV_ENABLE_IPV6", "", &AgentConfig.EnableIpv6},
+	{"KUBECONFIG", "", &AgentConfig.KubeconfigPath},
 }

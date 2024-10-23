@@ -17,7 +17,7 @@ kubeadmConfigPatches:
 nodes:
   - role: control-plane
     extraPortMappings:
-      # for proxy server
+      # for proxy server on kuberntes
       - containerPort: 20090
         hostPort: 20090
         protocol: TCP
