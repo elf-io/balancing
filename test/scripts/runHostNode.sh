@@ -40,13 +40,17 @@ if [ "$1" == "on" ] ; then
 elif [ "$1" == "runAgent" ] ; then
   SOURCE_IMAGE="$2"
   SOURCE_BIN_PATH="/usr/bin/agent"
+  INSPECT_BIN_PATH="/usr/bin/inspect"
+
   echo "copy ${SOURCE_IMAGE}:$SOURCE_BIN_PATH to container ${CONTAINER_NAME} and run "
 
   docker create --name temp-container ${SOURCE_IMAGE}
   docker cp temp-container:${SOURCE_BIN_PATH} /tmp/$( basename $SOURCE_BIN_PATH )
+  docker cp temp-container:${INSPECT_BIN_PATH} /tmp/$( basename ${INSPECT_BIN_PATH} )
   docker rm temp-container
 
   docker cp /tmp/$( basename $SOURCE_BIN_PATH ) ${CONTAINER_NAME}:${SOURCE_BIN_PATH}
+  docker cp /tmp/$( basename $INSPECT_BIN_PATH ) ${CONTAINER_NAME}:${INSPECT_BIN_PATH}
   docker exec ${CONTAINER_NAME} bash -c " export KUBECONFIG=/admin.conf  && setsid ${SOURCE_BIN_PATH} "
 
 elif [ "$1" == "runProxyServer" ] ; then
