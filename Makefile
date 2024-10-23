@@ -92,9 +92,10 @@ build_local_controller_image:
 
 #=================
 .PHONY: build_local_test_app_image
+build_local_test_app_image: APT_HTTP_PROXY :=
 build_local_test_app_image:
-	cd ./test/appServer && docker build --file Dockerfile.proxy --tag $(TEST_APP_PROXY_SERVER_IMAGE) .
-	cd ./test/appServer && docker build --file Dockerfile.backend --tag $(TEST_APP_BACKEND_SERVER_IMAGE) .
+	cd ./test/appServer && docker build --build-arg APT_HTTP_PROXY=$(APT_HTTP_PROXY) --file Dockerfile.proxy --tag $(TEST_APP_PROXY_SERVER_IMAGE) .
+	cd ./test/appServer && docker build --build-arg APT_HTTP_PROXY=$(APT_HTTP_PROXY) --file Dockerfile.backend --tag $(TEST_APP_BACKEND_SERVER_IMAGE) .
 
 
 #================= update golang

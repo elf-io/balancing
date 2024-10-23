@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"path"
 	"syscall"
+	"time"
 
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
 	"github.com/elf-io/balancing/pkg/types"
@@ -15,6 +16,10 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	controllerzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	runtimeWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
+)
+
+var (
+	InformerListInvterval = time.Second * 60
 )
 
 var scheme = runtime.NewScheme()

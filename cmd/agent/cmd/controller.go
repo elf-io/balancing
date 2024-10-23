@@ -10,6 +10,7 @@ import (
 	"github.com/elf-io/balancing/pkg/ebpfEvent"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
+	"github.com/elf-io/balancing/pkg/lock"
 	"github.com/elf-io/balancing/pkg/nodeId"
 	"github.com/elf-io/balancing/pkg/podId"
 	"github.com/elf-io/balancing/pkg/podLabel"
@@ -39,11 +40,15 @@ func init() {
 }
 
 var finishSetUp = false
+var finishlock = &lock.RWMutex{}
 
 func HealthCheckHandler(req *http.Request) error {
+	finishlock.RLock()
+	defer finishlock.RUnlock()
 	if finishSetUp {
 		return nil
 	}
+
 	rootLogger.Sugar().Warnf("health is not ready")
 	return fmt.Errorf("setting up")
 }
@@ -166,7 +171,10 @@ func RunReconciles() {
 	ebpfEvent.WatchEbpfEvent(stopWatchCh)
 
 	rootLogger.Info("finish all setup ")
+
+	finishlock.Lock()
 	finishSetUp = true
+	finishlock.Unlock()
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)

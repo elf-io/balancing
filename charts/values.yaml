@@ -46,6 +46,9 @@ balancingAgent:
   ## @param balancingAgent.hostnetwork enable hostnetwork mode of balancingAgent pod
   hostnetwork: true
 
+  ## @param balancingAgent.nodeEntryInterface set the interface name of each node for entryIP
+  nodeEntryInterface: ""
+
   image:
     ## @param balancingAgent.image.registry the image registry of balancingAgent
     registry: ghcr.io

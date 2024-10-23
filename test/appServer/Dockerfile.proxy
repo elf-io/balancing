@@ -10,7 +10,10 @@ RUN go build -o proxy_server proxy_server.go
 #======================
 FROM ubuntu:24.10
 
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+ARG APT_HTTP_PROXY
+RUN [ -z "${APT_HTTP_PROXY}" ] || { echo "use APT_HTTP_PROXY=${APT_HTTP_PROXY}" ; export http_proxy=${APT_HTTP_PROXY} ; } ; \
+    apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /app/proxy_server /usr/sbin
 
 EXPOSE 8090

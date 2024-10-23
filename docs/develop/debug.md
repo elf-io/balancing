@@ -2,24 +2,24 @@
 
 ## local develop
 
-1. `make build_local_image -e  APT_HTTP_PROXY=http://10.64.0.14:7890`
+1. `make build_local_image -e  APT_HTTP_PROXY=http://10.64.0.3:7890`
 
-2. `make build_local_test_app_image`
+2. `make build_local_test_app_image  -e APT_HTTP_PROXY=http://10.64.0.3:7890 `
 
 3. `make e2e_init`
+    `make e2e_init -e PROJECT_IMAGE_VERSION=XXXX`
 
 4. `make e2e_run`
 
 5. check proscope, browser visits http://NodeIP:4040
 
-6. check metric,
+6. check metric
 
 ## chart develop
 
 helm repo add rocktemplate https://spidernet-io.github.io/rocktemplate
 
 ## test
-
 
 ```shell
 

@@ -32,7 +32,7 @@ func (s *NodeReconciler) HandlerAdd(obj interface{}) {
 	logger.Sugar().Debugf("HandlerAdd process node %+v", node.Name)
 
 	// before UpdateNode, BuildNodeId firstly
-	nodeId.NodeIdManagerHander.BuildNodeId(node)
+	nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(node)
 	s.writer.UpdateNode(logger, node, false)
 
 	// before UpdateBalancingByNode, UpdateNode firstly
@@ -70,6 +70,9 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		zap.String("node", newNode.Name),
 	)
 
+	// update database
+	nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(newNode)
+
 	NoChange := true
 	if t := cmp.Diff(oldNode.Status.Addresses, newNode.Status.Addresses); len(t) > 0 {
 		logger.Sugar().Debugf("node address: %s", t)
@@ -82,19 +85,12 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		NoChange = false
 		logger.Sugar().Infof("node NodeProxyIP changed, new: %+v, old: %+v", newNode.Annotations, oldNode.Annotations)
 	}
-
+	// before UpdateBalancingByNode, s.writer.UpdateNode firstly
 	s.writer.UpdateNode(logger, newNode, NoChange)
-
 	if !NoChange {
 		// node ip or nodePoryIP changes, update the nodeip and nodeProxyIp for balancing
-		// before UpdateBalancingByNode, UpdateNode firstly
+		// before UpdateBalancingByNode, s.writer.UpdateNode firstly
 		s.writer.UpdateBalancingByNode(logger, newNode)
-	}
-
-	if checkNodeIdChanged(oldNode, newNode) {
-		logger.Sugar().Infof("the nodeId of node %s changes", newNode.Name)
-		// update nodeId mapping to nodeName
-		nodeId.NodeIdManagerHander.BuildNodeId(newNode)
 	}
 
 	return
@@ -111,11 +107,12 @@ func (s *NodeReconciler) HandlerDelete(obj interface{}) {
 	)
 
 	logger.Sugar().Infof("HandlerDelete process node %+v", node.Name)
-	s.writer.DeleteNode(logger, node)
 
 	// must update the ebpf firstly, then delete the nodeIP
-	nodeId.NodeIdManagerHander.DeleteNodeId(node.Name)
+	nodeId.NodeIdManagerHander.DeleteNodeIdAndEntryIP(node.Name)
 
+	// before UpdateBalancingByNode, UpdateNode firstly
+	s.writer.DeleteNode(logger, node)
 	// before UpdateBalancingByNode, UpdateNode firstly
 	s.writer.UpdateBalancingByNode(logger, node)
 
