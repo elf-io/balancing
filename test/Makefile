@@ -2,6 +2,7 @@ include ../Makefile.defs
 
 
 .PHONY: init_kind_env
+init_kind_env: APT_HTTP_PROXY ?=
 init_kind_env:
 	make init_one_kind -e KIND_CONFIG_PATH=./kindconfig/global-kind.yaml -e KIND_CLUSTER_NAME=$(E2E_KIND_CLUSTER_NAME) -e KIND_KUBECONFIG=$(E2E_KIND_KUBECONFIG_PATH)
 	make install_proscope
@@ -42,7 +43,7 @@ init_one_kind: checkBin clean
 	- kubectl --kubeconfig $(KIND_KUBECONFIG) taint nodes --all node-role.kubernetes.io/control-plane- || true
 	@  echo "run a host node" ; \
   		MASTER_NODE_NAME=$$( kubectl --kubeconfig $(KIND_KUBECONFIG) get node  | grep control-plane | awk '{print $$1}' ) ; \
-		./test/scripts/runHostNode.sh on ${MASTER_NODE_NAME} ${APT_HTTP_PROXY}
+		./scripts/runHostNode.sh on $${MASTER_NODE_NAME} $(APT_HTTP_PROXY)
 	@echo "===================== deploy prometheus CRD ========== "
 	# https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml ; } \
 	kubectl apply --kubeconfig $(KIND_KUBECONFIG)  -f ./crd/monitoring.coreos.com_servicemonitors.yaml
@@ -163,9 +164,9 @@ deploy_project:
 			fi ;\
 			echo "load local image $${IMAGE} " ; \
 			kind load docker-image $${IMAGE}  --name $(KIND_CLUSTER_NAME)  ; \
-			if grep "agent" "$${IMAGE}" &>/dev/null ; then \
+			if grep "agent" <<< "$${IMAGE}" &>/dev/null ; then \
 					echo "deploy agent on host node " ; \
-					./test/scripts/runHostNode.sh "runAgent" "$${IMAGE}"  ; \
+					./scripts/runHostNode.sh "runAgent" "$${IMAGE}"  ; \
 			fi ; \
 		done ; \
 	fi
@@ -221,8 +222,8 @@ install_example_app:
 					--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(KIND_KUBECONFIG) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ;\
 			echo " deploy proxy on host node" ; \
-			IMAGE=` helm template test /charts/proxyserver --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
-			./test/scripts/runHostNode.sh "runProxyServer" "$${IMAGE}"
+			IMAGE=` helm template test ./charts/proxyserver --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
+			./scripts/runHostNode.sh "runProxyServer" "$${IMAGE}"
 	echo "deploy backend server " ; \
 			helm  --kubeconfig=$(KIND_KUBECONFIG) uninstall  backendserver &>/dev/null || true ; \
 			helm  --kubeconfig=$(KIND_KUBECONFIG) install  backendserver ./charts/backendserver \
@@ -249,7 +250,7 @@ clean:
 	-@ rm -rf $(E2E_RUNTIME_DIR)
 	-@ docker stop $(PYROSCOPE_CONTAINER_NAME) &>/dev/null
 	-@ docker rm $(PYROSCOPE_CONTAINER_NAME) &>/dev/null
-	- ./test/scripts/runHostNode.sh off
+	- ./scripts/runHostNode.sh off
 
 
 

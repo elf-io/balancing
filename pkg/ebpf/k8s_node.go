@@ -178,10 +178,9 @@ func (s *EbpfProgramStruct) applyEpfMapDataNodeProxyIpV4(l *zap.Logger, oldNode 
 	l.Sugar().Infof("apply nodeProxyIP %s for node %s", entryIp, newNode.Name)
 
 	nodeId, err := nodeId.NodeIdManagerHander.GetNodeId(newNode.Name)
-
 	if err != nil {
-		l.Sugar().Errorf("failed to find the nodeProxyIP for node %s when updating ebpf data: %v", oldNode.Name, err)
-		return fmt.Errorf("failed to find the nodeProxyIP for node %s when updating ebpf data: %v", oldNode.Name, err)
+		l.Sugar().Errorf("failed to find the nodeProxyIP for node %s when updating ebpf data: %v", newNode.Name, err)
+		return fmt.Errorf("failed to find the nodeProxyIP for node %s when updating ebpf data: %v", newNode.Name, err)
 	}
 
 	r := bpf_cgroupMapvalueNodeProxyIp{
