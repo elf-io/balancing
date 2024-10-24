@@ -6,7 +6,7 @@
 
 2. `make build_local_test_app_image  -e APT_HTTP_PROXY=http://10.64.0.3:7890 `
 
-3. `make e2e_init -e APT_HTTP_PROXY=http://10.64.0.3:7890`
+3. `make e2e_init  `
     `make e2e_init -e PROJECT_IMAGE_VERSION=XXXX`
 
 4. `make e2e_run`

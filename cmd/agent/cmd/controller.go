@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpf"
 	"github.com/elf-io/balancing/pkg/ebpfEvent"
@@ -132,7 +133,7 @@ func RunReconciles() {
 	apiServerHostAddress := ""
 	if len(types.AgentConfig.KubeconfigPath) > 0 {
 		rootLogger.Sugar().Infof("out of cluster: set Kubebeconfig to %s", types.AgentConfig.KubeconfigPath)
-	} else if len(types.AgentConfig.Configmap.ApiServerHost) > 0 && len(types.AgentConfig.Configmap.ApiServerPort) {
+	} else if len(types.AgentConfig.Configmap.ApiServerHost) > 0 && len(types.AgentConfig.Configmap.ApiServerPort) > 0 {
 		apiServerHostAddress = fmt.Sprintf("%s:%s", types.AgentConfig.Configmap.ApiServerHost, types.AgentConfig.Configmap.ApiServerPort)
 		rootLogger.Sugar().Infof("in cluster: replace the address of api Server to %s", apiServerHostAddress)
 	}

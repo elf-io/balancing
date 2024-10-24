@@ -1,14 +1,14 @@
 include ../Makefile.defs
 
 
-.PHONY: init_kind_env
-init_kind_env:
-	make init_one_kind
+.PHONY: init_env
+init_env:
+	make init_vagrant
 	make install_proscope
 
 
-.PHONY: init_one_kind
-init_one_kind: installE2eTools clean
+.PHONY: init_vagrant
+init_vagrant: installE2eTools clean
 	@echo "================== init vagrant cluster"
 	cd ./vagrant ;  \
 		  HOSTPORT_MASTER_PROXY_SERVER=$(E2E_HOSTPORT_MASTER_PROXY_SERVER) HOSTPORT_HOST_ALONE_HTTP=$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER) KUBECONFIG_PATH=$(E2E_KUBECONFIG_PATH) ./setupCluster.sh on

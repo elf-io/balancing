@@ -333,11 +333,10 @@ e2e:
 	make -C tests e2e
 
 .PHONY: e2e_init
-e2e_init: APT_HTTP_PROXY ?=
 e2e_init:
 	make -C tests check_images_ready
 	make -C tests check_test_app_images_ready
-	make -C tests init_kind_env -e APT_HTTP_PROXY=$(APT_HTTP_PROXY)
+	make -C tests init_env
 	make -C tests deploy_project
 	make -C tests install_example_app
 
