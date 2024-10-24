@@ -16,12 +16,13 @@ COMPONENT_NAMESPACE="$4"
 [ -z "$E2E_KUBECONFIG" ] && echo "error, miss E2E_KUBECONFIG " && exit 1
 [ ! -f "$E2E_KUBECONFIG" ] && echo "error, could not find file $E2E_KUBECONFIG " && exit 1
 echo "$CURRENT_FILENAME : E2E_KUBECONFIG $E2E_KUBECONFIG "
+export KUBECONFIG=$E2E_KUBECONFIG
 
 # ====modify====
 COMPONENT_GOROUTINE_MAX=300
 COMPONENT_PS_PROCESS_MAX=50
-CONTROLLER_LABEL="app.kubernetes.io/component=elf-controller"
-AGENT_LABEL="app.kubernetes.io/component=elf-agent"
+CONTROLLER_LABEL="app.kubernetes.io/component=balancing-controller"
+AGENT_LABEL="app.kubernetes.io/component=balancing-agent"
 
 
 CONTROLLER_POD_LIST=$( kubectl get pods --no-headers --kubeconfig ${E2E_KUBECONFIG}  --namespace ${COMPONENT_NAMESPACE} --selector ${CONTROLLER_LABEL} --output jsonpath={.items[*].metadata.name} )
@@ -127,16 +128,6 @@ elif [ "$TYPE"x == "detail"x ] ; then
     echo ""
     echo "===============  get crd  ============== "
 
-
-    echo ""
-    echo "=============== node log  ============== "
-    KIND_CLUSTER_NAME=${KIND_CLUSTER_NAME:-"elf"}
-    KIND_NODES=$(  kind get  nodes --name ${KIND_CLUSTER_NAME} )
-    [ -z "$KIND_NODES" ] && echo "warning, failed to find nodes of kind cluster $KIND_CLUSTER_NAME " || true
-    for NODE in $KIND_NODES ; do
-        echo "--------- logs from node ${NODE}"
-        docker exec $NODE ls /var/log/
-    done
 
 
 elif [ "$TYPE"x == "error"x ] ; then

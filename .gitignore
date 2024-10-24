@@ -80,7 +80,7 @@ GIT_VERSION
 
 # build directory
 output
-test/runtime
+tests/runtime
 
 tests/vagrant/config
 tests/vagrant/scripts/join.sh

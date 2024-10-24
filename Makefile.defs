@@ -139,7 +139,7 @@ OPENAPI_SDK_DIR :=  ${ROOT_DIR}/api/v1/http
 
 #==================== test image
 
-TEST_APP_IMAGE_TAG := $(shell git ls-tree --full-tree HEAD -- $(ROOT_DIR)/test/appServer | awk '{ print $$3 }' )
+TEST_APP_IMAGE_TAG := $(shell git ls-tree --full-tree HEAD -- $(ROOT_DIR)/tests/appServer | awk '{ print $$3 }' )
 TEST_APP_PROXY_SERVER_IMAGE := ${REGISTER}/${GIT_REPO}-proxy_server:$(TEST_APP_IMAGE_TAG)
 TEST_APP_BACKEND_SERVER_IMAGE := ${REGISTER}/${GIT_REPO}-backend_server:$(TEST_APP_IMAGE_TAG)
 
@@ -155,6 +155,13 @@ endif
 
 E2E_KUBECONFIG_PATH="$(ROOT_DIR)/tests/vagrant/config"
 
+E2E_VM_HOST=host-alone
+E2E_VM_MASTER=k8s-master
+E2E_VM_WORKER=k8s-worker
+
+E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER=26440
+E2E_HOSTPORT_MASTER_PROXY_SERVER=27000
+
 #====== pyroscope
 PYROSCOPE_CONTAINER_NAME := pyroscope
 PYROSCOPE_IMAGE_NAME := grafana/pyroscope:latest
@@ -163,7 +170,7 @@ PYROSCOPE_IMAGE_NAME := grafana/pyroscope:latest
 PYROSCOPE_LOCAL_PORT := 8040
 
 E2E_KIND_CLUSTER_NAME ?= elf
-E2E_RUNTIME_DIR := $(ROOT_DIR)/test/runtime
+E2E_RUNTIME_DIR := $(ROOT_DIR)/tests/runtime
 E2E_KIND_KUBECONFIG_PATH := $(E2E_RUNTIME_DIR)/kubeconfig_$(E2E_KIND_CLUSTER_NAME).config
 E2E_LOG_FILE ?= $(E2E_RUNTIME_DIR)/e2edebugLog.txt
 E2E_GINKGO_REPORT_FILE ?= $(E2E_RUNTIME_DIR)/ginkgoreport.json

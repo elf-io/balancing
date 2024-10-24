@@ -1,9 +1,9 @@
 name: Call E2E
 
 env:
-  E2E_LOG_PATH: test/runtime/e2edebugLog.txt
-  E2E_GINKGO_REPORT_PATH: test/runtime/ginkgoreport.json
-  PERFORMANCE_SCRIPT: test/scripts/getPerformanceData.sh
+  E2E_LOG_PATH: tests/runtime/e2edebugLog.txt
+  E2E_GINKGO_REPORT_PATH: tests/runtime/ginkgoreport.json
+  PERFORMANCE_SCRIPT: tests/scripts/getPerformanceData.sh
   # ====modify====
   PERFORMANCE_BADGE_ID:
   PERFORMANCE_BADGE_FILENAME:

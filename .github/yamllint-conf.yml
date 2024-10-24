@@ -11,7 +11,7 @@ yaml-files:
 ignore: |
   vendor/
   .github/
-  test/yaml/
+  tests/yaml/
   charts/
 
 rules:

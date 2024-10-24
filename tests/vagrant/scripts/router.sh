@@ -21,6 +21,10 @@ set -x
 set -o errexit
 set -o nounset
 
+sysctl -w net.ipv4.conf.all.forwarding=1 || true
+sysctl -w net.ipv4.ip_forward=1 || true
+sysctl -w net.ipv6.conf.all.forwarding=1 || true
+
 removeIptablesByComment(){
    IPTABLES_CMD=\${1}
    IPTABLES_TABLE=\${2}

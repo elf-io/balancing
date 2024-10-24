@@ -12,6 +12,8 @@ UBUNTU_IMAGE=${UBUNTU_IMAGE:-"alvistack/ubuntu-24.04"}
 VM_MEMORY=${VM_MEMORY:-$((${VM_MEMORY:-1024}*8))}
 VM_CPUS=${VM_CPUS:-"4"} 
 HOSTPORT_API_SERVER=${HOSTPORT_API_SERVER:-"26443"}
+HOSTPORT_HOST_ALONE_HTTP=${HOSTPORT_HOST_ALONE_HTTP:-"26440"}
+HOSTPORT_MASTER_PROXY_SERVER=${HOSTPORT_MASTER_PROXY_SERVER:-"27000"}
 KUBECONFIG_PATH=${KUBECONFIG_PATH:-${CURRENT_DIR_PATH}/config}
 
 # 检查命令行参数
@@ -31,7 +33,7 @@ Vagrant.configure("2") do |config|
     k8s.vm.hostname = "k8s-master"
     k8s.vm.network "private_network", ip: "192.168.0.10", netmask: "255.255.255.0", ipv6: "fd00::10", ipv6_prefix_length: 64
     k8s.vm.network "forwarded_port", guest: 6443, host: ${HOSTPORT_API_SERVER}
-    k8s.vm.network "forwarded_port", guest: 27000, host: 27000
+    k8s.vm.network "forwarded_port", guest: 27000, host: ${HOSTPORT_MASTER_PROXY_SERVER}
     k8s.vm.provider "virtualbox" do |vb|
       vb.memory = "$VM_MEMORY"
       vb.cpus = "$VM_CPUS"
@@ -144,7 +146,7 @@ Vagrant.configure("2") do |config|
     ubuntu.vm.box = "$UBUNTU_IMAGE"
     ubuntu.vm.hostname = "ubuntu-vm"
     ubuntu.vm.network "private_network", ip: "192.168.0.2", netmask: "255.255.255.0", ipv6: "fd00::2", ipv6_prefix_length: 64
-    ubuntu.vm.network "forwarded_port", guest: 80, host: 27001
+    ubuntu.vm.network "forwarded_port", guest: 80, host: ${HOSTPORT_HOST_ALONE_HTTP}
     ubuntu.vm.provider "virtualbox" do |vb|
       vb.memory = "$VM_MEMORY"
       vb.cpus = "$VM_CPUS"
@@ -176,28 +178,11 @@ Vagrant.configure("2") do |config|
       # 在 .bashrc 中添加 sudo -i
       echo "sudo -i" >> /home/vagrant/.bashrc
 
+      apt-get update
+      apt-get install -y docker.io
+
       chmod +x /home/vagrant/scripts/router.sh
       /home/vagrant/scripts/router.sh on
-
-#      # 启用 IPv4 和 IPv6 转发
-#      sysctl -w net.ipv4.ip_forward=1
-#      sysctl -w net.ipv6.conf.all.forwarding=1
-#
-#      # 清除 iptables 规则
-#      iptables -F
-#      iptables -t nat -F
-#      iptables -t mangle -F
-#      iptables -X
-#
-#      ip6tables -F
-#      ip6tables -t nat -F
-#      ip6tables -t mangle -F
-#      ip6tables -X
-#
-#      # 设置 iptables 规则允许转发
-#      iptables -P FORWARD ACCEPT
-#      ip6tables -P FORWARD ACCEPT
-
     SHELL
   end
 end

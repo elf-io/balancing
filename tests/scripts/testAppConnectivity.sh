@@ -16,8 +16,14 @@ E2E_KUBECONFIG="${1}"
 [ -z "$E2E_KUBECONFIG" ] && echo "error, miss E2E_KUBECONFIG " && exit 1
 [ ! -f "$E2E_KUBECONFIG" ] && echo "error, could not find file $E2E_KUBECONFIG " && exit 1
 echo "$CURRENT_FILENAME : E2E_KUBECONFIG $E2E_KUBECONFIG "
+export KUBECONFIG=${E2E_KUBECONFIG}
 
 which jq &>/dev/null || { echo "please install jq" ; exit 1 ; }
+
+K8S_PROXY_SERVER_MAPPING_PORT="${2}"
+HOST_PROXY_SERVER_MAPPING_PORT="${3}"
+echo "K8S_PROXY_SERVER_MAPPING_PORT ${K8S_PROXY_SERVER_MAPPING_PORT}"
+echo "HOST_PROXY_SERVER_MAPPING_PORT ${HOST_PROXY_SERVER_MAPPING_PORT}"
 
 
 VisitServiceForK8s(){
@@ -26,7 +32,7 @@ VisitServiceForK8s(){
 
   echo ""
   echo "visit the ${LOCALVAR_METHOD} server ${LOCALVAR_URL} from k8s pod"
-  MSG=$( curl -s 127.0.0.1:20090 -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
+  MSG=$( curl -s 127.0.0.1:${K8S_PROXY_SERVER_MAPPING_PORT} -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
      || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
   echo "${MSG}" | jq .
 
@@ -38,13 +44,13 @@ VisitServiceForAll(){
 
   echo ""
   echo "visit the ${LOCALVAR_METHOD} server ${LOCALVAR_URL} from k8s pod"
-  MSG=$( curl -s 127.0.0.1:20090 -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
+  MSG=$( curl -s 127.0.0.1:${K8S_PROXY_SERVER_MAPPING_PORT} -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
      || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
   echo "${MSG}" | jq .
 
   echo ""
   echo "visit the ${LOCALVAR_METHOD} server ${LOCALVAR_URL} from host"
-  MSG=$( curl -s 127.0.0.1:20080 -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
+  MSG=$( curl -s 127.0.0.1:${HOST_PROXY_SERVER_MAPPING_PORT} -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
      || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
   echo "${MSG}" | jq .
 
@@ -53,15 +59,11 @@ VisitServiceForAll(){
 echo ""
 echo "------------- test proxy-server by hostPort ------------ "
 echo "visit the proxy server on master"
-curl -s 127.0.0.1:20090/healthy || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
-
-echo ""
-echo "visit the proxy server on worker"
-curl -s 127.0.0.1:20091/healthy || { echo "failed to visit the proxy server on worker node" ; exit 1 ; }
+curl -s 127.0.0.1:${K8S_PROXY_SERVER_MAPPING_PORT}/healthy || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
 
 echo ""
 echo "visit the proxy server on host"
-curl -s 127.0.0.1:20080/healthy || { echo "failed to visit the proxy server on worker node" ; exit 1 ; }
+curl -s 127.0.0.1:${HOST_PROXY_SERVER_MAPPING_PORT}/healthy || { echo "failed to visit the proxy server on host " ; exit 1 ; }
 
 
 echo ""

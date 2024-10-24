@@ -11,7 +11,7 @@ init_kind_env:
 init_one_kind: installE2eTools clean
 	@echo "================== init vagrant cluster"
 	cd ./vagrant ;  \
-			KUBECONFIG_PATH=$(E2E_KUBECONFIG_PATH) ./setupCluster.sh on
+		  HOSTPORT_MASTER_PROXY_SERVER=$(E2E_HOSTPORT_MASTER_PROXY_SERVER) HOSTPORT_HOST_ALONE_HTTP=$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER) KUBECONFIG_PATH=$(E2E_KUBECONFIG_PATH) ./setupCluster.sh on
 	@echo "===================== deploy prometheus CRD ========== "
 	# https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml ; } \
 	kubectl apply --kubeconfig $(E2E_KUBECONFIG_PATH)  -f ./crd/monitoring.coreos.com_servicemonitors.yaml
@@ -36,22 +36,19 @@ installE2eTools:
 .PHONY: install_proscope
 install_proscope:
 	if [ -n "$(PYROSCOPE_LOCAL_PORT)" ] ; then \
-  		echo "install proscope " ; \
-		docker stop $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true ; \
-		docker rm $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true ; \
-		ServerAddress=$$(docker network inspect kind -f {{\(index\ $$.IPAM.Config\ 0\).Gateway}}) ; \
-		echo "setup pyroscope on $${ServerAddress}:$(PYROSCOPE_LOCAL_PORT)" ; \
-		docker run -d --name $(PYROSCOPE_CONTAINER_NAME) -p $(PYROSCOPE_LOCAL_PORT):4040 $(PYROSCOPE_IMAGE_NAME) server ; \
+  		echo "install proscope on vm host-alone " ; \
+  		( cd vagrant ; ./ssh "host-alone" "docker stop $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
+  		( cd vagrant ; ./ssh "host-alone" "docker rm $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
+  		( cd vagrant ; ./ssh "host-alone" "docker run -d --name $(PYROSCOPE_CONTAINER_NAME) -p $(PYROSCOPE_LOCAL_PORT):4040 $(PYROSCOPE_IMAGE_NAME) server" ) ; \
 		echo "finish setuping pyroscope " ; \
       fi
-
 
 
 #==================
 
 .PHONY: check_test_app_images_ready
 check_test_app_images_ready:
-	CHART_LIST=" $(ROOT_DIR)/test/charts/backendserver $(ROOT_DIR)/test/charts/proxyserver $(ROOT_DIR)/test/charts/redirectserver " ;\
+	CHART_LIST=" $(ROOT_DIR)/tests/charts/backendserver $(ROOT_DIR)/tests/charts/proxyserver $(ROOT_DIR)/tests/charts/redirectserver " ;\
 		for CHART_DIR in $${CHART_LIST} ; do \
 			echo "check image for $${CHART_DIR}  " ; \
 			IMAGE_LIST=` helm template test $${CHART_DIR} --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
@@ -113,7 +110,6 @@ check_images_ready:
 
 # install balancing on global cluster
 .PHONY: deploy_project
-deploy_project: KIND_CLUSTER_NAME ?= $(E2E_KIND_CLUSTER_NAME)
 deploy_project:
 	echo "try to load local image tag $(PROJECT_IMAGE_VERSION) " ; \
 		IMAGE_LIST=` helm template test $(ROOT_DIR)/charts --set global.imageTagOverride=$(PROJECT_IMAGE_VERSION)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
@@ -139,13 +135,12 @@ deploy_project:
 		HELM_OPTION="" ; \
     	if [ -n "$(PYROSCOPE_LOCAL_PORT)" ] ; then \
 			echo "add env" ; \
-			ServerAddress=$$(docker network inspect kind -f {{\(index\ $$.IPAM.Config\ 0\).Gateway}}) ; \
-			HELM_OPTION+=" --set balancingAgent.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingAgent.extraEnv[0].value=http://$${ServerAddress}:$(PYROSCOPE_LOCAL_PORT) " ; \
-			HELM_OPTION+=" --set balancingController.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingController.extraEnv[0].value=http://$${ServerAddress}:$(PYROSCOPE_LOCAL_PORT) " ; \
+			HELM_OPTION+=" --set balancingAgent.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingAgent.extraEnv[0].value=http://192.168.0.2:$(PYROSCOPE_LOCAL_PORT) " ; \
+			HELM_OPTION+=" --set balancingController.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingController.extraEnv[0].value=http://192.168.0.2:$(PYROSCOPE_LOCAL_PORT) " ; \
 		fi ; \
 		HELM_OPTION+=" --set balancingAgent.debug.logLevel=debug --set balancingController.debug.logLevel=debug " ; \
 		HELM_OPTION+=" --set balancingAgent.prometheus.enabled=true --set balancingController.prometheus.enabled=true  " ; \
-		HELM_OPTION+=" --set balancingAgent.nodeEntryInterface=eth0 " ; \
+		HELM_OPTION+=" --set balancingAgent.nodeEntryInterface=eth1 " ; \
 		helm --kubeconfig=$(E2E_KUBECONFIG_PATH) install project $(ROOT_DIR)/charts \
 				-n $(E2E_INSTALL_NAMESPACE) --create-namespace --wait --debug \
 				--set global.imageTagOverride=$(PROJECT_IMAGE_VERSION) \
@@ -154,17 +149,20 @@ deploy_project:
 				$${HELM_OPTION} \
 				|| {  ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ; \
 		echo "begin to deploy agent on host node " ; \
-		./scripts/runHostNode.sh "runAgent" "$${AGENT_IMAGE}"  ; \
+		( cd vagrant ; ./cpToVM "$(E2E_VM_HOST)" ./config /home/vagrant/config  ) ; \
+		( cd vagrant ; ./scripts/ssh \
+			docker run -d --net=host --privileged  -v /home/vagrant/config:/config  \
+                          -v /sys/fs:/sys/fs  -v /proc:/host/proc -v /var/run/balancing:/run/balancing \
+                          "$${AGENT_IMAGE}"  bash -c "KUBECONFIG=/admin.conf /usr/bin/agent" ; \
+		) ; \
 		exit 0
 
 # test kind is ok
 .PHONY: install_example_app
-install_example_app: E2E_KUBECONFIG_PATH ?= $(E2E_E2E_KUBECONFIG_PATH_PATH)
-install_example_app: KIND_CLUSTER_NAME ?= $(E2E_KIND_CLUSTER_NAME)
 install_example_app:
 	@echo "---------- install applicatio on kubernetes"
 	echo "get images ... " ; \
-		CHART_LIST=" $(ROOT_DIR)/test/charts/backendserver $(ROOT_DIR)/test/charts/proxyserver $(ROOT_DIR)/test/charts/redirectserver " ;\
+		CHART_LIST=" $(ROOT_DIR)/tests/charts/backendserver $(ROOT_DIR)/tests/charts/proxyserver $(ROOT_DIR)/tests/charts/redirectserver " ;\
 		for CHART_DIR in $${CHART_LIST} ; do \
 			echo "check image for $${CHART_DIR}  " ; \
 			IMAGE_LIST=` helm template test $${CHART_DIR} --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
@@ -181,7 +179,7 @@ install_example_app:
 						  docker pull $${IMAGE} ; \
 					fi ;\
 					echo "load local image $${IMAGE} " ; \
-					kind load docker-image $${IMAGE}  --name $(KIND_CLUSTER_NAME)  ; \
+				    ( cd vagrant ; ./scripts/loadHostImages.sh $${IMAGE}  ) ; \
 				done ; \
 			fi \
 		done
@@ -189,24 +187,26 @@ install_example_app:
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  proxyserver &>/dev/null || true ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) install  proxyserver ./charts/proxyserver \
 					--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
-			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ;\
+			|| { ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ;\
 			echo " deploy proxy on host node" ; \
 			IMAGE=` helm template test ./charts/proxyserver --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
-			./scripts/runHostNode.sh "runProxyServer" "$${IMAGE}"
+			( cd vagrant ; ./scripts/ssh \
+				docker run -d --net=host  \
+							  "$${IMAGE}"  bash -c "/usr/sbin/proxy_server -port=80" ; \
+			)
 	echo "deploy backend server " ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  backendserver &>/dev/null || true ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) install  backendserver ./charts/backendserver \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
-			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
+			|| {   ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
 	echo "deploy redirect server " ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  redirectserver &>/dev/null || true ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) install  redirectserver ./charts/redirectserver \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
-			|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
+			|| { ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
 	@echo "---------- install proxy-server application on host"
-	./scripts/testAppConnectivity.sh "$(E2E_KUBECONFIG_PATH)" || { echo "failed to test the connectivity" ; exit 1 ; }
+	./scripts/testAppConnectivity.sh "$(E2E_KUBECONFIG_PATH)" "$(E2E_HOSTPORT_MASTER_PROXY_SERVER)"  "$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER)" || { echo "failed to test the connectivity" ; exit 1 ; }
 	@echo "========================================================"
-	@echo "   deploy kind cluster $(KIND_CLUSTER_NAME)             "
 	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
 	@echo "   kubectl get pod -o wide -A                           "
 	@echo "========================================================"
@@ -217,5 +217,3 @@ install_example_app:
 clean:
 	-@ cd ./vagrant ; ./setupCluster.sh off || true
 	-@ rm -rf $(E2E_RUNTIME_DIR) || true
-
-

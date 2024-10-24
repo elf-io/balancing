@@ -1,8 +1,8 @@
 name: Auto Golang Lint And Unitest
 
 env:
-  COVERAGE_REPORT_PATH: output/test/coverage.out
-  UNITEST_REPORT_PATH: output/test/unitestreport.json
+  COVERAGE_REPORT_PATH: output/tests/coverage.out
+  UNITEST_REPORT_PATH: output/tests/unitestreport.json
 
 on:
   pull_request: {}
