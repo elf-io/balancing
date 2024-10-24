@@ -16,6 +16,19 @@ VERSION=v3.28.2
 sed -i 's?docker.io?docker.m.daocloud.io?'  ${CURRENT_DIR_PATH}/calico-${VERSION}.yaml
 kubectl apply -f ${CURRENT_DIR_PATH}/calico-${VERSION}.yaml
 
+PullImage(){
+    IMAGE_LIST=$( cat ${CURRENT_DIR_PATH}/calico-${VERSION}.yaml | grep "image:" | sort | uniq )
+    cat <<EOF > ${CURRENT_DIR_PATH}/pull-calico-image.sh
+    for  IMAGE in ${IMAGE_LIST}; do
+        echo "pull image: ${IMAGE}"
+        podman pull ${IMAGE}
+    done
+EOF
+    chmod +x ${CURRENT_DIR_PATH}/pull-calico-image.sh
+    ${CURRENT_DIR_PATH}/pull-calico-image.sh
+}
+PullImage
+
 kubectl set env daemonset -n kube-system calico-node CALICO_IPV4POOL_IPIP=Never
 kubectl set env daemonset -n kube-system calico-node CALICO_IPV4POOL_VXLAN=CrossSubnet
 kubectl set env daemonset -n kube-system calico-node CALICO_IPV6POOL_VXLAN=CrossSubnet

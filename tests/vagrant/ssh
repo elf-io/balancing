@@ -9,6 +9,7 @@ if [ -z "${EXEC_COMMAND}" ] ; then
   sshpass -p vagrant \
       ssh -p ${SSH_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null vagrant@127.0.0.1
 else
+  echo "exec commmand: ${EXEC_COMMAND}"
   sshpass -p vagrant \
-      ssh -p ${SSH_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null vagrant@127.0.0.1 bash -c "${EXEC_COMMAND}"
+      ssh -p ${SSH_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null vagrant@127.0.0.1 "${EXEC_COMMAND}"
 fi

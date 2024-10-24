@@ -11,7 +11,12 @@ init_env:
 init_vagrant: installE2eTools clean
 	@echo "================== init vagrant cluster"
 	cd ./vagrant ;  \
-		  HOSTPORT_MASTER_PROXY_SERVER=$(E2E_HOSTPORT_MASTER_PROXY_SERVER) HOSTPORT_HOST_ALONE_HTTP=$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER) KUBECONFIG_PATH=$(E2E_KUBECONFIG_PATH) ./setupCluster.sh on
+		  HOSTPORT_MASTER_PROXY_SERVER=$(E2E_HOSTPORT_MASTER_PROXY_SERVER) \
+		  HOSTPORT_HOST_ALONE_HTTP=$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER) \
+		  KUBECONFIG_PATH=$(E2E_KUBECONFIG_PATH) \
+		  HOSTPORT_HOST_ALONE_PYROSCOPE=$(PYROSCOPE_HOST_PORT)  \
+		  VMPORT_HOST_ALONE_PYROSCOPE=$(PYROSCOPE_VM_PORT)  \
+		  ./setupCluster.sh on
 	@echo "===================== deploy prometheus CRD ========== "
 	# https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml ; } \
 	kubectl apply --kubeconfig $(E2E_KUBECONFIG_PATH)  -f ./crd/monitoring.coreos.com_servicemonitors.yaml
@@ -35,13 +40,22 @@ installE2eTools:
 
 .PHONY: install_proscope
 install_proscope:
-	if [ -n "$(PYROSCOPE_LOCAL_PORT)" ] ; then \
+	if [ -n "$(PYROSCOPE_VM_PORT)" ] ; then \
   		echo "install proscope on vm host-alone " ; \
-  		( cd vagrant ; ./ssh "host-alone" "docker stop $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
-  		( cd vagrant ; ./ssh "host-alone" "docker rm $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
-  		( cd vagrant ; ./ssh "host-alone" "docker run -d --name $(PYROSCOPE_CONTAINER_NAME) -p $(PYROSCOPE_LOCAL_PORT):4040 $(PYROSCOPE_IMAGE_NAME) server" ) ; \
+  		( cd vagrant ; ./ssh "host-alone" "sudo docker stop $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
+  		( cd vagrant ; ./ssh "host-alone" "sudo docker rm $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
+  		( cd vagrant ; ./ssh "host-alone" "sudo docker run -d --name $(PYROSCOPE_CONTAINER_NAME) -p $(PYROSCOPE_VM_PORT):4040 $(PYROSCOPE_IMAGE_NAME) server" ) ; \
 		echo "finish setuping pyroscope " ; \
+		HOST_IP=$$( ip r get 8.8.8.8 | grep -oE "src [\.0-9]+" | grep -oE "[\.0-9]+" ) ; \
+		echo "visit pyroscope: http://$${HOST_IP}:$(PYROSCOPE_HOST_PORT)" ; \
       fi
+
+.PHONY: showInfo
+showInfo:
+	@HOST_IP=$$( ip r get 8.8.8.8 | grep -oE "src [\.0-9]+" | grep -oE "[\.0-9]+" ) ; \
+		echo "visit pyroscope: http://$${HOST_IP}:$(PYROSCOPE_HOST_PORT)"
+		echo "visit proxy server on host-alone: http://127.0.0.1:$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER)"
+		echo "visit proxy server on master node: http://127.0.0.1:$(E2E_HOSTPORT_MASTER_PROXY_SERVER)"
 
 
 #==================
@@ -133,10 +147,10 @@ deploy_project:
 		echo "begin to deploy on kubernetes" ; \
 		helm --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall -n $(E2E_INSTALL_NAMESPACE) project || true  ;\
 		HELM_OPTION="" ; \
-    	if [ -n "$(PYROSCOPE_LOCAL_PORT)" ] ; then \
+    	if [ -n "$(PYROSCOPE_VM_PORT)" ] ; then \
 			echo "add env" ; \
-			HELM_OPTION+=" --set balancingAgent.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingAgent.extraEnv[0].value=http://192.168.0.2:$(PYROSCOPE_LOCAL_PORT) " ; \
-			HELM_OPTION+=" --set balancingController.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingController.extraEnv[0].value=http://192.168.0.2:$(PYROSCOPE_LOCAL_PORT) " ; \
+			HELM_OPTION+=" --set balancingAgent.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingAgent.extraEnv[0].value=http://192.168.0.2:$(PYROSCOPE_VM_PORT) " ; \
+			HELM_OPTION+=" --set balancingController.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingController.extraEnv[0].value=http://192.168.0.2:$(PYROSCOPE_VM_PORT) " ; \
 		fi ; \
 		HELM_OPTION+=" --set balancingAgent.debug.logLevel=debug --set balancingController.debug.logLevel=debug " ; \
 		HELM_OPTION+=" --set balancingAgent.prometheus.enabled=true --set balancingController.prometheus.enabled=true  " ; \

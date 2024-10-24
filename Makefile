@@ -331,12 +331,12 @@ e2e: e2e_clean e2e_init e2e_deploy
 
 .PHONY: e2e_init
 e2e_init:
-	make -C tests check_images_ready
-	make -C tests check_test_app_images_ready
 	make -C tests init_env
 
 .PHONY: e2e_deploy
 e2e_deploy:
+	make -C tests check_images_ready
+	make -C tests check_test_app_images_ready
 	make -C tests deploy_project
 	make -C tests install_example_app
 

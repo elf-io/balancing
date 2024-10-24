@@ -10,11 +10,17 @@ UBUNTU_IMAGE=${UBUNTU_IMAGE:-"alvistack/ubuntu-24.04"}
 
 # 定义资源变量
 VM_MEMORY=${VM_MEMORY:-$((${VM_MEMORY:-1024}*8))}
-VM_CPUS=${VM_CPUS:-"4"} 
+VM_CPUS=${VM_CPUS:-"4"}
+
+# PORT
 HOSTPORT_API_SERVER=${HOSTPORT_API_SERVER:-"26443"}
 HOSTPORT_HOST_ALONE_HTTP=${HOSTPORT_HOST_ALONE_HTTP:-"26440"}
 HOSTPORT_MASTER_PROXY_SERVER=${HOSTPORT_MASTER_PROXY_SERVER:-"27000"}
+HOSTPORT_HOST_ALONE_PYROSCOPE=${HOSTPORT_HOST_ALONE_PYROSCOPE:-"28000"}
+VMPORT_HOST_ALONE_PYROSCOPE=${VMPORT_HOST_ALONE_PYROSCOPE:-"8040"}
+
 KUBECONFIG_PATH=${KUBECONFIG_PATH:-${CURRENT_DIR_PATH}/config}
+
 
 # 检查命令行参数
 if [ "$#" -ne 1 ]; then
@@ -126,7 +132,12 @@ Vagrant.configure("2") do |config|
       chmod +x /home/vagrant/scripts/resetNode.sh
       /home/vagrant/scripts/resetNode.sh 
       chmod +x /home/vagrant/scripts/getImages.sh
-      /home/vagrant/scripts/getImages.sh 
+      /home/vagrant/scripts/getImages.sh
+      #
+      scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null 192.168.0.10:/home/vagrant/scripts/pull-calico-image.sh /home/vagrant/scripts/pull-calico-image.sh
+      chmod +x /home/vagrant/scripts/pull-calico-image.sh
+      sudo /home/vagrant/scripts/pull-calico-image.sh
+      #
       scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null 192.168.0.10:/home/vagrant/scripts/join.sh /home/vagrant/scripts/join.sh
       chmod +x /home/vagrant/scripts/join.sh
       sudo /home/vagrant/scripts/join.sh 
@@ -144,9 +155,11 @@ Vagrant.configure("2") do |config|
   # 定义 Ubuntu 虚拟机
   config.vm.define "host-alone" do |ubuntu|
     ubuntu.vm.box = "$UBUNTU_IMAGE"
-    ubuntu.vm.hostname = "ubuntu-vm"
+    ubuntu.vm.hostname = "host-alone"
     ubuntu.vm.network "private_network", ip: "192.168.0.2", netmask: "255.255.255.0", ipv6: "fd00::2", ipv6_prefix_length: 64
     ubuntu.vm.network "forwarded_port", guest: 80, host: ${HOSTPORT_HOST_ALONE_HTTP}
+    ubuntu.vm.network "forwarded_port", guest: ${VMPORT_HOST_ALONE_PYROSCOPE}, host: ${HOSTPORT_HOST_ALONE_PYROSCOPE}
+
     ubuntu.vm.provider "virtualbox" do |vb|
       vb.memory = "$VM_MEMORY"
       vb.cpus = "$VM_CPUS"
