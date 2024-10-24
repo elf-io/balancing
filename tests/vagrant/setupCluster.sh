@@ -57,7 +57,7 @@ Vagrant.configure("2") do |config|
       # 生成 SSH 密钥对
       [ -d '/root/.ssh' ] || mkdir /root/.ssh
       cp /home/vagrant/scripts/ssh/* /root/.ssh
-      cp /home/vagrant/scripts/ssh/id_rsa_pub  /root/.ssh/authorized_keys
+      cp /home/vagrant/scripts/ssh/id_rsa.pub  /root/.ssh/authorized_keys
       chmod 0600 /root/.ssh/id_rsa
 
       # 在 .bashrc 中添加 sudo -i, vagrant ssh 登录后默认有 root 权限
@@ -114,7 +114,7 @@ Vagrant.configure("2") do |config|
       # 生成 SSH 密钥对
       [ -d '/root/.ssh' ] || mkdir /root/.ssh
       cp /home/vagrant/scripts/ssh/* /root/.ssh
-      cp /home/vagrant/scripts/ssh/id_rsa_pub  /root/.ssh/authorized_keys
+      cp /home/vagrant/scripts/ssh/id_rsa.pub  /root/.ssh/authorized_keys
       chmod 0600 /root/.ssh/id_rsa
 
       # 在 .bashrc 中添加 sudo -i
@@ -165,7 +165,7 @@ Vagrant.configure("2") do |config|
       # 生成 SSH 密钥对
       [ -d '/root/.ssh' ] || mkdir /root/.ssh
       cp /home/vagrant/scripts/ssh/* /root/.ssh
-      cp /home/vagrant/scripts/ssh/id_rsa_pub  /root/.ssh/authorized_keys
+      cp /home/vagrant/scripts/ssh/id_rsa.pub  /root/.ssh/authorized_keys
       chmod 0600 /root/.ssh/id_rsa
 
       # the image disable ipv6 by default, so reconfigure it 
