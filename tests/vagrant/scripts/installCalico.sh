@@ -57,7 +57,6 @@ spec:
   vxlanMode: CrossSubnet
 EOF
 
-==============
 
 # set assign_ipv6
 cat <<EOF | kubectl apply -f -

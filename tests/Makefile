@@ -84,7 +84,7 @@ check_test_app_images_ready:
 # this will auto tag github ci image : agent:xxx -> github.com/elf-io/balancing/agent:xxx
 .PHONY: check_images_ready
 check_images_ready:
-	echo "check image  " ; \
+	echo "check balancing image  " ; \
 	IMAGE_LIST=` helm template test $(ROOT_DIR)/charts --set global.imageTagOverride=$(PROJECT_IMAGE_VERSION)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
 	if [ -z "$${IMAGE_LIST}" ] ; then \
 		echo "warning, failed to find image from chart " ; \
@@ -111,9 +111,8 @@ check_images_ready:
 	fi
 
 
-# install spidernet on global cluster
+# install balancing on global cluster
 .PHONY: deploy_project
-deploy_project: E2E_KUBECONFIG_PATH ?= $(E2E_E2E_KUBECONFIG_PATH_PATH)
 deploy_project: KIND_CLUSTER_NAME ?= $(E2E_KIND_CLUSTER_NAME)
 deploy_project:
 	echo "try to load local image tag $(PROJECT_IMAGE_VERSION) " ; \
@@ -218,48 +217,3 @@ clean:
 	-@ rm -rf $(E2E_RUNTIME_DIR) || true
 
 
-
-#============ e2e ====================
-.PHONY: e2e_test
-e2e_test: KIND_CLUSTER_NAME ?= $(E2E_KIND_CLUSTER_NAME)
-e2e_test: E2E_KUBECONFIG_PATH ?= $(E2E_E2E_KUBECONFIG_PATH_PATH)
-e2e_test:
-	@echo -e "\033[35m Run e2e test on the cluster $(KIND_CLUSTER_NAME) \033[0m "
-	@ echo -e "\033[35m [E2E] Run E2E with ginkgo label=$(E2E_GINKGO_LABELS) , timeout=$(E2E_TIMEOUT) GINKGO_OPTION=$(E2E_GINKGO_OPTION) \033[0m"
-	@  NODE_LIST=` docker ps | egrep " kindest/node.* $(KIND_CLUSTER_NAME)-(control|worker)" | awk '{print $$NF }' ` ; \
-		[ -n "$$NODE_LIST" ] || { echo "error, failed to find any kind nodes, please setup kind cluster $(KIND_CLUSTER_NAME) first" ; exit 1 ; } ; \
-		NODE_LIST=` echo "$${NODE_LIST}" | tr -d ' ' | tr '\n' ',' ` ; \
-		NODE_LIST=$${NODE_LIST%%,} ; \
-		echo "find cluster node: $${NODE_LIST}" ; \
-		export E2E_KIND_CLUSTER_NODE_LIST="$${NODE_LIST}" ; \
-		export E2E_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ; \
-		if [ "$(E2E_IP_FAMILY)" == "ipv4" ] ; then \
-			export E2E_IPV4_ENABLED=true ; export E2E_IPV6_ENABLED=false ; \
-		elif [ "$(E2E_IP_FAMILY)" == "ipv6" ] ; then \
-			export E2E_IPV4_ENABLED=false ; export E2E_IPV6_ENABLED=true ; \
-		else \
-			export E2E_IPV4_ENABLED=true ; export E2E_IPV6_ENABLED=true ; \
-		fi ; \
-		export E2E_KUBECONFIG_PATH=$(E2E_KUBECONFIG_PATH) ; [ -f "$(E2E_KUBECONFIG_PATH)" ] || { echo "error, does not exist KUBECONFIG $(E2E_KUBECONFIG)" ; exit 1 ; } ; \
-		rm -f $(E2E_LOG_FILE) || true ; \
-		echo "=========== before test `date` ===========" >> $(E2E_LOG_FILE) ; \
-		./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "system" "$(E2E_LOG_FILE)" $(E2E_INSTALL_NAMESPACE) ; \
-		RESULT=0 ; \
-		$(ROOT_DIR)/tools/golang/ginkgo.sh \
-			--race --timeout=$(E2E_TIMEOUT) --output-interceptor-mode=none  --slow-spec-threshold=15s \
-			--json-report e2ereport.json --output-dir $(ROOT_DIR) --procs $(E2E_GINKGO_PROCS) \
-			--label-filter="$(E2E_GINKGO_LABELS)" -randomize-suites -randomize-all  -vv --fail-fast  $(E2E_GINKGO_OPTION) \
-			-r e2e/*  || RESULT=1  ; \
-		echo "=========== after test `date` ===========" >> $(E2E_LOG_FILE) ; \
-		./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "system" "$(E2E_LOG_FILE)" $(E2E_INSTALL_NAMESPACE) ; \
-		KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail" "$(E2E_LOG_FILE)" $(E2E_INSTALL_NAMESPACE) ; \
-		./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "error" "$(E2E_LOG_FILE)" $(E2E_INSTALL_NAMESPACE) || { echo "error, found error log, datarace/pacni/longlock !!!" ; RESULT=1 ; } ; \
-		if (($${RESULT} != 0)) ; then \
-		   echo "failed to run e2e test"  ; \
-		   exit 1 ; \
-		fi ; \
-		echo "" ; \
-		echo "============================================" ; \
-		echo "succeeded to run all test" ; \
-		echo "output report to e2ereport.json" ; \
-		echo "output env log to $(E2E_LOG_FILE) "

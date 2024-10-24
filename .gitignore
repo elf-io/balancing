@@ -83,5 +83,6 @@ output
 test/runtime
 
 tests/vagrant/config
+tests/vagrant/scripts/join.sh
 
 docs/site.tar.gz
