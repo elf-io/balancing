@@ -65,4 +65,5 @@ else
     echo "vagrant is ready"
 fi
 
+
 exit 0
