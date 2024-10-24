@@ -55,10 +55,12 @@ Vagrant.configure("2") do |config|
       sudo ip a a fd00::10/64 dev eth1 || true  
 
       # 生成 SSH 密钥对
-      ssh-keygen -t rsa -b 2048 -f /home/vagrant/.ssh/id_rsa -N ""
-      cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
+      [ -d '/root/.ssh' ] || mkdir /root/.ssh
+      cp /home/vagrant/scripts/ssh/* /root/.ssh
+      cp /home/vagrant/scripts/ssh/id_rsa_pub  /root/.ssh/authorized_keys
+      chmod 0600 /root/.ssh/id_rsa
 
-      # 在 .bashrc 中添加 sudo -i
+      # 在 .bashrc 中添加 sudo -i, vagrant ssh 登录后默认有 root 权限
       echo "sudo -i" >> /home/vagrant/.bashrc
 
       # set up kubernetes master
@@ -110,8 +112,10 @@ Vagrant.configure("2") do |config|
       sudo ip a a fd00::11/64 dev eth1 || true
 
       # 生成 SSH 密钥对
-      ssh-keygen -t rsa -b 2048 -f /home/vagrant/.ssh/id_rsa -N ""
-      cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
+      [ -d '/root/.ssh' ] || mkdir /root/.ssh
+      cp /home/vagrant/scripts/ssh/* /root/.ssh
+      cp /home/vagrant/scripts/ssh/id_rsa_pub  /root/.ssh/authorized_keys
+      chmod 0600 /root/.ssh/id_rsa
 
       # 在 .bashrc 中添加 sudo -i
       echo "sudo -i" >> /home/vagrant/.bashrc
@@ -157,6 +161,12 @@ Vagrant.configure("2") do |config|
       # 确保 vagrant 用户具有 sudo 权限
       echo "vagrant ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/vagrant
       sudo chmod 0440 /etc/sudoers.d/vagrant
+
+      # 生成 SSH 密钥对
+      [ -d '/root/.ssh' ] || mkdir /root/.ssh
+      cp /home/vagrant/scripts/ssh/* /root/.ssh
+      cp /home/vagrant/scripts/ssh/id_rsa_pub  /root/.ssh/authorized_keys
+      chmod 0600 /root/.ssh/id_rsa
 
       # the image disable ipv6 by default, so reconfigure it 
       sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0

@@ -149,8 +149,10 @@ deploy_project:
 		helm --kubeconfig=$(E2E_KUBECONFIG_PATH) install project $(ROOT_DIR)/charts \
 				-n $(E2E_INSTALL_NAMESPACE) --create-namespace --wait --debug \
 				--set global.imageTagOverride=$(PROJECT_IMAGE_VERSION) \
+				--set feature.apiServerHost=192.168.0.10 \
+                --set feature.apiServerPort=6443 \
 				$${HELM_OPTION} \
-				|| { KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ; \
+				|| {  ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ; \
 		echo "begin to deploy agent on host node " ; \
 		./scripts/runHostNode.sh "runAgent" "$${AGENT_IMAGE}"  ; \
 		exit 0
@@ -205,7 +207,7 @@ install_example_app:
 	./scripts/testAppConnectivity.sh "$(E2E_KUBECONFIG_PATH)" || { echo "failed to test the connectivity" ; exit 1 ; }
 	@echo "========================================================"
 	@echo "   deploy kind cluster $(KIND_CLUSTER_NAME)             "
-	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)                 "
+	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
 	@echo "   kubectl get pod -o wide -A                           "
 	@echo "========================================================"
 	@ KUBECONFIG=$(E2E_KUBECONFIG_PATH)  kubectl get pod -o wide -A

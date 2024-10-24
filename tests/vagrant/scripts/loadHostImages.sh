@@ -14,7 +14,7 @@ EXCLUDE_VM_LIST=${EXCLUDE_VM_LIST:-""}
 SPECIFIED_VM_LIST=${SPECIFIED_VM_LIST:-""}
 
 RAW_INFO=` vagrant status `
-RUNNING_INFO=` grep " running " <<< "$RAW_INFO" | grep -v "host-alone" `
+RUNNING_INFO=` grep " running " <<< "$RAW_INFO"  `
 RUNNING_NUM=` echo "$RUNNING_INFO" | wc -l `
 (( $RUNNING_NUM == 0 )) && echo "error, no running VMs" >&2 && exit 1
 RUNNING_NAMES=` awk '{print $1}' <<< "$RUNNING_INFO" | tr  '\n' ' ' `
