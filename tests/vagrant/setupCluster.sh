@@ -5,7 +5,7 @@ CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
 
 
 # 定义镜像变量
-K8S_IMAGE=${K8S_IMAGE:-"alvistack/kubernetes-1.31"}
+K8S_IMAGE=${K8S_IMAGE:-"alvistack/kubernetes-1.30"}
 UBUNTU_IMAGE=${UBUNTU_IMAGE:-"alvistack/ubuntu-24.04"}
 
 # 定义资源变量

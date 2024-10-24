@@ -214,8 +214,8 @@ install_example_app:
 
 .PHONY: clean
 clean:
-	-@ cd ./vagrant ; ./setupCluster.sh off
-	-@ rm -rf $(E2E_RUNTIME_DIR)
+	-@ cd ./vagrant ; ./setupCluster.sh off || true
+	-@ rm -rf $(E2E_RUNTIME_DIR) || true
 
 
 
