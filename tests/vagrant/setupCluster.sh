@@ -121,7 +121,7 @@ Vagrant.configure("2") do |config|
       /home/vagrant/scripts/resetNode.sh 
       chmod +x /home/vagrant/scripts/getImages.sh
       /home/vagrant/scripts/getImages.sh 
-      scp 192.168.0.10:/home/vagrant/scripts/join.sh /home/vagrant/scripts/join.sh
+      scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null 192.168.0.10:/home/vagrant/scripts/join.sh /home/vagrant/scripts/join.sh
       chmod +x /home/vagrant/scripts/join.sh
       sudo /home/vagrant/scripts/join.sh 
 
@@ -196,15 +196,21 @@ SetKubeconfig(){
     sed -i -E 's?server: .*?server: https://127.0.0.1:'${HOSTPORT_API_SERVER}'?' ${KUBECONFIG_PATH}
 
     echo "wait for cluster ready"
+    DONE=""
     for i in {1..60}; do
       echo "waiting for cluster ready: ${i}"
       KUBECONFIG=${KUBECONFIG_PATH} kubectl get pod -A | sed '1d' | grep -v Running &>/dev/null
       if [ $? -eq 0 ]; then
-        sleep 5 
+        sleep 10
+        DONE="true"
         continue
       fi
       break
-    done    
+    done
+    if [ -z "$DONE" ] ; then
+       echo "k8s cluster is not ready, time out"
+       exit 1
+    fi
 
     echo "============================"
     KUBECONFIG=${KUBECONFIG_PATH} kubectl get pod -A

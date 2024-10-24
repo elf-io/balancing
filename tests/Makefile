@@ -128,7 +128,7 @@ deploy_project:
 				  docker pull $${IMAGE} ; \
 				fi ;\
 				echo "load local image $${IMAGE} " ; \
-				kind load docker-image $${IMAGE}  --name $(KIND_CLUSTER_NAME)  ; \
+				( cd vagrant ; ./scripts/loadHostImages.sh $${IMAGE}  ) ; \
 				if grep "agent" <<< "$${IMAGE}" &>/dev/null ; then \
 						AGENT_IMAGE=$${IMAGE} ; \
 				fi ; \

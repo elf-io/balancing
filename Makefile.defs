@@ -153,7 +153,7 @@ ifeq ($(PROJECT_IMAGE_VERSION),)
 endif
 
 
-KUBECONFIG_PATH="$(ROOT_DIR)/tests/vagrant/config"
+E2E_KUBECONFIG_PATH="$(ROOT_DIR)/tests/vagrant/config"
 
 #====== pyroscope
 PYROSCOPE_CONTAINER_NAME := pyroscope
