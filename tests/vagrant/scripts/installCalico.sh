@@ -20,8 +20,8 @@ PullImage(){
     IMAGE_LIST=$( cat ${CURRENT_DIR_PATH}/calico-${VERSION}.yaml | grep "image:" | sort | uniq )
     cat <<EOF > ${CURRENT_DIR_PATH}/pull-calico-image.sh
     for  IMAGE in ${IMAGE_LIST}; do
-        echo "pull image: ${IMAGE}"
-        podman pull ${IMAGE}
+        echo "pull image: \${IMAGE}"
+        podman pull \${IMAGE}
     done
 EOF
     chmod +x ${CURRENT_DIR_PATH}/pull-calico-image.sh
