@@ -4,7 +4,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpf"
 	"github.com/elf-io/balancing/pkg/ebpfEvent"
@@ -19,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"net/http"
 	"os"
 	"os/signal"
@@ -54,14 +54,16 @@ func HealthCheckHandler(req *http.Request) error {
 }
 
 // for CRD
-func SetupController(writer ebpfWriter.EbpfWriter) {
+func SetupController(clientConfig *rest.Config, writer ebpfWriter.EbpfWriter) {
 
 	// ctrl.SetLogger(logr.New(controllerruntimelog.NullLogSink{}))
 	ctrl.SetLogger(controllerzap.New())
 
 	// controller for CRD
 	rootLogger.Info("setup crd controller ")
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+	// c:=ctrl.GetConfigOrDie()
+	c := clientConfig
+	mgr, err := ctrl.NewManager(c, ctrl.Options{
 		Scheme: scheme,
 		// todo: metric server
 		Metrics: metricsserver.Options{
@@ -127,11 +129,20 @@ func RunReconciles() {
 	rootLogger.Sugar().Debugf("RunReconciles")
 
 	// get clientset
-	c, e1 := utils.AutoK8sConfig(types.AgentConfig.KubeconfigPath)
+	apiServerHostAddress := ""
+	if len(types.AgentConfig.KubeconfigPath) > 0 {
+		rootLogger.Sugar().Infof("out of cluster: set Kubebeconfig to %s", types.AgentConfig.KubeconfigPath)
+	} else if len(types.AgentConfig.Configmap.ApiServerHost) > 0 && len(types.AgentConfig.Configmap.ApiServerPort) {
+		apiServerHostAddress = fmt.Sprintf("%s:%s", types.AgentConfig.Configmap.ApiServerHost, types.AgentConfig.Configmap.ApiServerPort)
+		rootLogger.Sugar().Infof("in cluster: replace the address of api Server to %s", apiServerHostAddress)
+	}
+	clientConfig, e1 := utils.AutoK8sConfig(types.AgentConfig.KubeconfigPath, apiServerHostAddress)
 	if e1 != nil {
 		rootLogger.Sugar().Fatalf("failed to find client-go config, make sure it is in a pod or ~/.kube/config exists: %v", e1)
 	}
-	Client, e2 := kubernetes.NewForConfig(c)
+	rootLogger.Sugar().Debugf("clientConfig: %+v", clientConfig)
+
+	Client, e2 := kubernetes.NewForConfig(clientConfig)
 	if e2 != nil {
 		rootLogger.Sugar().Fatalf("failed to NewForConfig: %v", e2)
 	}
@@ -164,7 +175,7 @@ func RunReconciles() {
 	NewEndpointSliceInformer(Client, stopWatchCh, writer)
 
 	// crd reconcile
-	SetupController(writer)
+	SetupController(clientConfig, writer)
 
 	//
 	ebpfEvent := ebpfEvent.NewEbpfEvent(rootLogger.Named("ebpfEvent"), bpfManager, writer)

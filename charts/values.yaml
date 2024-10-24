@@ -34,6 +34,12 @@ feature:
   ## @param feature.enableIPv6 enable ipv6
   enableIPv6: false
 
+  ## @param feature.apiServerHost the host address of api server, which should not be the clusterIP
+  apiServerHost: ""
+
+  ## @param feature.apiServerPort the host port of api server, which should not be the clusterIP
+  apiServerPort: ""
+
 ## @section balancingAgent parameters
 ##
 balancingAgent:

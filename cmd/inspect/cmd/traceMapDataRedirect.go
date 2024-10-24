@@ -31,7 +31,7 @@ var CmdTraceMapByRedirect = &cobra.Command{
 		defer bpf.UnloadAllEbpfMap()
 
 		// Load kubeconfig
-		config, err := utils.AutoCrdConfig("")
+		config, err := utils.AutoCrdConfig("", "")
 		if err != nil {
 			log.Fatalf("Failed to load kubeconfig: %v", err)
 		}

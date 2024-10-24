@@ -152,6 +152,9 @@ ifeq ($(PROJECT_IMAGE_VERSION),)
     PROJECT_IMAGE_VERSION = $(shell cat $(ROOT_DIR)/VERSION | tr -d ' ' | tr -d '\n' )
 endif
 
+
+KUBECONFIG_PATH="$(ROOT_DIR)/tests/vagrant/config"
+
 #====== pyroscope
 PYROSCOPE_CONTAINER_NAME := pyroscope
 PYROSCOPE_IMAGE_NAME := grafana/pyroscope:latest

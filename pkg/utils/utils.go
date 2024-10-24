@@ -88,7 +88,9 @@ func ExistDir(dirPath string) bool {
 	return false
 }
 
-func AutoK8sConfig(KubeConfigPath string) (*rest.Config, error) {
+// KubeConfigPath is for agent on hosts out of the cluster
+// apiServerHostAddress is for agent and controller pod in the cluster when kube-proxy is not running
+func AutoK8sConfig(KubeConfigPath, apiServerHostAddress string) (*rest.Config, error) {
 	var config *rest.Config
 	var err error
 
@@ -111,7 +113,9 @@ func AutoK8sConfig(KubeConfigPath string) (*rest.Config, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to get config from serviceaccount=%v , info=%v", ScInPodPath, err)
 		}
-
+		if len(apiServerHostAddress) > 0 {
+			config.Host = apiServerHostAddress
+		}
 	} else {
 		return nil, fmt.Errorf("failed to get config ")
 	}
@@ -119,7 +123,9 @@ func AutoK8sConfig(KubeConfigPath string) (*rest.Config, error) {
 	return config, nil
 }
 
-func AutoCrdConfig(KubeConfigPath string) (*rest.Config, error) {
+// KubeConfigPath is for agent on hosts out of the cluster
+// apiServerHostAddress is for agent and controller pod in the cluster when kube-proxy is not running
+func AutoCrdConfig(KubeConfigPath, apiServerHostAddress string) (*rest.Config, error) {
 	var config *rest.Config
 	var err error
 
@@ -142,7 +148,9 @@ func AutoCrdConfig(KubeConfigPath string) (*rest.Config, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to get config from serviceaccount=%v , info=%v", ScInPodPath, err)
 		}
-
+		if len(apiServerHostAddress) > 0 {
+			config.Host = apiServerHostAddress
+		}
 	} else {
 		return nil, fmt.Errorf("failed to get config ")
 	}

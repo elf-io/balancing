@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/elf-io/balancing/pkg/utils"
 	"net/http"
 	"os"
 	"os/signal"
@@ -41,11 +42,25 @@ var finishSetUp = false
 // for CRD
 func SetupController() {
 
+	// get clientset
+	apiServerHostAddress := ""
+	if len(types.ControllerConfig.Configmap.ApiServerHost) > 0 && len(types.ControllerConfig.Configmap.ApiServerPort) > 0 {
+		apiServerHostAddress = fmt.Sprintf("%s:%s", types.ControllerConfig.Configmap.ApiServerHost, types.ControllerConfig.Configmap.ApiServerPort)
+		rootLogger.Sugar().Infof("in cluster: replace the address of api Server to %s", apiServerHostAddress)
+	}
+	clientConfig, e1 := utils.AutoK8sConfig("", apiServerHostAddress)
+	if e1 != nil {
+		rootLogger.Sugar().Fatalf("failed to find client-go config, make sure it is in a pod or ~/.kube/config exists: %v", e1)
+	}
+	rootLogger.Sugar().Debugf("clientConfig: %+v", clientConfig)
+
 	// ctrl.SetLogger(logr.New(controllerruntimelog.NullLogSink{}))
 	ctrl.SetLogger(controllerzap.New())
 
 	// controller for CRD
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+	// c:=ctrl.GetConfigOrDie()
+	c := clientConfig
+	mgr, err := ctrl.NewManager(c, ctrl.Options{
 		Scheme: scheme,
 		// Readiness probe endpoint name, defaults to "readyz"
 		// Liveness probe endpoint name, defaults to "healthz"
