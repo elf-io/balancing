@@ -82,4 +82,6 @@ GIT_VERSION
 output
 test/runtime
 
+tests/vagrant/config
+
 docs/site.tar.gz
