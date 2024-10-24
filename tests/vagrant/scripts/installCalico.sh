@@ -17,7 +17,7 @@ sed -i 's?docker.io?docker.m.daocloud.io?'  ${CURRENT_DIR_PATH}/calico-${VERSION
 kubectl apply -f ${CURRENT_DIR_PATH}/calico-${VERSION}.yaml
 
 PullImage(){
-    IMAGE_LIST=$( cat ${CURRENT_DIR_PATH}/calico-${VERSION}.yaml | grep "image:" | sort | uniq )
+    IMAGE_LIST=$( cat ${CURRENT_DIR_PATH}/calico-${VERSION}.yaml | grep "image:" | sort | uniq | awk '{print $2}' | tr '\n' ' ' )
     cat <<EOF > ${CURRENT_DIR_PATH}/pull-calico-image.sh
     for  IMAGE in ${IMAGE_LIST}; do
         echo "pull image: \${IMAGE}"
