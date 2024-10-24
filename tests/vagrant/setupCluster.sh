@@ -176,24 +176,27 @@ Vagrant.configure("2") do |config|
       # 在 .bashrc 中添加 sudo -i
       echo "sudo -i" >> /home/vagrant/.bashrc
 
-      # 启用 IPv4 和 IPv6 转发
-      sysctl -w net.ipv4.ip_forward=1
-      sysctl -w net.ipv6.conf.all.forwarding=1
+      chmod +x /home/vagrant/scripts/router.sh
+      /home/vagrant/scripts/router.sh on
 
-      # 清除 iptables 规则
-      iptables -F
-      iptables -t nat -F
-      iptables -t mangle -F
-      iptables -X
-
-      ip6tables -F
-      ip6tables -t nat -F
-      ip6tables -t mangle -F
-      ip6tables -X
-
-      # 设置 iptables 规则允许转发
-      iptables -P FORWARD ACCEPT
-      ip6tables -P FORWARD ACCEPT
+#      # 启用 IPv4 和 IPv6 转发
+#      sysctl -w net.ipv4.ip_forward=1
+#      sysctl -w net.ipv6.conf.all.forwarding=1
+#
+#      # 清除 iptables 规则
+#      iptables -F
+#      iptables -t nat -F
+#      iptables -t mangle -F
+#      iptables -X
+#
+#      ip6tables -F
+#      ip6tables -t nat -F
+#      ip6tables -t mangle -F
+#      ip6tables -X
+#
+#      # 设置 iptables 规则允许转发
+#      iptables -P FORWARD ACCEPT
+#      ip6tables -P FORWARD ACCEPT
 
     SHELL
   end

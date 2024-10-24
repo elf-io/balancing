@@ -1,6 +1,14 @@
 #!/bin/bash
 
 VM_NAME=${1:-"k8s-master"}
-SSH_PORT=$(vagrant ssh-config ${VM_NAME} | grep Port | awk '{print $2}')   
-sshpass -p vagrant \
-    ssh -p ${SSH_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null vagrant@127.0.0.1
+shift
+EXEC_COMMAND="$@"
+
+SSH_PORT=$(vagrant ssh-config ${VM_NAME} | grep Port | awk '{print $2}')
+if [ -z "${EXEC_COMMAND}" ] ; then
+  sshpass -p vagrant \
+      ssh -p ${SSH_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null vagrant@127.0.0.1
+else
+  sshpass -p vagrant \
+      ssh -p ${SSH_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null vagrant@127.0.0.1 bash -c "${EXEC_COMMAND}"
+fi
