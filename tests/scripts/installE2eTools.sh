@@ -10,10 +10,6 @@ if [ -n "$http_proxy" ]; then
   export http_proxy="$http_proxy"
 fi
 
-apt-get update  -y
-apt-get install -y sshpass jq
-
-
 if ! kubectl help &>/dev/null  ; then
     echo "error, miss 'kubectl', try to install it "
     LATEST_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
@@ -49,6 +45,7 @@ if ! VBoxManage -v &>/dev/null ; then
     echo "install virtual box"
     #https://www.virtualbox.org/wiki/Linux_Downloads
     wget https://download.virtualbox.org/virtualbox/7.0.20/virtualbox-7.0_7.0.20-163906~Ubuntu~jammy_amd64.deb
+    apt-get update  -y
     apt install ./virtualbox-7.0_7.0.20-163906~Ubuntu~jammy_amd64.deb
     VBoxManage -v
 else
@@ -65,5 +62,12 @@ else
     echo "vagrant is ready"
 fi
 
+
+if ! which sshpass &>/dev/null ; then
+    apt-get install -y sshpass
+fi
+if ! which jq &>/dev/null ; then
+    apt-get install -y jq
+fi
 
 exit 0
