@@ -157,15 +157,6 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 
 	// 把 ebpf 程序再挂载到 cgroup
 	// https://github.com/cilium/ebpf/blob/main/link/cgroup.go#L43
-	s.l.Sugar().Debugf("attach AttachCGroupInet4Connect")
-	s.CgroupLinkConnect, err = link.AttachCgroup(link.CgroupOptions{
-		Path:    types.CgroupV2Path,
-		Attach:  ebpf.AttachCGroupInet4Connect,
-		Program: s.BpfObjCgroup.bpf_cgroupPrograms.Sock4Connect,
-	})
-	if err != nil {
-		return fmt.Errorf("Error attaching Sock4Connect to cgroup: %v", err)
-	}
 	s.l.Sugar().Debugf("attach AttachCGroupUDP4Sendmsg")
 	s.CgroupLinkSend, err = link.AttachCgroup(link.CgroupOptions{
 		Path:    types.CgroupV2Path,
@@ -192,6 +183,15 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 	})
 	if err != nil {
 		return fmt.Errorf("Error attaching Sock4Getpeername to cgroup: %v", err)
+	}
+	s.l.Sugar().Debugf("attach AttachCGroupInet4Connect")
+	s.CgroupLinkConnect, err = link.AttachCgroup(link.CgroupOptions{
+		Path:    types.CgroupV2Path,
+		Attach:  ebpf.AttachCGroupInet4Connect,
+		Program: s.BpfObjCgroup.bpf_cgroupPrograms.Sock4Connect,
+	})
+	if err != nil {
+		return fmt.Errorf("Error attaching Sock4Connect to cgroup: %v", err)
 	}
 
 	go s.daemonGetEvent()
