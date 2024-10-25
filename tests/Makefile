@@ -43,10 +43,10 @@ installE2eTools:
 .PHONY: install_proscope
 install_proscope:
 	if [ -n "$(PYROSCOPE_VM_PORT)" ] ; then \
-  		echo "install proscope on vm host-alone " ; \
-  		( cd vagrant ; ./ssh "host-alone" "sudo docker stop $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
-  		( cd vagrant ; ./ssh "host-alone" "sudo docker rm $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
-  		( cd vagrant ; ./ssh "host-alone" "sudo docker run -d --name $(PYROSCOPE_CONTAINER_NAME) -p $(PYROSCOPE_VM_PORT):4040 $(PYROSCOPE_IMAGE_NAME) server" ) ; \
+  		echo "install proscope on vm $(E2E_VM_HOST)  " ; \
+  		( cd vagrant ; ./ssh "$(E2E_VM_HOST)" "sudo docker stop $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
+  		( cd vagrant ; ./ssh "$(E2E_VM_HOST)" "sudo docker rm $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
+  		( cd vagrant ; ./ssh "$(E2E_VM_HOST)" "sudo docker run -d --name $(PYROSCOPE_CONTAINER_NAME) -p $(PYROSCOPE_VM_PORT):4040 $(PYROSCOPE_IMAGE_NAME) server" ) ; \
 		echo "finish setuping pyroscope " ; \
 		HOST_IP=$$( ip r get 8.8.8.8 | grep -oE "src [\.0-9]+" | grep -oE "[\.0-9]+" ) ; \
 		echo "visit pyroscope: http://$${HOST_IP}:$(PYROSCOPE_HOST_PORT)" ; \
@@ -56,7 +56,7 @@ install_proscope:
 showInfo:
 	@HOST_IP=$$( ip r get 8.8.8.8 | grep -oE "src [\.0-9]+" | grep -oE "[\.0-9]+" ) ; \
 		echo "visit pyroscope: http://$${HOST_IP}:$(PYROSCOPE_HOST_PORT)"
-		echo "visit proxy server on host-alone: http://127.0.0.1:$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER)"
+		echo "visit proxy server on $(E2E_VM_HOST): http://127.0.0.1:$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER)"
 		echo "visit proxy server on master node: http://127.0.0.1:$(E2E_HOSTPORT_MASTER_PROXY_SERVER)"
 
 
@@ -75,22 +75,22 @@ check_test_app_images_ready:
 				echo "find image from chart : $${IMAGE_LIST} " ; \
 				for IMAGE in $${IMAGE_LIST} ; do \
 					echo "try to find image $${IMAGE} " ; \
-					EXIST=` docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${IMAGE}" ` || true ; \
+					EXIST=`sudo docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${IMAGE}" ` || true ; \
 					if [ -z "$${EXIST}" ] ; then \
 							CI_IMAGE=$${IMAGE##*/} ; \
 							echo "try to find github CI image $${CI_IMAGE} " ; \
-							EXIST=` docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${CI_IMAGE}" ` || true ; \
+							EXIST=`sudo docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${CI_IMAGE}" ` || true ; \
 							if [ -z "$${EXIST}" ] ; then \
 								echo "error, failed to find image $${IMAGE}" ; \
 								echo "error, failed to find image $${CI_IMAGE}" ; \
 								echo "try to build image 'build_local_test_app_image' " ; \
 								exit 1 ; \
 							fi ; \
-							docker tag $${CI_IMAGE} $${IMAGE} ; \
+							sudo docker tag $${CI_IMAGE} $${IMAGE} ; \
 					fi ;\
 					echo "image exists: $${IMAGE}" ; \
 				done ; \
-				docker images ; \
+				sudo docker images ; \
 			fi \
 		done
 
@@ -106,21 +106,21 @@ check_images_ready:
 		echo "find image from chart : $${IMAGE_LIST} " ; \
 		for IMAGE in $${IMAGE_LIST} ; do \
 		  	echo "try to find image $${IMAGE} " ; \
-			EXIST=` docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${IMAGE}" ` || true ; \
+			EXIST=`sudo docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${IMAGE}" ` || true ; \
 			if [ -z "$${EXIST}" ] ; then \
 					CI_IMAGE=$${IMAGE##*/} ; \
 			  		echo "try to find github CI image $${CI_IMAGE} " ; \
-			  		EXIST=` docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${CI_IMAGE}" ` || true ; \
+			  		EXIST=`sudo docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${CI_IMAGE}" ` || true ; \
 			  		if [ -z "$${EXIST}" ] ; then \
 			  			echo "error, failed to find image $${IMAGE}" ; \
 			  			echo "error, failed to find image $${CI_IMAGE}" ; \
 			  			exit 1 ; \
 			  		fi ; \
-			  		docker tag $${CI_IMAGE} $${IMAGE} ; \
+			  		sudo docker tag $${CI_IMAGE} $${IMAGE} ; \
 			fi ;\
 			echo "image exists: $${IMAGE}" ; \
 		done ; \
-		docker images ; \
+		sudo docker images ; \
 	fi
 
 
@@ -134,10 +134,10 @@ deploy_project:
 		else \
 			echo "found image from chart : $${IMAGE_LIST} " ; \
 			for IMAGE in $${IMAGE_LIST} ; do \
-				EXIST=` docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${IMAGE}" ` ; \
+				EXIST=`sudo docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${IMAGE}" ` ; \
 				if [ -z "$${EXIST}" ] ; then \
 				  echo "docker pull $${IMAGE} to local" ; \
-				  docker pull $${IMAGE} ; \
+				  sudo docker pull $${IMAGE} ; \
 				fi ;\
 				echo "load local image $${IMAGE} " ; \
 				( cd vagrant ; ./loadHostImages.sh $${IMAGE}  ) ; \
@@ -166,8 +166,8 @@ deploy_project:
 				|| {  ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ; \
 		echo "begin to deploy agent on host node " ; \
 		( cd vagrant ; ./cpToVM "$(E2E_VM_HOST)" ./config /home/vagrant/config  ) ; \
-		( cd vagrant ; ./ssh \
-			docker run -d --net=host --privileged  -v /home/vagrant/config:/config  \
+		( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  \
+			sudo docker run -d --net=host --privileged  -v /home/vagrant/config:/config  \
                           -v /sys/fs:/sys/fs  -v /proc:/host/proc -v /var/run/balancing:/run/balancing \
                           "$${AGENT_IMAGE}"  bash -c "KUBECONFIG=/admin.conf /usr/bin/agent" ; \
 		) ; \
@@ -189,10 +189,10 @@ install_example_app:
 				echo "find image from chart : $${IMAGE_LIST} " ; \
 				for IMAGE in $${IMAGE_LIST} ; do \
 					echo "try to find image $${IMAGE} " ; \
-					EXIST=` docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${IMAGE}" ` || true ; \
+					EXIST=`sudo docker images | awk '{printf("%s:%s\n",$$1,$$2)}' | grep "$${IMAGE}" ` || true ; \
 					if [ -z "$${EXIST}" ] ; then \
 						  echo "docker pull $${IMAGE} to local" ; \
-						  docker pull $${IMAGE} ; \
+						  sudo docker pull $${IMAGE} ; \
 					fi ;\
 					echo "load local image $${IMAGE} " ; \
 				    ( cd vagrant ; ./loadHostImages.sh $${IMAGE}  ) ; \
@@ -206,8 +206,8 @@ install_example_app:
 			|| { ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ;\
 			echo " deploy proxy on host node" ; \
 			IMAGE=` helm template test ./charts/proxyserver --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
-			( cd vagrant ; ./ssh \
-				docker run -d --net=host  \
+			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" \
+				sudo docker run -d --net=host  \
 							  "$${IMAGE}"  bash -c "/usr/sbin/proxy_server -port=80" ; \
 			)
 	echo "deploy backend server " ; \

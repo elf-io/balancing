@@ -68,6 +68,9 @@ setUpMaster(){
 kubeadm join ${IPV4_ADDRESS}:6443 --token ${CLUSTER_TOKEN} --discovery-token-ca-cert-hash sha256:${CLUSTER_CERT} --v=5
 EOF
 
+    kubectl taint nodes --all node-role.kubernetes.io/master- &>/dev/null  || true
+    kubectl taint nodes --all  node-role.kubernetes.io/control-plane- &>/dev/null || true
+
 }
 
 setUpMaster

@@ -126,6 +126,9 @@ Vagrant.configure("2") do |config|
       scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null 192.168.0.10:/home/vagrant/scripts/join.sh /home/vagrant/scripts/join.sh
       chmod +x /home/vagrant/scripts/join.sh
       sudo /home/vagrant/scripts/join.sh 
+      #
+      sudo mkdir /root/.kube
+      sudo scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null 192.168.0.10:/root/.kube/config /root/.kube/config
 
       if [ "${DEFAULT_ROUTER_TO_HOST}" == "true" ]; then
         # 删除原有默认路由
