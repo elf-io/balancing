@@ -168,9 +168,10 @@ deploy_project:
 		( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  sudo docker stop balancing || true ; ) ; \
 		( cd vagrant ; ./ssh "$(E2E_VM_HOST)" 	sudo docker rm balancing || true ; ) ; \
 		( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  \
-			sudo docker run -d --net=host --privileged --name balancing -v /tmp/config:/config  \
+			sudo docker run -d --net=host --privileged --name balancing \
+						 -e "KUBECONFIG=/config"  -v /tmp/config:/config  \
                           -v /sys/fs:/sys/fs:rw  -v /proc:/host/proc \
-                          "$${AGENT_IMAGE}"  bash -c "KUBECONFIG=/config /usr/bin/agent" ; \
+                          "$${AGENT_IMAGE}"   ; \
 		) ; \
 		exit 0
 		make showInfo
@@ -211,8 +212,7 @@ install_example_app:
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  sudo docker stop server || true ; ) ; \
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" sudo docker rm server || true ; ) ; \
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" \
-				sudo docker run -d --net=host --name server \
-							  "$${IMAGE}"  bash -c '/usr/sbin/proxy_server -port=80' ; \
+				sudo docker run -d -p 80:80 --name server "$${IMAGE}" ; \
 			)
 	echo "deploy backend server " ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  backendserver &>/dev/null || true ; \
