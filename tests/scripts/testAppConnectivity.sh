@@ -24,36 +24,50 @@ echo "K8S_PROXY_SERVER_MAPPING_PORT ${K8S_PROXY_SERVER_MAPPING_PORT}"
 echo "HOST_PROXY_SERVER_MAPPING_PORT ${HOST_PROXY_SERVER_MAPPING_PORT}"
 
 
-VisitServiceForK8s(){
+# 定义颜色的 ANSI 转义码
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color，用于重置颜色
+
+VisitK8s(){
   LOCALVAR_URL="${1}"
   LOCALVAR_METHOD="${2}"
+  LOCALVAR_TITLE="${3}"
+  LOCALVAR_EXPECT="${4}"
 
   echo ""
+  echo "-------------- to K8S: ${LOCALVAR_TITLE} -----------------"
   echo "visit the ${LOCALVAR_METHOD} server ${LOCALVAR_URL} from k8s pod"
   MSG=$( curl -s 127.0.0.1:${K8S_PROXY_SERVER_MAPPING_PORT} -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
      || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
   echo "${MSG}" | jq .
-
+  if echo "${MSG}" | jq '.BackendResponse' | grep -e "${LOCALVAR_EXPECT}" &>/dev/null ; then
+        echo -e "--------------------${GREEN}result: pass${NC}-------------------"
+  else
+        echo -e "--------------------${RED}result: fail${NC}---------------------"
+  fi
+  echo ""
 }
 
-VisitServiceForAll(){
+VisitHost(){
   LOCALVAR_URL="${1}"
   LOCALVAR_METHOD="${2}"
+  LOCALVAR_TITLE="${3}"
+  LOCALVAR_EXPECT="${4}"
 
   echo ""
+  echo "-------------- to Host: ${LOCALVAR_TITLE} -----------------"
   echo "visit the ${LOCALVAR_METHOD} server ${LOCALVAR_URL} from k8s pod"
-  MSG=$( curl -s 127.0.0.1:${K8S_PROXY_SERVER_MAPPING_PORT} -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
-     || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
-  echo "${MSG}" | jq .
-
-  echo ""
-  echo "visit the ${LOCALVAR_METHOD} server ${LOCALVAR_URL} from host"
   MSG=$( curl -s 127.0.0.1:${HOST_PROXY_SERVER_MAPPING_PORT} -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
      || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
   echo "${MSG}" | jq .
-
+  if echo "${MSG}" | jq '.BackendResponse' | grep -e "${LOCALVAR_EXPECT}" &>/dev/null ; then
+        echo -e "--------------------${GREEN}result: pass${NC}-------------------"
+  else
+        echo -e "--------------------${RED}result: fail${NC}---------------------"
+  fi
+  echo ""
 }
-
 
 TestBasicConnectity(){
     echo ""
@@ -65,29 +79,30 @@ TestBasicConnectity(){
     echo "directly visit the proxy server on host"
     curl -s 127.0.0.1:${HOST_PROXY_SERVER_MAPPING_PORT}/healthy || { echo "failed to visit the proxy server on host " ; exit 1 ; }
 
-
     echo ""
-    echo "------------- directly test backend-server  ------------ "
+    echo "------------- directly test pod id of backend-server by proxy-server ------------ "
     POD_NAMESPACE=default
     POD_LABEL="app.kubernetes.io/instance=backendserver"
     POD_IP_LIST=$( kubectl get pods --no-headers   --namespace ${POD_NAMESPACE} --selector ${POD_LABEL} --output jsonpath={.items[*].status.podIP} )
     [ -z "${POD_IP_LIST}" ] && echo "error, failed to find the pod ip of backend server " && exit 1
     for POD_IP in $POD_IP_LIST  ; do
-          echo "directly visit the backend-server  "
-          VisitServiceForK8s "http://${POD_IP}:80"  "http"
-          VisitServiceForK8s "${POD_IP}:80"  "udp"
+          VisitK8s "http://${POD_IP}:80"  "http"  \
+              "http: directly visit the pod ip ${POD_IP} of backend-server"  "backendserver"
+          VisitK8s "${POD_IP}:80"  "udp" \
+              "udp: directly visit the pod ip ${POD_IP} of backend-server"  "backendserver"
     done
 
     echo ""
-    echo "------------- directly test redirect-server  ------------ "
+    echo "------------- directly test redirect-server by proxy-server  ------------ "
     POD_NAMESPACE=default
     POD_LABEL="app.kubernetes.io/instance=redirectserver"
     POD_IP_LIST=$( kubectl get pods --no-headers   --namespace ${POD_NAMESPACE} --selector ${POD_LABEL} --output jsonpath={.items[*].status.podIP} )
     [ -z "${POD_IP_LIST}" ] && echo "error, failed to find the pod ip of backend server " && exit 1
     for POD_IP in $POD_IP_LIST  ; do
-          echo "directly visit the redirect-server  "
-          VisitServiceForK8s "http://${POD_IP}:80"  "http"
-          VisitServiceForK8s "${POD_IP}:80"  "udp"
+          VisitK8s "http://${POD_IP}:80"  "http"  \
+              "http: directly visit the pod ip ${POD_IP} of redirect-server"  "redirectserver"
+          VisitK8s "${POD_IP}:80"  "udp" \
+              "udp: directly visit the pod ip ${POD_IP} of redirect-server"  "redirectserver"
     done
 }
 
@@ -133,17 +148,18 @@ TestService(){
 TestRedirectPolicy(){
     echo "===================== test balancing: localRedirect policy  ========================="
 
-    echo ""
-    echo "----------- test balancing of localRedirect policy: visit the clusterIp of backend-server localRedirect service "
     SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-redirect-service | sed '1 d' | awk '{print $3}' )
-    VisitServiceForAll "http://${SERVICE_CLUSTER_IP}:80"  "http"
-    VisitServiceForAll "${SERVICE_CLUSTER_IP}:80"  "udp"
+    VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
+              "http: visit the clusterIp of backend-server localRedirect service"  "redirectserver.*k8s-master"
+    VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
+              "udp: visit the clusterIp of backend-server localRedirect service"  "redirectserver.*k8s-master"
 
-    echo ""
-    echo "----------- test balancing of localRedirect policy: visit the virtual address of backend-server localRedirect service "
     ADDRESS=$( kubectl  get LocalRedirectPolicy example-matchaddress | sed '1d' | awk '{print $2}' )
-    VisitServiceForAll "http://${ADDRESS}:80"  "http"
-VisitServiceForAll "${ADDRESS}:80"  "udp"
+    VisitK8s "http://${ADDRESS}:80"  "http"  \
+              "http: visit the virtual address of backend-server localRedirect service"  "redirectserver.*k8s-master"
+    VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
+              "udp: visit the virtual address of backend-server localRedirect service"  "redirectserver.*k8s-master"
+
 }
 
 TestBalancingPolicy(){
