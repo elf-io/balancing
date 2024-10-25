@@ -22,10 +22,14 @@
 
 ~# bpftool cgroup tree /run/balancing/cgroupv2
 
-#日志
+#主机日志
 ~#  bpftool prog tracelog
 或
 ~# cat /sys/kernel/debug/tracing/trace_pipe
+
+
+agent ebpf 访问解析日志
+~# kubectl logs -n elf balancing-agent-q727g | grep "formatted ebpf event" | jq .
 
 ```
 
