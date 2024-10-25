@@ -165,8 +165,10 @@ deploy_project:
 				|| {  ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ; \
 		echo "begin to deploy agent on host node " ; \
 		( cd vagrant ; ./cpToVM "$(E2E_VM_HOST)" ./config_old /tmp/config  ) ; \
+		( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  sudo docker stop balancing || true ; ) ; \
+		( cd vagrant ; ./ssh "$(E2E_VM_HOST)" 	sudo docker rm balancing || true ; ) ; \
 		( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  \
-			sudo docker run -d --net=host --privileged  -v /tmp/config:/config  \
+			sudo docker run -d --net=host --privileged --name balancing -v /tmp/config:/config  \
                           -v /sys/fs:/sys/fs:rw  -v /proc:/host/proc \
                           "$${AGENT_IMAGE}"  bash -c "KUBECONFIG=/config /usr/bin/agent" ; \
 		) ; \
@@ -206,8 +208,10 @@ install_example_app:
 			|| { ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ;\
 			echo " deploy proxy on host node" ; \
 			IMAGE=` helm template test ./charts/proxyserver --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
+			( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  sudo docker stop server || true ; ) ; \
+			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" sudo docker rm server || true ; ) ; \
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" \
-				sudo docker run -d --net=host  \
+				sudo docker run -d --net=host --name server \
 							  "$${IMAGE}"  bash -c "/usr/sbin/proxy_server -port=80" ; \
 			)
 	echo "deploy backend server " ; \
