@@ -13,7 +13,7 @@
 ```
 make e2e_deploy
 #or
-make e2e_deploy -e PROJECT_IMAGE_TAG=e578cdf795ac221e1e875e0dbdf2fd56aa0f1c6a \
+make e2e_deploy -e PROJECT_IMAGE_TAG=96abcfc96d2b33266bc62d76ee947e646267dd6e \
                 -e TEST_APP_IMAGE_TAG=c357da95d2bbe22e2573753d63e7dbf44d1d2edd
 ```
 
