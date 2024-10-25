@@ -44,10 +44,8 @@ kubectl set env daemonset -n kube-system calico-node FELIX_IPV6SUPPORT=true
 #kubectl patch configmap -n kube-system calico-config -p '{"data":{"calico_backend": "vxlan"}}'
 #kubectl patch FelixConfiguration default  -p '{"spec":{"vxlanEnabled": true}}'  --type merge
 
-kubectl patch FelixConfiguration default  -p '{"spec":{"bpfEnabled": false}}'  --type merge
-kubectl patch FelixConfiguration default  -p '{"spec":{"ipv6Support": true}}'  --type merge
-
-
+#kubectl patch FelixConfiguration default  -p '{"spec":{"bpfEnabled": false}}'  --type merge
+#kubectl patch FelixConfiguration default  -p '{"spec":{"ipv6Support": true}}'  --type merge
 
 
 kubectl set env daemonset -n kube-system calico-node CALICO_IPV6POOL_CIDR="fc01::/48"
