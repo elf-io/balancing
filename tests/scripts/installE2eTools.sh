@@ -18,7 +18,7 @@ if ! kubectl help &>/dev/null  ; then
     chmod +x /usr/local/bin/kubectl
     ! kubectl -h  &>/dev/null && echo "error, failed to install kubectl" && exit 1
 else
-    echo "pass   'kubectl' installed:  $(kubectl version --client=true | grep -E -o "Client.*GitVersion:\"[^[:space:]]+\"" | awk -F, '{print $NF}') "
+    echo "pass   'kubectl' installed:  $( kubectl version --client=true ) "
 fi
 
 # Install Helm
@@ -49,7 +49,7 @@ if ! VBoxManage -v &>/dev/null ; then
     apt install ./virtualbox-7.0_7.0.20-163906~Ubuntu~jammy_amd64.deb
     VBoxManage -v
 else
-    echo "virtual box is ready"
+    echo "pass virtual box is ready: $(vboxmanage --version) "
 fi
 
 if ! vagrant version &>/dev/null ; then
@@ -59,7 +59,7 @@ if ! vagrant version &>/dev/null ; then
     sudo apt update && sudo apt install -y vagrant
     vagrant version
 else
-    echo "vagrant is ready"
+    echo "pass vagrant is ready: $(vagrant version) "
 fi
 
 

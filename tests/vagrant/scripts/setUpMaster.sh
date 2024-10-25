@@ -38,8 +38,6 @@ setUpMaster(){
     cp -i /etc/kubernetes/admin.conf /root/.kube/config
     sudo chown -R root:root /root/.kube
 
-    echo 'KUBELET_EXTRA_ARGS="--node-ip='${IPV4_ADDRESS}','${IPV6_ADDRESS}'"' > /etc/default/kubelet
-    systemctl daemon-reload && systemctl restart kubelet
 
 
     echo "wait for api-server ready"

@@ -11,9 +11,14 @@ ResetNode(){
     systemctl stop etcd  
     rm /var/lib/etcd -rf  
     kubeadm reset -f  
-    rm /root/.kube/config -f   
+
+    swapoff -a && sed -i "s/.*swap.*/#&/" /etc/fstab
+
+    rm /root/.kube -f
     systemctl enable kubelet  
     systemctl restart kubelet 
+    systemctl enable crio
+    systemctl restart crio
 
     rm /etc/sysctl.d/99-sysctl.conf
     rm /etc/sysctl.conf
@@ -44,11 +49,8 @@ net.ipv4.neigh.default.gc_thresh3 = 8192
 net.ipv6.neigh.default.gc_thresh1 = 0
 net.ipv6.neigh.default.gc_thresh2 = 512
 net.ipv6.neigh.default.gc_thresh3 = 8192
-
 EOF
-sysctl --system
-
-swapoff -a && sed -i "s/.*swap.*/#&/" /etc/fstab
+  sysctl --system
 
 }
 

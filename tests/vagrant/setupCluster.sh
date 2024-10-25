@@ -84,6 +84,7 @@ Vagrant.configure("2") do |config|
       chmod +x /home/vagrant/scripts/setUpMaster.sh
       export WORKER_JOIN_SCRIPT_PATH=/home/vagrant/scripts/join.sh
       sudo /home/vagrant/scripts/setUpMaster.sh
+      sudo /home/vagrant/scripts/setKubelet.sh  eth1
       chmod +x /home/vagrant/scripts/installCalico.sh
       /home/vagrant/scripts/installCalico.sh
 
@@ -134,6 +135,7 @@ Vagrant.configure("2") do |config|
       scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null 192.168.0.10:/home/vagrant/scripts/join.sh /home/vagrant/scripts/join.sh
       chmod +x /home/vagrant/scripts/join.sh
       sudo /home/vagrant/scripts/join.sh 
+      sudo /home/vagrant/scripts/setKubelet.sh  eth1
       #
       rm -rf /root/.kube || true
       sudo mkdir /root/.kube || true
@@ -147,10 +149,6 @@ Vagrant.configure("2") do |config|
         ip route add default via 192.168.0.2
         ip -6 route add default via fd00::2
       fi
-
-      #systemctl restart crio
-      #systemctl restart kubelet
-
     SHELL
   end
 
