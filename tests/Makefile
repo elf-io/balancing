@@ -19,6 +19,8 @@ init_vagrant: installE2eTools clean
 		  KUBECONFIG_PATH=$(E2E_KUBECONFIG_PATH) \
 		  HOSTPORT_HOST_ALONE_PYROSCOPE=$(PYROSCOPE_HOST_PORT)  \
 		  VMPORT_HOST_ALONE_PYROSCOPE=$(PYROSCOPE_VM_PORT)  \
+		  VAGRANT_IMAGE_K8S=$(E2E_VAGRANT_IMAGE_K8S) \
+		  VAGRANT_IMAGE_UBUNTU=$(E2E_VAGRANT_IMAGE_UBUNTU) \
 		  ./setupCluster.sh on
 	@echo "===================== deploy prometheus CRD ========== "
 	# https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml ; } \

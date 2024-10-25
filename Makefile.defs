@@ -155,6 +155,9 @@ endif
 
 E2E_KUBECONFIG_PATH="$(ROOT_DIR)/tests/vagrant/config"
 
+E2E_VAGRANT_IMAGE_K8S=alvistack/kubernetes-1.30
+E2E_VAGRANT_IMAGE_UBUNTU=alvistack/ubuntu-24.04
+
 E2E_VM_HOST=host-alone
 E2E_VM_MASTER=k8s-master
 E2E_VM_WORKER=k8s-worker

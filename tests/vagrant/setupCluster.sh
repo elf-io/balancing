@@ -8,8 +8,8 @@ CURRENT_FILENAME=`basename $0`
 CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
 
 # 定义镜像变量
-K8S_IMAGE=${K8S_IMAGE:-"alvistack/kubernetes-1.30"}
-UBUNTU_IMAGE=${UBUNTU_IMAGE:-"alvistack/ubuntu-24.04"}
+VAGRANT_IMAGE_K8S=${VAGRANT_IMAGE_K8S:-"alvistack/kubernetes-1.30"}
+VAGRANT_IMAGE_UBUNTU=${VAGRANT_IMAGE_UBUNTU:-"alvistack/ubuntu-24.04"}
 # 定义资源变量
 VM_MEMORY=${VM_MEMORY:-$((${VM_MEMORY:-1024}*8))}
 VM_CPUS=${VM_CPUS:-"4"}
@@ -53,7 +53,7 @@ Vagrant.configure("2") do |config|
 
   # 定义 Kubernetes 主节点虚拟机
   config.vm.define "k8s-master" do |k8s|
-    k8s.vm.box = "$K8S_IMAGE"
+    k8s.vm.box = "$VAGRANT_IMAGE_K8S"
     k8s.vm.hostname = "k8s-master"
     k8s.vm.network "private_network", ip: "192.168.0.10", netmask: "255.255.255.0", ipv6: "fd00::10", ipv6_prefix_length: 64
     k8s.vm.network "forwarded_port", guest: 6443, host: ${HOSTPORT_API_SERVER}
@@ -100,7 +100,7 @@ Vagrant.configure("2") do |config|
 
   # 定义 Kubernetes 工作节点虚拟机
   config.vm.define "k8s-worker" do |k8s|
-    k8s.vm.box = "$K8S_IMAGE"
+    k8s.vm.box = "$VAGRANT_IMAGE_K8S"
     k8s.vm.hostname = "k8s-worker"
     k8s.vm.network "private_network", ip: "192.168.0.11", netmask: "255.255.255.0", ipv6: "fd00::11", ipv6_prefix_length: 64
     k8s.vm.provider "virtualbox" do |vb|
@@ -156,7 +156,7 @@ Vagrant.configure("2") do |config|
 
   # 定义 Ubuntu 虚拟机
   config.vm.define "host-alone" do |ubuntu|
-    ubuntu.vm.box = "$UBUNTU_IMAGE"
+    ubuntu.vm.box = "$VAGRANT_IMAGE_UBUNTU"
     ubuntu.vm.hostname = "host-alone"
     ubuntu.vm.network "private_network", ip: "192.168.0.2", netmask: "255.255.255.0", ipv6: "fd00::2", ipv6_prefix_length: 64
     ubuntu.vm.network "forwarded_port", guest: 80, host: ${HOSTPORT_HOST_ALONE_HTTP}
@@ -199,8 +199,7 @@ SetKubeconfig(){
     DONE=""
     for i in {1..60}; do
       echo "waiting for cluster ready: ${i}"
-      kubectl get pod -A | sed '1d' | grep -v Running &>/dev/null
-      if [ $? -eq 0 ]; then
+      if kubectl get pod -A | sed '1d' | grep -v Running &>/dev/null ; then
         sleep 10
         continue
       fi
