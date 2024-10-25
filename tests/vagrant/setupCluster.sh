@@ -3,25 +3,21 @@
 CURRENT_FILENAME=`basename $0`
 CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
 
-
 # 定义镜像变量
 K8S_IMAGE=${K8S_IMAGE:-"alvistack/kubernetes-1.31"}
 UBUNTU_IMAGE=${UBUNTU_IMAGE:-"alvistack/ubuntu-24.04"}
-
 # 定义资源变量
 VM_MEMORY=${VM_MEMORY:-$((${VM_MEMORY:-1024}*8))}
 VM_CPUS=${VM_CPUS:-"4"}
-
 # PORT
 HOSTPORT_API_SERVER=${HOSTPORT_API_SERVER:-"26443"}
 HOSTPORT_HOST_ALONE_HTTP=${HOSTPORT_HOST_ALONE_HTTP:-"26440"}
 HOSTPORT_MASTER_PROXY_SERVER=${HOSTPORT_MASTER_PROXY_SERVER:-"27000"}
 HOSTPORT_HOST_ALONE_PYROSCOPE=${HOSTPORT_HOST_ALONE_PYROSCOPE:-"28000"}
 VMPORT_HOST_ALONE_PYROSCOPE=${VMPORT_HOST_ALONE_PYROSCOPE:-"8040"}
-
+#
 KUBECONFIG_PATH=${KUBECONFIG_PATH:-${CURRENT_DIR_PATH}/config}
-
-
+#
 DEFAULT_ROUTER_TO_HOST="false"
 
 # 检查命令行参数
@@ -240,14 +236,19 @@ SetKubeconfig(){
 # 根据参数执行相应操作
 case "$1" in
   on)
-    echo "start time: $(date)"
+    echo "============================================================================"
+    echo "start setting up vagrant cluster: $(date)"
     create_vagrantfile
     vagrant up
     SetKubeconfig
-    echo "end time: $(date)"
+    echo "finish setting up vagrant cluster: $(date)"
+    echo "============================================================================"
     ;;
   off)
+    echo "============================================================================"
+    echo "destroy vagrant cluster"
     vagrant destroy -f k8s-master k8s-worker host-alone
+    echo "============================================================================"
     ;;
   *)
     echo "Invalid command. Use 'on' to start the VMs or 'off' to destroy them."

@@ -5,7 +5,10 @@ include ../Makefile.defs
 init_env:
 	make init_vagrant
 	make install_proscope
-
+	@echo "========================================================"
+	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
+	@echo "   kubectl get pod -o wide -A                           "
+	@echo "========================================================"
 
 .PHONY: init_vagrant
 init_vagrant: installE2eTools clean
@@ -32,7 +35,6 @@ init_vagrant: installE2eTools clean
 	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
 	@echo "   kubectl get pod -o wide -A                           "
 	@echo "========================================================"
-
 
 .PHONY: installE2eTools
 installE2eTools:
@@ -138,7 +140,7 @@ deploy_project:
 				  docker pull $${IMAGE} ; \
 				fi ;\
 				echo "load local image $${IMAGE} " ; \
-				( cd vagrant ; ./scripts/loadHostImages.sh $${IMAGE}  ) ; \
+				( cd vagrant ; ./loadHostImages.sh $${IMAGE}  ) ; \
 				if grep "agent" <<< "$${IMAGE}" &>/dev/null ; then \
 						AGENT_IMAGE=$${IMAGE} ; \
 				fi ; \
@@ -193,7 +195,7 @@ install_example_app:
 						  docker pull $${IMAGE} ; \
 					fi ;\
 					echo "load local image $${IMAGE} " ; \
-				    ( cd vagrant ; ./scripts/loadHostImages.sh $${IMAGE}  ) ; \
+				    ( cd vagrant ; ./loadHostImages.sh $${IMAGE}  ) ; \
 				done ; \
 			fi \
 		done

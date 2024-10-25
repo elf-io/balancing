@@ -35,7 +35,7 @@ for VM in $RUNNING_NAMES ; do
     [ -n "$EXCLUDE_VM_LIST" ] && grep " $VM " <<< " ${EXCLUDE_VM_LIST} " &>/dev/null && echo "ignore vm $VM" && continue
     echo "load $ImageName to VM $VM "
     if ${CURRENT_DIR_PATH}/ssh  $VM " podman images &>/dev/null " &>/dev/null ; then
-        if SSH_CMD $VM " podman images  " | awk '{ printf("%s:%s\n",$1,$2) }' | grep "$ImageName" &>/dev/null ; then
+        if ${CURRENT_DIR_PATH}/ssh $VM " podman images  " | awk '{ printf("%s:%s\n",$1,$2) }' | grep "$ImageName" &>/dev/null ; then
             echo "image $ImageName exists in VM $VM, ignore copy "
             continue
         fi
