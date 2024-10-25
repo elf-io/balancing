@@ -8,7 +8,7 @@
     map_affinity  map_backend  map_configure  map_event  map_nat_record  map_node_ip  map_node_proxy_ip  map_service
 
 #主机上 cgroup v2 挂载
-~# ls /run/balancing/cgroupv2
+~# ls /sys/fs/cgroup
     cgroup.controllers      cgroup.stat             cpuset.cpus.isolated   dev-mqueue.mount  io.prio.class     memory.reclaim          proc-sys-fs-binfmt_misc.mount  system.slice
     cgroup.max.depth        cgroup.subtree_control  cpuset.mems.effective  init.scope        io.stat           memory.stat             sys-fs-fuse-connections.mount  user.slice
     cgroup.max.descendants  cgroup.threads          cpu.stat               io.cost.model     kubepods.slice    memory.zswap.writeback  sys-kernel-config.mount

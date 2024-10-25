@@ -18,9 +18,8 @@ helm install -n elf balancing ./charts \
   docker run -d --net=host \
       --privileged \
       -v /tmp/config:/config  \
-      -v /sys/fs:/sys/fs \
+      -v /sys/fs:/sys/fs:rw \
       -v /proc:/host/proc \
-      -v /run/balancing:/run/balancing:rw \
       ghcr.io/elf-io/balancing-agent:v0.0.1 \
       bash -c "KUBECONFIG=/config /usr/bin/agent"
 ```

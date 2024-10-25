@@ -218,9 +218,6 @@ spec:
             - name: ebpf-map
               mountPath: /sys/fs
               mountPropagation: Bidirectional
-            - name: cgroup-fs
-              mountPath: /run/balancing
-              mountPropagation: Bidirectional
             {{- if .Values.balancingAgent.extraVolumes }}
             {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.extraVolumeMounts "context" $ ) | nindent 12 }}
             {{- end }}

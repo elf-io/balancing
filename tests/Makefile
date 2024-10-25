@@ -167,7 +167,7 @@ deploy_project:
 		( cd vagrant ; ./cpToVM "$(E2E_VM_HOST)" ./config_old /home/vagrant/config  ) ; \
 		( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  \
 			sudo docker run -d --net=host --privileged  -v /home/vagrant/config:/config  \
-                          -v /sys/fs:/sys/fs  -v /proc:/host/proc -v /run/balancing:/run/balancing:rw \
+                          -v /sys/fs:/sys/fs:rw  -v /proc:/host/proc \
                           "$${AGENT_IMAGE}"  bash -c "KUBECONFIG=/config /usr/bin/agent" ; \
 		) ; \
 		exit 0
