@@ -31,6 +31,18 @@ create_vagrantfile() {
   cat <<EOF > Vagrantfile
 Vagrant.configure("2") do |config|
 
+  config.vm.provision "shell", privileged: true, run: "once", inline: <<-SHELL
+      # 确保 vagrant 用户具有 sudo 权限
+      echo "vagrant ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/vagrant
+      sudo chmod 0440 /etc/sudoers.d/vagrant
+      echo "sudo -i" >> /home/vagrant/.bashrc
+      # 生成 SSH 密钥对
+      [ -d '/root/.ssh' ] || mkdir /root/.ssh
+      cp /home/vagrant/scripts/ssh/* /root/.ssh
+      cp /home/vagrant/scripts/ssh/id_rsa.pub  /root/.ssh/authorized_keys
+      chmod 0600 /root/.ssh/id_rsa
+  SHELL
+
   # 定义 Kubernetes 主节点虚拟机
   config.vm.define "k8s-master" do |k8s|
     k8s.vm.box = "$K8S_IMAGE"
@@ -51,23 +63,10 @@ Vagrant.configure("2") do |config|
       set -o nounset
       set -o pipefail
 
-      # 确保 vagrant 用户具有 sudo 权限
-      echo "vagrant ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/vagrant
-      sudo chmod 0440 /etc/sudoers.d/vagrant
-
       # the image disable ipv6 by default, so reconfigure it 
       sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0
       sudo ip a a 192.168.0.10/24 dev eth1 || true
-      sudo ip a a fd00::10/64 dev eth1 || true  
-
-      # 生成 SSH 密钥对
-      [ -d '/root/.ssh' ] || mkdir /root/.ssh
-      cp /home/vagrant/scripts/ssh/* /root/.ssh
-      cp /home/vagrant/scripts/ssh/id_rsa.pub  /root/.ssh/authorized_keys
-      chmod 0600 /root/.ssh/id_rsa
-
-      # 在 .bashrc 中添加 sudo -i, vagrant ssh 登录后默认有 root 权限
-      echo "sudo -i" >> /home/vagrant/.bashrc
+      sudo ip a a fd00::10/64 dev eth1 || true
 
       # set up kubernetes master
       chmod +x /home/vagrant/scripts/resetNode.sh
@@ -109,23 +108,10 @@ Vagrant.configure("2") do |config|
       set -o nounset
       set -o pipefail
 
-      # 确保 vagrant 用户具有 sudo 权限
-      echo "vagrant ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/vagrant
-      sudo chmod 0440 /etc/sudoers.d/vagrant
-
       # the image disable ipv6 by default, so reconfigure it 
       sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0
       sudo ip a a 192.168.0.11/24 dev eth1 || true
       sudo ip a a fd00::11/64 dev eth1 || true
-
-      # 生成 SSH 密钥对
-      [ -d '/root/.ssh' ] || mkdir /root/.ssh
-      cp /home/vagrant/scripts/ssh/* /root/.ssh
-      cp /home/vagrant/scripts/ssh/id_rsa.pub  /root/.ssh/authorized_keys
-      chmod 0600 /root/.ssh/id_rsa
-
-      # 在 .bashrc 中添加 sudo -i
-      echo "sudo -i" >> /home/vagrant/.bashrc
 
       # set up kubernetes worker
       chmod +x /home/vagrant/scripts/resetNode.sh
@@ -174,23 +160,10 @@ Vagrant.configure("2") do |config|
       set -o nounset
       set -o pipefail
 
-      # 确保 vagrant 用户具有 sudo 权限
-      echo "vagrant ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/vagrant
-      sudo chmod 0440 /etc/sudoers.d/vagrant
-
-      # 生成 SSH 密钥对
-      [ -d '/root/.ssh' ] || mkdir /root/.ssh
-      cp /home/vagrant/scripts/ssh/* /root/.ssh
-      cp /home/vagrant/scripts/ssh/id_rsa.pub  /root/.ssh/authorized_keys
-      chmod 0600 /root/.ssh/id_rsa
-
       # the image disable ipv6 by default, so reconfigure it 
       sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0
       sudo ip a a 192.168.0.2/24 dev eth1 || true
       sudo ip a a fd00::2/64 dev eth1 || true
-
-      # 在 .bashrc 中添加 sudo -i
-      echo "sudo -i" >> /home/vagrant/.bashrc
 
       apt-get update
       apt-get install -y docker.io

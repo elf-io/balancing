@@ -25,7 +25,7 @@ FILE_NAME="${FILE_NAME}.tar"
 
 echo "docker save $ $ImageName "
 rm -f /tmp/${FILE_NAME}
-docker save -o /tmp/${FILE_NAME} $ImageName
+sudo docker save -o /tmp/${FILE_NAME} $ImageName
 
 if [ -n "${SPECIFIED_VM_LIST}" ] ; then
   RUNNING_NAMES="${SPECIFIED_VM_LIST}"
@@ -34,29 +34,29 @@ fi
 for VM in $RUNNING_NAMES ; do
     [ -n "$EXCLUDE_VM_LIST" ] && grep " $VM " <<< " ${EXCLUDE_VM_LIST} " &>/dev/null && echo "ignore vm $VM" && continue
     echo "load $ImageName to VM $VM "
-    if ${CURRENT_DIR_PATH}/ssh  $VM " podman images &>/dev/null " &>/dev/null ; then
-        if ${CURRENT_DIR_PATH}/ssh $VM " podman images  " | awk '{ printf("%s:%s\n",$1,$2) }' | grep "$ImageName" &>/dev/null ; then
+    if ${CURRENT_DIR_PATH}/ssh  $VM "sudo podman images &>/dev/null " &>/dev/null ; then
+        if ${CURRENT_DIR_PATH}/ssh $VM "sudo podman images  " | awk '{ printf("%s:%s\n",$1,$2) }' | grep "$ImageName" &>/dev/null ; then
             echo "image $ImageName exists in VM $VM, ignore copy "
             continue
         fi
         ${CURRENT_DIR_PATH}/cpToVM $VM /tmp/${FILE_NAME}   /tmp/${FILE_NAME}
-        ${CURRENT_DIR_PATH}/ssh $VM "podman load -i /tmp/${FILE_NAME} "
+        ${CURRENT_DIR_PATH}/ssh $VM "sudo podman load -i /tmp/${FILE_NAME} "
         ${CURRENT_DIR_PATH}/ssh $VM "rm -f /tmp/${FILE_NAME} "
-    elif ${CURRENT_DIR_PATH}/ssh $VM " crictl images &>/dev/null " &>/dev/null ; then
-        if ${CURRENT_DIR_PATH}/ssh $VM " crictl images  " | awk '{ printf("%s:%s\n",$1,$2) }' | grep "$ImageName" &>/dev/null ; then
+    elif ${CURRENT_DIR_PATH}/ssh $VM "sudo crictl images &>/dev/null " &>/dev/null ; then
+        if ${CURRENT_DIR_PATH}/ssh $VM "sudo crictl images  " | awk '{ printf("%s:%s\n",$1,$2) }' | grep "$ImageName" &>/dev/null ; then
             echo "image $ImageName exists in VM $VM, ignore copy "
             continue
         fi
         ${CURRENT_DIR_PATH}/cpToVM $VM /tmp/${FILE_NAME}   /tmp/${FILE_NAME}
-        ${CURRENT_DIR_PATH}/ssh $VM "ctr -n k8s.io images import /tmp/${FILE_NAME} "
+        ${CURRENT_DIR_PATH}/ssh $VM "sudo ctr -n k8s.io images import /tmp/${FILE_NAME} "
         ${CURRENT_DIR_PATH}/ssh $VM "rm -f /tmp/${FILE_NAME} "
     else
-        if ${CURRENT_DIR_PATH}/ssh $VM " docker images  " | awk '{ printf("%s:%s\n",$1,$2) }' | grep "$ImageName" &>/dev/null ; then
+        if ${CURRENT_DIR_PATH}/ssh $VM "sudo docker images  " | awk '{ printf("%s:%s\n",$1,$2) }' | grep "$ImageName" &>/dev/null ; then
             echo "image $ImageName exists in VM $VM, ignore copy "
             continue
         fi
         ${CURRENT_DIR_PATH}/cpToVM $VM /tmp/${FILE_NAME}   /tmp/${FILE_NAME}
-        ${CURRENT_DIR_PATH}/ssh $VM "docker load -i /tmp/${FILE_NAME} "
+        ${CURRENT_DIR_PATH}/ssh $VM "sudo docker load -i /tmp/${FILE_NAME} "
         ${CURRENT_DIR_PATH}/ssh $VM "rm -f /tmp/${FILE_NAME} "
     fi
 done

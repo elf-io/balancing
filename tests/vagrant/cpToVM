@@ -7,9 +7,6 @@ VM_PATH="$3"
 CURRENT_FILENAME=`basename $0`
 CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
 
-PROJECT_DIR_PATH=$( cd ${CURRENT_DIR_PATH}/.. && pwd )
-SSH_KEY=${PROJECT_DIR_PATH}/common/.ssh/id_rsa
-
 usage(){
   echo "bad input"
   echo "usage:"

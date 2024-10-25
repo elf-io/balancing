@@ -166,7 +166,7 @@ deploy_project:
 				|| {  ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ; \
 		echo "begin to deploy agent on host node " ; \
 		( cd vagrant ; ./cpToVM "$(E2E_VM_HOST)" ./config /home/vagrant/config  ) ; \
-		( cd vagrant ; ./scripts/ssh \
+		( cd vagrant ; ./ssh \
 			docker run -d --net=host --privileged  -v /home/vagrant/config:/config  \
                           -v /sys/fs:/sys/fs  -v /proc:/host/proc -v /var/run/balancing:/run/balancing \
                           "$${AGENT_IMAGE}"  bash -c "KUBECONFIG=/admin.conf /usr/bin/agent" ; \
@@ -206,7 +206,7 @@ install_example_app:
 			|| { ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ;\
 			echo " deploy proxy on host node" ; \
 			IMAGE=` helm template test ./charts/proxyserver --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
-			( cd vagrant ; ./scripts/ssh \
+			( cd vagrant ; ./ssh \
 				docker run -d --net=host  \
 							  "$${IMAGE}"  bash -c "/usr/sbin/proxy_server -port=80" ; \
 			)
