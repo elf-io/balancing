@@ -158,6 +158,7 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 	// 把 ebpf 程序再挂载到 cgroup
 	// https://github.com/cilium/ebpf/blob/main/link/cgroup.go#L43
 	s.l.Sugar().Debugf("attach AttachCGroupUDP4Sendmsg")
+	// 返回的 CgroupLink 必须进行存储，否则会被 GC 而触发 attach 被释放的问题
 	s.CgroupLinkSend, err = link.AttachCgroup(link.CgroupOptions{
 		Path:    types.CgroupV2Path,
 		Attach:  ebpf.AttachCGroupUDP4Sendmsg,
@@ -167,6 +168,7 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 		return fmt.Errorf("Error attaching Sock4Sendmsg to cgroup: %v", err)
 	}
 	s.l.Sugar().Debugf("attach AttachCGroupUDP4Recvmsg")
+	// 返回的 CgroupLink 必须进行存储，否则会被 GC 而触发 attach 被释放的问题
 	s.CgroupLinkRecv, err = link.AttachCgroup(link.CgroupOptions{
 		Path:    types.CgroupV2Path,
 		Attach:  ebpf.AttachCGroupUDP4Recvmsg,
@@ -176,6 +178,7 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 		return fmt.Errorf("Error attaching Sock4Recvmsg to cgroup: %v", err)
 	}
 	s.l.Sugar().Debugf("attach AttachCgroupInet4GetPeername")
+	// 返回的 CgroupLink 必须进行存储，否则会被 GC 而触发 attach 被释放的问题
 	s.CgroupLinkPeer, err = link.AttachCgroup(link.CgroupOptions{
 		Path:    types.CgroupV2Path,
 		Attach:  ebpf.AttachCgroupInet4GetPeername,
@@ -185,6 +188,7 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 		return fmt.Errorf("Error attaching Sock4Getpeername to cgroup: %v", err)
 	}
 	s.l.Sugar().Debugf("attach AttachCGroupInet4Connect")
+	// 返回的 CgroupLink 必须进行存储，否则会被 GC 而触发 attach 被释放的问题
 	s.CgroupLinkConnect, err = link.AttachCgroup(link.CgroupOptions{
 		Path:    types.CgroupV2Path,
 		Attach:  ebpf.AttachCGroupInet4Connect,

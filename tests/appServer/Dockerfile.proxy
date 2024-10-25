@@ -1,5 +1,5 @@
 # docker build -t myproxy -f Dockerfile.proxy .
-# docker run -p 8090:8090 myproxy
+# docker run -p 80:80 myproxy
 
 FROM golang:1.23.1 AS builder
 
