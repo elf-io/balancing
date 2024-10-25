@@ -116,7 +116,7 @@ jobs:
           shell: bash
           command: |
             make e2e_init -e E2E_KIND_CLUSTER_NAME=${{ env.RUN_KIND_CLUSTER_NAME }} \
-                -e PROJECT_IMAGE_VERSION=${{ inputs.ref }} \
+                -e PROJECT_IMAGE_TAG=${{ inputs.ref }} \
                 -e E2E_IP_FAMILY=${{ inputs.ipfamily }} \
                 -e PYROSCOPE_VM_PORT='' \
                 -e E2E_KIND_NODE_IMAGE=${{ inputs.kind_node_image }}

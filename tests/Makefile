@@ -98,7 +98,7 @@ check_test_app_images_ready:
 .PHONY: check_images_ready
 check_images_ready:
 	echo "check balancing image  " ; \
-	IMAGE_LIST=` helm template test $(ROOT_DIR)/charts --set global.imageTagOverride=$(PROJECT_IMAGE_VERSION)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
+	IMAGE_LIST=` helm template test $(ROOT_DIR)/charts --set global.imageTagOverride=$(PROJECT_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
 	if [ -z "$${IMAGE_LIST}" ] ; then \
 		echo "warning, failed to find image from chart " ; \
 		exit 1 ;\
@@ -127,8 +127,8 @@ check_images_ready:
 # install balancing on global cluster
 .PHONY: deploy_project
 deploy_project:
-	echo "try to load local image tag $(PROJECT_IMAGE_VERSION) " ; \
-		IMAGE_LIST=` helm template test $(ROOT_DIR)/charts --set global.imageTagOverride=$(PROJECT_IMAGE_VERSION)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
+	echo "try to load local image tag $(PROJECT_IMAGE_TAG) " ; \
+		IMAGE_LIST=` helm template test $(ROOT_DIR)/charts --set global.imageTagOverride=$(PROJECT_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
 		if [ -z "$${IMAGE_LIST}" ] ; then \
 			echo "warning, failed to find image from chart " ; \
 		else \
@@ -159,7 +159,7 @@ deploy_project:
 		HELM_OPTION+=" --set balancingAgent.nodeEntryInterface=eth1 " ; \
 		helm --kubeconfig=$(E2E_KUBECONFIG_PATH) install project $(ROOT_DIR)/charts \
 				-n $(E2E_INSTALL_NAMESPACE) --create-namespace --wait --debug \
-				--set global.imageTagOverride=$(PROJECT_IMAGE_VERSION) \
+				--set global.imageTagOverride=$(PROJECT_IMAGE_TAG) \
 				--set feature.apiServerHost=192.168.0.10 \
                 --set feature.apiServerPort=6443 \
 				$${HELM_OPTION} \

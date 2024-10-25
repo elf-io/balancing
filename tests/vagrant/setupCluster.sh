@@ -1,10 +1,14 @@
 #!/bin/bash
 
+set -o errexit
+set -o nounset
+set -o pipefail
+
 CURRENT_FILENAME=`basename $0`
 CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
 
 # 定义镜像变量
-K8S_IMAGE=${K8S_IMAGE:-"alvistack/kubernetes-1.31"}
+K8S_IMAGE=${K8S_IMAGE:-"alvistack/kubernetes-1.30"}
 UBUNTU_IMAGE=${UBUNTU_IMAGE:-"alvistack/ubuntu-24.04"}
 # 定义资源变量
 VM_MEMORY=${VM_MEMORY:-$((${VM_MEMORY:-1024}*8))}
@@ -32,6 +36,10 @@ create_vagrantfile() {
 Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", privileged: true, run: "once", inline: <<-SHELL
+      set -o errexit
+      set -o nounset
+      set -o pipefail
+
       # 确保 vagrant 用户具有 sudo 权限
       echo "vagrant ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/vagrant
       sudo chmod 0440 /etc/sudoers.d/vagrant
@@ -139,6 +147,9 @@ Vagrant.configure("2") do |config|
         ip route add default via 192.168.0.2
         ip -6 route add default via fd00::2
       fi
+
+      #systemctl restart crio
+      #systemctl restart kubelet
 
     SHELL
   end

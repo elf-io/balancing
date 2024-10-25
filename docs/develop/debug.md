@@ -8,8 +8,16 @@
 
 3. `make e2e_init  `
 
-4. `make e2e_deploy`
-   `make e2e_deploy -e PROJECT_IMAGE_VERSION=7327c2b95b5a951f83055affcfe17d3e0dbb6c85 -e TEST_APP_IMAGE_TAG=c357da95d2bbe22e2573753d63e7dbf44d1d2edd`
+4. 
+
+```
+make e2e_deploy`
+
+#or 
+
+make e2e_deploy -e PROJECT_IMAGE_TAG=eeb9274aa3a7ed4187d00f73b01e91b9f487e9dc \
+                -e TEST_APP_IMAGE_TAG=c357da95d2bbe22e2573753d63e7dbf44d1d2edd
+```
 
 6. check proscope, browser visits http://NodeIP:4040
 

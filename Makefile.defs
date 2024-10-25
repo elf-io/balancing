@@ -147,9 +147,9 @@ TEST_APP_BACKEND_SERVER_IMAGE := ${REGISTER}/${GIT_REPO}-backend_server:$(TEST_A
 #===================== E2E
 
 
-PROJECT_IMAGE_VERSION ?= $(GIT_COMMIT_VERSION)
-ifeq ($(PROJECT_IMAGE_VERSION),)
-    PROJECT_IMAGE_VERSION = $(shell cat $(ROOT_DIR)/VERSION | tr -d ' ' | tr -d '\n' )
+PROJECT_IMAGE_TAG ?= $(GIT_COMMIT_VERSION)
+ifeq ($(PROJECT_IMAGE_TAG),)
+    PROJECT_IMAGE_TAG = $(shell cat $(ROOT_DIR)/VERSION | tr -d ' ' | tr -d '\n' )
 endif
 
 
