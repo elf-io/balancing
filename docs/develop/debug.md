@@ -17,6 +17,17 @@ make e2e_deploy -e PROJECT_IMAGE_TAG=cfae79fa0283efa646afc633a7837290701d6a13 \
                 -e TEST_APP_IMAGE_TAG=c357da95d2bbe22e2573753d63e7dbf44d1d2edd
 ```
 
+5. 
+
+```shell
+# visit the proxy server running on the kubernetes, from the host
+curl 127.0.0.1:27000
+
+# visit the proxy server running on the host-alone, from the host
+curl 127.0.0.1:26440
+
+```
+
 6. check proscope, browser visits http://NodeIP:28000
 
 7. check metric
