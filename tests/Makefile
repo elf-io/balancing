@@ -212,7 +212,7 @@ install_example_app:
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" sudo docker rm server || true ; ) ; \
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" \
 				sudo docker run -d --net=host --name server \
-							  "$${IMAGE}"  bash -c "/usr/sbin/proxy_server -port=80" ; \
+							  "$${IMAGE}"  bash -c '/usr/sbin/proxy_server -port=80' ; \
 			)
 	echo "deploy backend server " ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  backendserver &>/dev/null || true ; \

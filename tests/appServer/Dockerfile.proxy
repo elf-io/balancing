@@ -16,6 +16,5 @@ RUN [ -z "${APT_HTTP_PROXY}" ] || { echo "use APT_HTTP_PROXY=${APT_HTTP_PROXY}" 
 
 COPY --from=builder /app/proxy_server /usr/sbin
 
-EXPOSE 8090
-CMD ["/usr/sbin/proxy_server"]
-
+EXPOSE 80
+CMD ["sh", "-c", "/usr/sbin/proxy_server -port 80"]
