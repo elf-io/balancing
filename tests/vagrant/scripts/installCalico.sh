@@ -31,13 +31,24 @@ PullImage
 
 kubectl set env daemonset -n kube-system calico-node CALICO_IPV4POOL_IPIP=Never
 kubectl set env daemonset -n kube-system calico-node CALICO_IPV4POOL_VXLAN=CrossSubnet
-kubectl set env daemonset -n kube-system calico-node CALICO_IPV6POOL_VXLAN=CrossSubnet
 kubectl set env daemonset -n kube-system calico-node CALICO_IPV4POOL_NAT_OUTGOING=true
 kubectl set env daemonset -n kube-system calico-node CALICO_IPV6POOL_NAT_OUTGOING=true
 kubectl set env daemonset -n kube-system calico-node IP_AUTODETECTION_METHOD="can-reach=192.168.0.10"
 kubectl set env daemonset -n kube-system calico-node IP6_AUTODETECTION_METHOD="can-reach=fd00::10"
 kubectl set env daemonset -n kube-system calico-node FELIX_IPV6SUPPORT=true
 #kubectl set env daemonset -n kube-system calico-node FELIX_IPTABLESBACKEND=NFT
+
+
+#kubectl set env daemonset -n kube-system calico-node CALICO_IPV6POOL_VXLAN=CrossSubnet
+#kubectl set env daemonset -n kube-system calico-node CALICO_NETWORKING_BACKEND=vxlan
+#kubectl patch configmap -n kube-system calico-config -p '{"data":{"calico_backend": "vxlan"}}'
+#kubectl patch FelixConfiguration default  -p '{"spec":{"vxlanEnabled": true}}'  --type merge
+
+kubectl patch FelixConfiguration default  -p '{"spec":{"bpfEnabled": false}}'  --type merge
+kubectl patch FelixConfiguration default  -p '{"spec":{"ipv6Support": true}}'  --type merge
+
+
+
 
 kubectl set env daemonset -n kube-system calico-node CALICO_IPV6POOL_CIDR="fc01::/48"
 
@@ -64,10 +75,10 @@ metadata:
 spec:
   blockSize: 122
   cidr: fc01::/48
-  ipipMode: Never
+  #ipipMode: Never
   natOutgoing: true
   nodeSelector: all()
-  vxlanMode: CrossSubnet
+  #vxlanMode: CrossSubnet
 EOF
 
 
