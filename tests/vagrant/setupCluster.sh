@@ -127,7 +127,8 @@ Vagrant.configure("2") do |config|
       chmod +x /home/vagrant/scripts/join.sh
       sudo /home/vagrant/scripts/join.sh 
       #
-      sudo mkdir /root/.kube
+      rm -rf /root/.kube || true
+      sudo mkdir /root/.kube || true
       sudo scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null 192.168.0.10:/root/.kube/config /root/.kube/config
 
       if [ "${DEFAULT_ROUTER_TO_HOST}" == "true" ]; then
