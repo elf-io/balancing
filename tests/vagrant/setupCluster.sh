@@ -5,7 +5,7 @@ CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
 
 
 # 定义镜像变量
-K8S_IMAGE=${K8S_IMAGE:-"alvistack/kubernetes-1.30"}
+K8S_IMAGE=${K8S_IMAGE:-"alvistack/kubernetes-1.31"}
 UBUNTU_IMAGE=${UBUNTU_IMAGE:-"alvistack/ubuntu-24.04"}
 
 # 定义资源变量
@@ -21,6 +21,8 @@ VMPORT_HOST_ALONE_PYROSCOPE=${VMPORT_HOST_ALONE_PYROSCOPE:-"8040"}
 
 KUBECONFIG_PATH=${KUBECONFIG_PATH:-${CURRENT_DIR_PATH}/config}
 
+
+DEFAULT_ROUTER_TO_HOST="false"
 
 # 检查命令行参数
 if [ "$#" -ne 1 ]; then
@@ -82,13 +84,14 @@ Vagrant.configure("2") do |config|
       chmod +x /home/vagrant/scripts/installCalico.sh
       /home/vagrant/scripts/installCalico.sh
 
-      # 删除原有默认路由
-      ip route del default || true
-      ip -6 route del default || true
-      # 设置新的默认路由
-      ip route add default via 192.168.0.2
-      ip -6 route add default via fd00::2
-
+      if [ "${DEFAULT_ROUTER_TO_HOST}" == "true" ]; then
+        # 删除原有默认路由
+        ip route del default || true
+        ip -6 route del default || true
+        # 设置新的默认路由
+        ip route add default via 192.168.0.2
+        ip -6 route add default via fd00::2
+      fi
     SHELL
   end
 
@@ -142,12 +145,14 @@ Vagrant.configure("2") do |config|
       chmod +x /home/vagrant/scripts/join.sh
       sudo /home/vagrant/scripts/join.sh 
 
-      # 删除原有默认路由
-      ip route del default || true
-      ip -6 route del default || true
-      # 设置新的默认路由
-      ip route add default via 192.168.0.2
-      ip -6 route add default via fd00::2
+      if [ "${DEFAULT_ROUTER_TO_HOST}" == "true" ]; then
+        # 删除原有默认路由
+        ip route del default || true
+        ip -6 route del default || true
+        # 设置新的默认路由
+        ip route add default via 192.168.0.2
+        ip -6 route add default via fd00::2
+      fi
 
     SHELL
   end
@@ -205,17 +210,17 @@ EOF
 SetKubeconfig(){
     sshpass -p vagrant scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -P 2222 vagrant@127.0.0.1:/home/vagrant/.kube/config ${KUBECONFIG_PATH}
     sed -i -E 's?server: .*?server: https://127.0.0.1:'${HOSTPORT_API_SERVER}'?' ${KUBECONFIG_PATH}
-
+    export KUBECONFIG=${KUBECONFIG_PATH}
     echo "wait for cluster ready"
     DONE=""
     for i in {1..60}; do
       echo "waiting for cluster ready: ${i}"
-      KUBECONFIG=${KUBECONFIG_PATH} kubectl get pod -A | sed '1d' | grep -v Running &>/dev/null
+      kubectl get pod -A | sed '1d' | grep -v Running &>/dev/null
       if [ $? -eq 0 ]; then
         sleep 10
-        DONE="true"
         continue
       fi
+      DONE="true"
       break
     done
     if [ -z "$DONE" ] ; then
@@ -224,7 +229,7 @@ SetKubeconfig(){
     fi
 
     echo "============================"
-    KUBECONFIG=${KUBECONFIG_PATH} kubectl get pod -A
+    kubectl get pod -A
     echo "============================"
 
     echo "export KUBECONFIG=${KUBECONFIG_PATH}"
