@@ -167,11 +167,11 @@ deploy_project:
 				$${HELM_OPTION} \
 				|| {  ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ; \
 		echo "begin to deploy agent on host node " ; \
-		( cd vagrant ; ./cpToVM "$(E2E_VM_HOST)" ./config /home/vagrant/config  ) ; \
+		( cd vagrant ; ./cpToVM "$(E2E_VM_HOST)" ./config_old /home/vagrant/config  ) ; \
 		( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  \
 			sudo docker run -d --net=host --privileged  -v /home/vagrant/config:/config  \
-                          -v /sys/fs:/sys/fs  -v /proc:/host/proc -v /var/run/balancing:/run/balancing \
-                          "$${AGENT_IMAGE}"  bash -c "KUBECONFIG=/admin.conf /usr/bin/agent" ; \
+                          -v /sys/fs:/sys/fs  -v /proc:/host/proc -v /run/balancing:/run/balancing:rw \
+                          "$${AGENT_IMAGE}"  bash -c "KUBECONFIG=/config /usr/bin/agent" ; \
 		) ; \
 		exit 0
 

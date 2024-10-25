@@ -85,6 +85,7 @@ func checkOrMountCgroupV2(cgroupRoot string) error {
 	if err := unix.Mount("none", cgroupRoot, "cgroup2", 0, ""); err != nil {
 		return fmt.Errorf("failed to mount %s: %w", cgroupRoot, err)
 	}
+	fmt.Printf("succeeded mounting cgroupV2 fs on %s \n", cgroupRoot)
 
 	return nil
 }

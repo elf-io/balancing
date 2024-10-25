@@ -2,20 +2,18 @@
 
 ## local develop
 
-1. `make build_local_image -e  APT_HTTP_PROXY=http://10.64.0.3:7890`
+1. ` make build_local_image -e  APT_HTTP_PROXY=http://10.64.0.3:7890 `
 
-2. `make build_local_test_app_image  -e APT_HTTP_PROXY=http://10.64.0.3:7890 `
+2. ` make build_local_test_app_image  -e APT_HTTP_PROXY=http://10.64.0.3:7890 `
 
-3. `make e2e_init  `
+3. ` make e2e_init  `
 
 4. 
 
 ```
-make e2e_deploy`
-
-#or 
-
-make e2e_deploy -e PROJECT_IMAGE_TAG=eeb9274aa3a7ed4187d00f73b01e91b9f487e9dc \
+make e2e_deploy
+#or
+make e2e_deploy -e PROJECT_IMAGE_TAG=64390b6318a72c57dea285467377ff936b2d685c \
                 -e TEST_APP_IMAGE_TAG=c357da95d2bbe22e2573753d63e7dbf44d1d2edd
 ```
 

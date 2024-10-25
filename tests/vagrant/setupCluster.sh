@@ -191,6 +191,7 @@ EOF
 
 SetKubeconfig(){
     sshpass -p vagrant scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -P 2222 vagrant@127.0.0.1:/home/vagrant/.kube/config ${KUBECONFIG_PATH}
+    cp ${KUBECONFIG_PATH} ${KUBECONFIG_PATH}_old
     sed -i -E 's?server: .*?server: https://127.0.0.1:'${HOSTPORT_API_SERVER}'?' ${KUBECONFIG_PATH}
     export KUBECONFIG=${KUBECONFIG_PATH}
     echo "wait for cluster ready"

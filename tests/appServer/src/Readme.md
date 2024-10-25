@@ -14,7 +14,7 @@ go run ./proxy_server.go -port=8090
 ### 直接访问 HTTP 服务器
 使用 `curl` 发送 POST 请求到 HTTP 服务器，并传递 JSON 数据：
 ```bash
-curl -X POST http://127.0.0.1:8080 -d '{"name": "tom"}'
+curl -X POST http://127.0.0.1:8080 -d '{"name": "tom"}' | jq .
 ```
 
 ### 通过代理访问 HTTP 服务器
@@ -28,7 +28,7 @@ curl -X POST http://127.0.0.1:8090 -d '{"BackendUrl":"http://127.0.0.1:8080","Ti
 ### 直接访问 UDP 服务器
 使用 `netcat` 发送数据到 UDP 服务器：
 ```bash
-echo '{"name": "tom"}' | nc -u -w1 localhost 8080
+echo '{"name": "tom"}' | nc -u -w1 localhost 8080 | jq .
 ```
 
 ### 通过代理访问 UDP 服务器

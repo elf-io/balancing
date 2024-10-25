@@ -25,7 +25,7 @@ const (
 
 	BpfFSPath    = "/sys/fs/bpf"
 	MapsPinpath  = BpfFSPath + "/balancing"
-	CgroupV2Path = "/run/balancing"
+	CgroupV2Path = "/run/balancing/cgroupV2"
 
 	LogLevelEbpfDebug = "verbose"
 	LogLevelEbpfInfo  = "info"
