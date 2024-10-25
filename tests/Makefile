@@ -224,8 +224,11 @@ install_example_app:
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) install  redirectserver ./charts/redirectserver \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| { ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
-	@echo "---------- install proxy-server application on host"
-	./scripts/testAppConnectivity.sh "$(E2E_KUBECONFIG_PATH)" "$(E2E_HOSTPORT_MASTER_PROXY_SERVER)"  "$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER)" || { echo "failed to test the connectivity" ; exit 1 ; }
+	@echo "----------"
+	K8S_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_MASTER_PROXY_SERVER)  HOST_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER) KUBECONFIG=$(E2E_KUBECONFIG_PATH) ./scripts/testAppConnectivity.sh basic || { echo "failed to test the connectivity" ; exit 1 ; }
+	K8S_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_MASTER_PROXY_SERVER)  HOST_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER) KUBECONFIG=$(E2E_KUBECONFIG_PATH) ./scripts/testAppConnectivity.sh service || { echo "failed to test the connectivity" ; exit 1 ; }
+	K8S_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_MASTER_PROXY_SERVER)  HOST_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER) KUBECONFIG=$(E2E_KUBECONFIG_PATH) ./scripts/testAppConnectivity.sh balancing || { echo "failed to test the connectivity" ; exit 1 ; }
+	K8S_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_MASTER_PROXY_SERVER)  HOST_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER) KUBECONFIG=$(E2E_KUBECONFIG_PATH) ./scripts/testAppConnectivity.sh redirect || { echo "failed to test the connectivity" ; exit 1 ; }
 	@echo "========================================================"
 	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
 	@echo "   kubectl get pod -o wide -A                           "
