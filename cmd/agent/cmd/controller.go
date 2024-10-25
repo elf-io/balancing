@@ -6,27 +6,17 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/elf-io/balancing/pkg/ebpf"
-	"github.com/elf-io/balancing/pkg/ebpfEvent"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
 	"github.com/elf-io/balancing/pkg/lock"
-	"github.com/elf-io/balancing/pkg/nodeId"
-	"github.com/elf-io/balancing/pkg/podId"
-	"github.com/elf-io/balancing/pkg/podLabel"
 	"github.com/elf-io/balancing/pkg/types"
-	"github.com/elf-io/balancing/pkg/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"net/http"
-	"os"
-	"os/signal"
 	ctrl "sigs.k8s.io/controller-runtime"
 	controllerzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
-	"syscall"
 	"time"
 )
 
@@ -121,79 +111,6 @@ func SetupController(clientConfig *rest.Config, writer ebpfWriter.EbpfWriter) {
 	waitForCacheSync := mgr.GetCache().WaitForCacheSync(context.Background())
 	if !waitForCacheSync {
 		rootLogger.Fatal("failed to wait for syncing controller-runtime cache")
-	}
-
-}
-
-func RunReconciles() {
-
-	rootLogger.Sugar().Debugf("RunReconciles")
-
-	// get clientset
-	apiServerHostAddress := ""
-	if len(types.AgentConfig.KubeconfigPath) > 0 {
-		rootLogger.Sugar().Infof("out of cluster: set Kubebeconfig to %s", types.AgentConfig.KubeconfigPath)
-	} else if len(types.AgentConfig.Configmap.ApiServerHost) > 0 && len(types.AgentConfig.Configmap.ApiServerPort) > 0 {
-		apiServerHostAddress = fmt.Sprintf("%s:%s", types.AgentConfig.Configmap.ApiServerHost, types.AgentConfig.Configmap.ApiServerPort)
-		rootLogger.Sugar().Infof("in cluster: replace the address of api Server to %s", apiServerHostAddress)
-	}
-	clientConfig, e1 := utils.AutoK8sConfig(types.AgentConfig.KubeconfigPath, apiServerHostAddress)
-	if e1 != nil {
-		rootLogger.Sugar().Fatalf("failed to find client-go config, make sure it is in a pod or ~/.kube/config exists: %v", e1)
-	}
-	rootLogger.Sugar().Debugf("clientConfig: %+v", clientConfig)
-
-	Client, e2 := kubernetes.NewForConfig(clientConfig)
-	if e2 != nil {
-		rootLogger.Sugar().Fatalf("failed to NewForConfig: %v", e2)
-	}
-
-	// before informer and ebpf, build nodeId database
-	nodeId.InitNodeIdManager(Client, rootLogger.Named("nodeId"))
-
-	// before informer and ebpf, build pod ip database of local node
-	podId.InitPodIdManager(Client, rootLogger.Named("podId"), types.AgentConfig.LocalNodeName)
-
-	podLabel.InitPodLabelManager(rootLogger.Named("podLabel"))
-
-	// setup ebpf and load
-	bpfManager := ebpf.NewEbpfProgramMananger(rootLogger.Named("ebpf"))
-	if err := bpfManager.LoadProgramp(); err != nil {
-		rootLogger.Sugar().Fatalf("failed to Load ebpf Programp: %v \n", err)
-	}
-	rootLogger.Sugar().Infof("succeeded to Load ebpf Programp \n")
-	// setup ebpf writer
-	writer := ebpfWriter.NewEbpfWriter(Client, bpfManager, InformerListInvterval, rootLogger.Named("ebpfWriter"))
-	// before informer, clean all map data to keep all data up to date
-	writer.CleanEbpfMapData()
-
-	// setup informer
-	stopWatchCh := make(chan struct{})
-	NewPodInformer(Client, stopWatchCh, writer)
-	NewNodeInformer(Client, stopWatchCh, writer)
-
-	NewServiceInformer(Client, stopWatchCh, writer)
-	NewEndpointSliceInformer(Client, stopWatchCh, writer)
-
-	// crd reconcile
-	SetupController(clientConfig, writer)
-
-	//
-	ebpfEvent := ebpfEvent.NewEbpfEvent(rootLogger.Named("ebpfEvent"), bpfManager, writer)
-	ebpfEvent.WatchEbpfEvent(stopWatchCh)
-
-	rootLogger.Info("finish all setup ")
-
-	finishlock.Lock()
-	finishSetUp = true
-	finishlock.Unlock()
-
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
-	for sig := range sigCh {
-		rootLogger.Sugar().Warnf("Received singal %+v ", sig)
-		bpfManager.UnloadProgramp()
-		os.Exit(1)
 	}
 
 }

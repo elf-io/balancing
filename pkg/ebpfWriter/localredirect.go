@@ -144,7 +144,7 @@ func (s *ebpfWriter) DeleteRedirectByPolicy(l *zap.Logger, policyName string) er
 	s.redirectPolicyLock.Lock()
 	defer s.redirectPolicyLock.Unlock()
 
-	if d, ok := s.redirectPolicyData[index]; ok {
+	if d, ok := s.redirectPolicyData[index]; ok && d.Svc != nil {
 		t := map[string]*discovery.EndpointSlice{}
 		if d.Epslice != nil && len(d.Epslice.Endpoints) > 0 {
 			t[d.Epslice.Name] = d.Epslice
@@ -212,6 +212,9 @@ func (s *ebpfWriter) DeleteRedirectByService(l *zap.Logger, svc *corev1.Service)
 	for policyName, data := range s.redirectPolicyData {
 		if data.Policy.Spec.RedirectFrontend.ServiceMatcher != nil {
 			if data.Policy.Spec.RedirectFrontend.ServiceMatcher.ServiceName == svc.Name && data.Policy.Spec.RedirectFrontend.ServiceMatcher.Namespace == svc.Namespace {
+				if data.Svc == nil {
+					return nil
+				}
 				oldSvc := data.Svc
 				s.redirectPolicyData[policyName].Svc = nil
 				t := map[string]*discovery.EndpointSlice{}

@@ -4,10 +4,7 @@ import (
 	"fmt"
 	"github.com/elf-io/balancing/pkg/utils"
 	"net/http"
-	"os"
-	"os/signal"
 	"path"
-	"syscall"
 	"time"
 
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
@@ -121,10 +118,4 @@ func SetupController() {
 	}()
 	finishSetUp = true
 
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
-	for sig := range sigCh {
-		rootLogger.Sugar().Warnf("Received singal %+v ", sig)
-		os.Exit(1)
-	}
 }

@@ -341,6 +341,10 @@ func (s *EbpfProgramStruct) UpdateEbpfMapForService(l *zap.Logger, natType uint8
 
 func (s *EbpfProgramStruct) DeleteEbpfMapForService(l *zap.Logger, natType uint8, svc *corev1.Service, edsList map[string]*discovery.EndpointSlice, natMode *uint8) error {
 
+	if svc == nil {
+		return fmt.Errorf("service is nill")
+	}
+
 	processIpv4 := false
 	processIpv6 := false
 	for _, v := range svc.Spec.IPFamilies {
