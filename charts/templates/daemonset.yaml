@@ -84,6 +84,44 @@ spec:
                     values:
                       - linux
       {{- end }}
+      initContainers:
+        - command:
+            - sh
+            - -ec
+            - |
+              cp /usr/bin/cilium-mount /hostbin/cilium-mount;
+              nsenter --cgroup=/hostproc/1/ns/cgroup --mount=/hostproc/1/ns/mnt "${BIN_PATH}/cilium-mount" $CGROUP_ROOT;
+              rm /hostbin/cilium-mount
+          env:
+            - name: CGROUP_ROOT
+              value: /run/cilium/cgroupv2
+            - name: BIN_PATH
+              value: /opt/cni/bin
+          image: quay.m.daocloud.io/cilium/cilium:v1.15.4
+          imagePullPolicy: IfNotPresent
+          name: mount-cgroup
+          resources: { }
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN
+                - SYS_CHROOT
+                - SYS_PTRACE
+              drop:
+                - ALL
+            seLinuxOptions:
+              level: s0
+              type: spc_t
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: FallbackToLogsOnError
+          volumeMounts:
+            - mountPath: /hostproc
+              name: hostproc
+            - mountPath: /hostbin
+              name: cni-path
+            - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              name: kube-api-access-hgb9m
+              readOnly: true
       containers:
         - name: {{ .Values.balancingAgent.name | trunc 63 | trimSuffix "-" }}
           image: {{ include "project.balancingAgent.image" . | quote }}
@@ -179,6 +217,7 @@ spec:
               mountPath: /host/proc
             - name: ebpf-map
               mountPath: /sys/fs
+              mountPropagation: Bidirectional
             - name: cgroup-fs
               mountPath: /run/balancing
               mountPropagation: Bidirectional

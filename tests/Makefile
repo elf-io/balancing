@@ -2,13 +2,7 @@ include ../Makefile.defs
 
 
 .PHONY: init_env
-init_env:
-	make init_vagrant
-	make install_proscope
-	@echo "========================================================"
-	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
-	@echo "   kubectl get pod -o wide -A                           "
-	@echo "========================================================"
+init_env: init_vagrant install_proscope showInfo
 
 .PHONY: init_vagrant
 init_vagrant: installE2eTools clean
@@ -60,7 +54,10 @@ showInfo:
 		echo "visit pyroscope: http://$${HOST_IP}:$(PYROSCOPE_HOST_PORT)"
 		echo "visit proxy server on $(E2E_VM_HOST): http://127.0.0.1:$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER)"
 		echo "visit proxy server on master node: http://127.0.0.1:$(E2E_HOSTPORT_MASTER_PROXY_SERVER)"
-
+	@echo "========================================================"
+	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
+	@echo "   kubectl get pod -o wide -A                           "
+	@echo "========================================================"
 
 #==================
 
@@ -174,6 +171,7 @@ deploy_project:
                           "$${AGENT_IMAGE}"  bash -c "KUBECONFIG=/config /usr/bin/agent" ; \
 		) ; \
 		exit 0
+		make showInfo
 
 # test kind is ok
 .PHONY: install_example_app
