@@ -57,7 +57,6 @@ Vagrant.configure("2") do |config|
     k8s.vm.hostname = "k8s-master"
     k8s.vm.network "private_network", ip: "192.168.0.10", netmask: "255.255.255.0", ipv6: "fd00::10", ipv6_prefix_length: 64
     k8s.vm.network "forwarded_port", guest: 6443, host: ${HOSTPORT_API_SERVER}
-    k8s.vm.network "forwarded_port", guest: 27000, host: ${HOSTPORT_MASTER_PROXY_SERVER}
     k8s.vm.provider "virtualbox" do |vb|
       vb.memory = "$VM_MEMORY"
       vb.cpus = "$VM_CPUS"
@@ -104,6 +103,7 @@ Vagrant.configure("2") do |config|
     k8s.vm.box = "$VAGRANT_IMAGE_K8S"
     k8s.vm.hostname = "k8s-worker"
     k8s.vm.network "private_network", ip: "192.168.0.11", netmask: "255.255.255.0", ipv6: "fd00::11", ipv6_prefix_length: 64
+    k8s.vm.network "forwarded_port", guest: 27000, host: ${HOSTPORT_MASTER_PROXY_SERVER}
     k8s.vm.provider "virtualbox" do |vb|
       vb.memory = "$VM_MEMORY"
       vb.cpus = "$VM_CPUS"
