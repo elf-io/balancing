@@ -77,16 +77,16 @@ func (s *ebpfWriter) UpdateRedirectByPolicy(l *zap.Logger, policy *balancingv1be
 				l.Sugar().Errorf("failed to DeepCopy service %s: %v", e, svcData.Svc.Name)
 				s.ebpfServiceLock.Unlock()
 				return fmt.Errorf("failed to DeepCopy service: %v", e)
-			} else {
-				s.ebpfServiceLock.Unlock()
-				l.Sugar().Errorf("did not find service %s for policy %v", index, policy.Name)
-				goto PROCESS_EDS_LABEL
 			}
 			policyData.Svc = &svc
 			svc.Annotations[types.AnnotationServiceID] = policy.Annotations[types.AnnotationServiceID]
 			frontReady = true
+			s.ebpfServiceLock.Unlock()
+		} else {
+			s.ebpfServiceLock.Unlock()
+			l.Sugar().Errorf("did not find service %s for policy %v creation", index, policy.Name)
+			goto PROCESS_EDS_LABEL
 		}
-		s.ebpfServiceLock.Unlock()
 	} else {
 		if t, e := FakeServiceForRedirectPolicy(policy); e != nil {
 			l.Sugar().Debugf("Failed to fake service for RedirectPolicy %s: %v", index, e)

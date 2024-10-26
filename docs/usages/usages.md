@@ -1,6 +1,6 @@
 # Quick Start
 
-## install on kubernetes
+## kubernetes installation
 
 ```shell
 # get the host address of api server
@@ -12,7 +12,8 @@ helm install -n elf balancing ./charts \
 	--set feature.apiServerPort=6443
  
 ```
-## install on host
+
+## docker installation on host
 
 ```shell
   IMAGE_TAG=96abcfc96d2b33266bc62d76ee947e646267dd6e

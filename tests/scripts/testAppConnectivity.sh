@@ -154,10 +154,10 @@ TestRedirectPolicy(){
     VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
               "udp: visit the clusterIp of backend-server localRedirect service"  "redirectserver.*controlvm"
 
-    ADDRESS=$( kubectl  get LocalRedirectPolicy example-matchaddress | sed '1d' | awk '{print $2}' )
+    ADDRESS=$( kubectl  get LocalRedirectPolicy redirect-matchaddress | sed '1d' | awk '{print $2}' )
     VisitK8s "http://${ADDRESS}:80"  "http"  \
               "http: visit the virtual address of backend-server localRedirect service"  "redirectserver.*controlvm"
-    VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
+    VisitK8s "${ADDRESS}:80"  "udp"  \
               "udp: visit the virtual address of backend-server localRedirect service"  "redirectserver.*controlvm"
 
 }
@@ -165,30 +165,45 @@ TestRedirectPolicy(){
 TestBalancingPolicy(){
     echo "===================== test balancing: balancing policy  ========================="
 
-    echo ""
-    echo "----------- test balancing of balancing policy: visit the virtual address of backend-server balancing service "
-    ADDRESS=$( kubectl  get BalancingPolicy example-matchaddress | sed '1d' | awk '{print $2}' )
-    VisitServiceForAll "http://${ADDRESS}:80"  "http"
-    VisitServiceForAll "${ADDRESS}:80"  "udp"
+    ADDRESS=$( kubectl  get BalancingPolicy balancing-matchaddress | sed '1d' | awk '{print $2}' )
+    VisitK8s "http://${ADDRESS}:80"  "http"  \
+              "http: visit the virtual address of backend-server localRedirect service"  "redirectserver"
+    VisitK8s "${ADDRESS}:80"  "udp"  \
+              "udp: visit the virtual address of backend-server localRedirect service"  "redirectserver"
+    VisitHost "http://${ADDRESS}:80"  "http"  \
+              "http: visit the virtual address of backend-server localRedirect service"  "redirectserver"
+    VisitHost "${ADDRESS}:80"  "udp"  \
+              "udp: visit the virtual address of backend-server localRedirect service"  "redirectserver"
 
-    echo ""
-    echo "----------- test balancing of balancing policy: visit the podEndpoint of backend-server balancing service "
+
     SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-balancing-pod | sed '1 d' | awk '{print $3}' )
-    VisitServiceForAll "http://${SERVICE_CLUSTER_IP}:80"  "http"
-    VisitServiceForAll "${SERVICE_CLUSTER_IP}:80"  "udp"
+    VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
+              "http: visit the pod ip of backend-server localRedirect service"  "redirectserver"
+    VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
+              "udp: visit the pod ip of backend-server localRedirect service"  "redirectserver"
 
 
-    echo ""
-    echo "----------- test balancing of balancing policy: visit the hostPort of backend-server balancing service "
     SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-balancing-hostport | sed '1 d' | awk '{print $3}' )
-    VisitServiceForAll "http://${SERVICE_CLUSTER_IP}:80"  "http"
-    VisitServiceForAll "${SERVICE_CLUSTER_IP}:80"  "udp"
+    VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
+              "http: visit the hostPort of backend-server localRedirect service"  "redirectserver"
+    VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
+              "udp: visit the hostPort of backend-server localRedirect service"  "redirectserver"
+    VisitHost "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
+              "http: visit the hostPort of backend-server localRedirect service"  "redirectserver"
+    VisitHost "${SERVICE_CLUSTER_IP}:80"  "udp"  \
+              "udp: visit the hostPort of backend-server localRedirect service"  "redirectserver"
 
-    echo ""
-    echo "----------- test balancing of balancing policy: visit the nodeProxy of backend-server balancing service "
+
     SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-balancing-nodeproxy | sed '1 d' | awk '{print $3}' )
-    VisitServiceForAll "http://${SERVICE_CLUSTER_IP}:80"  "http"
-    VisitServiceForAll "${SERVICE_CLUSTER_IP}:80"  "udp"
+    VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
+              "http: visit the nodeProxy of backend-server localRedirect service"  "redirectserver"
+    VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
+              "udp: visit the nodeProxy of backend-server localRedirect service"  "redirectserver"
+    VisitHost "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
+              "http: visit the nodeProxy of backend-server localRedirect service"  "redirectserver"
+    VisitHost "${SERVICE_CLUSTER_IP}:80"  "udp"  \
+              "udp: visit the nodeProxy of backend-server localRedirect service"  "redirectserver"
+
 }
 
 if [ "$1"x == "basic"x ]; then

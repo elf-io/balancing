@@ -2,7 +2,7 @@
 apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
-  name: example-matchservice-podendpoint
+  name: balancing-matchservice-podendpoint
   annotations:
     balancing.elf.io/serviceId: "20001"
 spec:
@@ -47,7 +47,7 @@ spec:
 apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
-  name: example-matchservice-hostport
+  name: balancing-matchservice-hostport
   annotations:
     balancing.elf.io/serviceId: "20002"
 spec:
@@ -85,7 +85,7 @@ spec:
 apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
-  name: example-mastchservice-nodeproxy
+  name: balancing-mastchservice-nodeproxy
   annotations:
     balancing.elf.io/serviceId: "20003"
 spec:
@@ -123,7 +123,7 @@ spec:
 apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
-  name: example-matchaddress
+  name: balancing-matchaddress
   annotations:
     balancing.elf.io/serviceId: "20004"
 spec:

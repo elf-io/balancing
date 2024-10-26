@@ -17,8 +17,6 @@ make e2e_deploy -e PROJECT_IMAGE_TAG=228ebcbda632481f9bf7471983d4dab2fc06b74e \
                 -e TEST_APP_IMAGE_TAG=5b44647869130c82d9582eedc9b5c553aece80b7
 ```
 
-
-
 5. 
 
 ```shell

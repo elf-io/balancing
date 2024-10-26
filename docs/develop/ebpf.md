@@ -69,42 +69,43 @@ agent ebpf 访问解析日志
 
 ```
 # 查询指定 service 的 ebpf 数据
-inspect  traceMapData service default redirectserver
-trace the service data of ebpf map for the service default/redirectserver
-
-------------------------------
-map Hash(map_service)#12 :
-    filterNatType service
-    filterSvcV4Id 3385136556
-
-Service Entries:
-[0]: key={ DestIp:172.21.197.201, DestPort:80, protocol:tcp, NatType:service, Scope:0 },
-     value={ SvcId:3385136556, TotalBackendCount:2, LocalBackendCount:1, AffinitySecond:0, NatMode:ServiceClusterIP, ServiceFlags:0, BalancingFlags:0, RedirectFlags:0 }
-account:  1
-
-LocalRedirect Entries:
-
-Balancing Entries:
-
-end map Hash(map_service)#12: account 1
-------------------------------
-
-
-------------------------------
-map Hash(map_backend)#7 :
-    filterNatType service
-    filterSvcV4Id 3385136556
-
-Service Entries:
-[0]: key={ Order:0, SvcId:3385136556, port:80, protocol:tcp, NatType:service, Scope: 0 }
-     value={ PodIp:172.20.235.198 , PodPort:80, NodeId:596592060, NodePort:0 }
-[1]: key={ Order:1, SvcId:3385136556, port:80, protocol:tcp, NatType:service, Scope: 0 }
-     value={ PodIp:172.20.254.131 , PodPort:80, NodeId:79869938, NodePort:0 }
-account:  2
-
-
-
-end map Hash(map_backend)#7: account 2
-------------------------------
+~# inspect  traceMapData service default redirectserver
+		trace the service data of ebpf map for the service default/redirectserver
+		
+		------------------------------
+		map Hash(map_service)#12 :
+		    filterNatType service
+		    filterSvcV4Id 3385136556
+		
+		Service Entries:
+		[0]: key={ DestIp:172.21.197.201, DestPort:80, protocol:tcp, NatType:service, Scope:0 },
+		     value={ SvcId:3385136556, TotalBackendCount:2, LocalBackendCount:1, AffinitySecond:0, NatMode:ServiceClusterIP, ServiceFlags:0, BalancingFlags:0, RedirectFlags:0 }
+		account:  1
+		
+		LocalRedirect Entries:
+		
+		Balancing Entries:
+		
+		end map Hash(map_service)#12: account 1
+		------------------------------
+		
+		
+		------------------------------
+		map Hash(map_backend)#7 :
+		    filterNatType service
+		    filterSvcV4Id 3385136556
+		
+		Service Entries:
+		[0]: key={ Order:0, SvcId:3385136556, port:80, protocol:tcp, NatType:service, Scope: 0 }
+		     value={ PodIp:172.20.235.198 , PodPort:80, NodeId:596592060, NodePort:0 }
+		[1]: key={ Order:1, SvcId:3385136556, port:80, protocol:tcp, NatType:service, Scope: 0 }
+		     value={ PodIp:172.20.254.131 , PodPort:80, NodeId:79869938, NodePort:0 }
+		account:  2
+		
+		
+		
+		end map Hash(map_backend)#7: account 2
+		------------------------------
 
 ```
+

@@ -2,7 +2,7 @@
 apiVersion: balancing.elf.io/v1beta1
 kind: LocalRedirectPolicy
 metadata:
-  name: example-matchservice
+  name: redirect-matchservice
   annotations:
     balancing.elf.io/serviceId: "10090"
 spec:
@@ -44,7 +44,7 @@ spec:
 apiVersion: balancing.elf.io/v1beta1
 kind: LocalRedirectPolicy
 metadata:
-  name: example-matchaddress
+  name: redirect-matchaddress
   annotations:
     balancing.elf.io/serviceId: "10091"
 spec:

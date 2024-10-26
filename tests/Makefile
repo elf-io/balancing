@@ -2,7 +2,7 @@ include ../Makefile.defs
 
 
 .PHONY: init_env
-init_env: init_vagrant install_proscope showInfo
+init_env: init_vagrant install_proscope show_info
 
 .PHONY: init_vagrant
 init_vagrant: installE2eTools clean
@@ -183,7 +183,7 @@ deploy_project:
                           "$${AGENT_IMAGE}"   ; \
 		) ; \
 		exit 0
-		make showInfo
+		make show_info
 
 .PHONY: install_example_app
 install_example_app:
@@ -259,4 +259,5 @@ test_connectivity:
 .PHONY: clean
 clean:
 	-@ cd ./vagrant ; ./setupCluster.sh off || true
+	-@ cd ./vagrant ; rm config -f || true
 	-@ rm -rf $(E2E_RUNTIME_DIR) || true

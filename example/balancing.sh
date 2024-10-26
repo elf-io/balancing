@@ -156,5 +156,3 @@ EOF
 kubectl get balancingpolicies
 
 
-
-
