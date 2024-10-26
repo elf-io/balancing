@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VM_NAME=${1:-"k8s-master"}
+VM_NAME=${1:-"controlvm"}
 shift
 EXEC_COMMAND="$@"
 

@@ -8,11 +8,11 @@ init_env: init_vagrant install_proscope showInfo
 init_vagrant: installE2eTools clean
 	@echo "================== init vagrant cluster"
 	cd ./vagrant ;  \
-		  HOSTPORT_MASTER_PROXY_SERVER=$(E2E_HOSTPORT_MASTER_PROXY_SERVER) \
-		  HOSTPORT_HOST_ALONE_HTTP=$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER) \
+		  HOSTPORT_CONTROLVM_TCP_PORT1=$(E2E_HOSTPORT_CONTROLVM_PROXY_SERVER) \
+		  HOSTPORT_HOSTVM_TCP_PORT1=$(E2E_HOSTPORT_HOSTVM_PROXY_SERVER) \
 		  KUBECONFIG_PATH=$(E2E_KUBECONFIG_PATH) \
-		  HOSTPORT_HOST_ALONE_PYROSCOPE=$(PYROSCOPE_HOST_PORT)  \
-		  VMPORT_HOST_ALONE_PYROSCOPE=$(PYROSCOPE_VM_PORT)  \
+		  HOSTPORT_HOSTVM_TCP_PORT2=$(E2E_PYROSCOPE_HOST_PORT)  \
+		  VMPORT_HOSTVM_PYROSCOPE=$(E2E_PYROSCOPE_VM_PORT)  \
 		  VAGRANT_IMAGE_K8S=$(E2E_VAGRANT_IMAGE_K8S) \
 		  VAGRANT_IMAGE_UBUNTU=$(E2E_VAGRANT_IMAGE_UBUNTU) \
 		  ./setupCluster.sh on
@@ -38,22 +38,22 @@ installE2eTools:
 
 .PHONY: install_proscope
 install_proscope:
-	if [ -n "$(PYROSCOPE_VM_PORT)" ] ; then \
+	if [ -n "$(E2E_PYROSCOPE_VM_PORT)" ] ; then \
   		echo "install proscope on vm $(E2E_VM_HOST)  " ; \
   		( cd vagrant ; ./ssh "$(E2E_VM_HOST)" "sudo docker stop $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
   		( cd vagrant ; ./ssh "$(E2E_VM_HOST)" "sudo docker rm $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
-  		( cd vagrant ; ./ssh "$(E2E_VM_HOST)" "sudo docker run -d --name $(PYROSCOPE_CONTAINER_NAME) -p $(PYROSCOPE_VM_PORT):4040 $(PYROSCOPE_IMAGE_NAME) server" ) ; \
+  		( cd vagrant ; ./ssh "$(E2E_VM_HOST)" "sudo docker run -d --name $(PYROSCOPE_CONTAINER_NAME) -p $(E2E_PYROSCOPE_VM_PORT):4040 $(PYROSCOPE_IMAGE_NAME) server" ) ; \
 		echo "finish setuping pyroscope " ; \
 		HOST_IP=$$( ip r get 8.8.8.8 | grep -oE "src [\.0-9]+" | grep -oE "[\.0-9]+" ) ; \
-		echo "visit pyroscope: http://$${HOST_IP}:$(PYROSCOPE_HOST_PORT)" ; \
+		echo "visit pyroscope: http://$${HOST_IP}:$(E2E_PYROSCOPE_HOST_PORT)" ; \
       fi
 
 .PHONY: showInfo
 showInfo:
 	@HOST_IP=$$( ip r get 8.8.8.8 | grep -oE "src [\.0-9]+" | grep -oE "[\.0-9]+" ) ; \
-		echo "visit pyroscope: http://$${HOST_IP}:$(PYROSCOPE_HOST_PORT)"
-		echo "visit proxy server on $(E2E_VM_HOST): http://127.0.0.1:$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER)"
-		echo "visit proxy server on master node: http://127.0.0.1:$(E2E_HOSTPORT_MASTER_PROXY_SERVER)"
+		echo "visit pyroscope: http://$${HOST_IP}:$(E2E_PYROSCOPE_HOST_PORT)"
+		echo "visit proxy server on $(E2E_VM_HOST): http://127.0.0.1:$(E2E_HOSTPORT_HOSTVM_PROXY_SERVER)"
+		echo "visit proxy server on master node: http://127.0.0.1:$(E2E_HOSTPORT_CONTROLVM_PROXY_SERVER)"
 	@echo "========================================================"
 	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
 	@echo "   kubectl get pod -o wide -A                           "
@@ -148,10 +148,10 @@ deploy_project:
 		echo "begin to deploy on kubernetes" ; \
 		helm --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall -n $(E2E_INSTALL_NAMESPACE) project || true  ;\
 		HELM_OPTION="" ; \
-    	if [ -n "$(PYROSCOPE_VM_PORT)" ] ; then \
+    	if [ -n "$(E2E_PYROSCOPE_VM_PORT)" ] ; then \
 			echo "add env" ; \
-			HELM_OPTION+=" --set balancingAgent.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingAgent.extraEnv[0].value=http://192.168.0.2:$(PYROSCOPE_VM_PORT) " ; \
-			HELM_OPTION+=" --set balancingController.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingController.extraEnv[0].value=http://192.168.0.2:$(PYROSCOPE_VM_PORT) " ; \
+			HELM_OPTION+=" --set balancingAgent.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingAgent.extraEnv[0].value=http://192.168.0.2:$(E2E_PYROSCOPE_VM_PORT) " ; \
+			HELM_OPTION+=" --set balancingController.extraEnv[0].name=ENV_PYROSCOPE_PUSH_SERVER_ADDRESS  --set balancingController.extraEnv[0].value=http://192.168.0.2:$(E2E_PYROSCOPE_VM_PORT) " ; \
 		fi ; \
 		HELM_OPTION+=" --set balancingAgent.debug.logLevel=debug --set balancingController.debug.logLevel=debug " ; \
 		HELM_OPTION+=" --set balancingAgent.prometheus.enabled=true --set balancingController.prometheus.enabled=true  " ; \
@@ -176,7 +176,6 @@ deploy_project:
 		exit 0
 		make showInfo
 
-# test kind is ok
 .PHONY: install_example_app
 install_example_app:
 	@echo "---------- install applicatio on kubernetes"
@@ -224,16 +223,26 @@ install_example_app:
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) install  redirectserver ./charts/redirectserver \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| { ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
-	@echo "----------"
-	K8S_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_MASTER_PROXY_SERVER)  HOST_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER) KUBECONFIG=$(E2E_KUBECONFIG_PATH) ./scripts/testAppConnectivity.sh basic || { echo "failed to test the connectivity" ; exit 1 ; }
-	K8S_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_MASTER_PROXY_SERVER)  HOST_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER) KUBECONFIG=$(E2E_KUBECONFIG_PATH) ./scripts/testAppConnectivity.sh service || { echo "failed to test the connectivity" ; exit 1 ; }
-	K8S_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_MASTER_PROXY_SERVER)  HOST_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER) KUBECONFIG=$(E2E_KUBECONFIG_PATH) ./scripts/testAppConnectivity.sh balancing || { echo "failed to test the connectivity" ; exit 1 ; }
-	K8S_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_MASTER_PROXY_SERVER)  HOST_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_HOST_ALONE_PROXY_SERVER) KUBECONFIG=$(E2E_KUBECONFIG_PATH) ./scripts/testAppConnectivity.sh redirect || { echo "failed to test the connectivity" ; exit 1 ; }
+	@ KUBECONFIG=$(E2E_KUBECONFIG_PATH)  kubectl get pod -o wide -A
 	@echo "========================================================"
 	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
 	@echo "   kubectl get pod -o wide -A                           "
+	@echo "   visit the proxy server on kubernetes : "
+	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_HOSTVM_PROXY_SERVER) | jq .                          "
+	@echo "   visit the proxy server on host : "
+	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_CONTROLVM_PROXY_SERVER) | jq .                          "
 	@echo "========================================================"
-	@ KUBECONFIG=$(E2E_KUBECONFIG_PATH)  kubectl get pod -o wide -A
+
+
+.PHONY: test_connectivity
+test_connectivity:
+	export K8S_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_CONTROLVM_PROXY_SERVER) ; \
+ 		export HOST_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_HOSTVM_PROXY_SERVER) ;\
+ 		export KUBECONFIG=$(E2E_KUBECONFIG_PATH) ; \
+ 		./scripts/testAppConnectivity.sh basic || { echo "failed to test the connectivity" ; exit 1 ; } ;  \
+	    ./scripts/testAppConnectivity.sh service || { echo "failed to test the connectivity" ; exit 1 ; } ; \
+	    ./scripts/testAppConnectivity.sh balancing || { echo "failed to test the connectivity" ; exit 1 ; } ; \
+	    ./scripts/testAppConnectivity.sh redirect || { echo "failed to test the connectivity" ; exit 1 ; }
 
 
 .PHONY: clean

@@ -150,15 +150,15 @@ TestRedirectPolicy(){
 
     SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-redirect-service | sed '1 d' | awk '{print $3}' )
     VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
-              "http: visit the clusterIp of backend-server localRedirect service"  "redirectserver.*k8s-master"
+              "http: visit the clusterIp of backend-server localRedirect service"  "redirectserver.*controlvm"
     VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
-              "udp: visit the clusterIp of backend-server localRedirect service"  "redirectserver.*k8s-master"
+              "udp: visit the clusterIp of backend-server localRedirect service"  "redirectserver.*controlvm"
 
     ADDRESS=$( kubectl  get LocalRedirectPolicy example-matchaddress | sed '1d' | awk '{print $2}' )
     VisitK8s "http://${ADDRESS}:80"  "http"  \
-              "http: visit the virtual address of backend-server localRedirect service"  "redirectserver.*k8s-master"
+              "http: visit the virtual address of backend-server localRedirect service"  "redirectserver.*controlvm"
     VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
-              "udp: visit the virtual address of backend-server localRedirect service"  "redirectserver.*k8s-master"
+              "udp: visit the virtual address of backend-server localRedirect service"  "redirectserver.*controlvm"
 
 }
 

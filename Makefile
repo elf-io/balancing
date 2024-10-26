@@ -344,7 +344,9 @@ e2e_deploy:
 e2e_clean:
 	make -C tests clean
 
-
+.PHONY: e2e_test_connectivity
+e2e_test_connectivity:
+	make -C test test_connectivity
 
 #============ doc
 
