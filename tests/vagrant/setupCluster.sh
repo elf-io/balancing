@@ -13,13 +13,19 @@ VAGRANT_IMAGE_UBUNTU=${VAGRANT_IMAGE_UBUNTU:-"alvistack/ubuntu-24.04"}
 # 定义资源变量
 VM_MEMORY=${VM_MEMORY:-$((${VM_MEMORY:-1024}*8))}
 VM_CPUS=${VM_CPUS:-"4"}
+
 # HOST PORT MAPPING
 HOSTPORT_API_SERVER=${HOSTPORT_API_SERVER:-"26443"}
-HOSTPORT_CONTROLVM_TCP_PORT1=${HOSTPORT_CONTROLVM_TCP_PORT1:-"27000"}
-HOSTPORT_HOSTVM_TCP_PORT1=${HOSTPORT_HOSTVM_TCP_PORT1:-"26440"}
-HOSTPORT_HOSTVM_TCP_PORT2=${HOSTPORT_HOSTVM_TCP_PORT2:-"28000"}
 #
-VMPORT_HOSTVM_PYROSCOPE=${VMPORT_HOSTVM_PYROSCOPE:-"8040"}
+HOSTPORT_CONTROLVM_TCP_PORT1=${HOSTPORT_CONTROLVM_TCP_PORT1:-"27000"}
+HOSTPORT_WORKERVM_TCP_PORT1=${HOSTPORT_WORKERVM_TCP_PORT1:-"27001"}
+VMPORT_K8SVM_TCP_PORT1=${VMPORT_K8SVM_TCP_PORT1:-"27000"}
+#
+HOSTPORT_HOSTVM_TCP_PORT1=${HOSTPORT_HOSTVM_TCP_PORT1:-"26440"}
+VMPORT_HOSTVM_TCP_PORT1=${VMPORT_HOSTVM_TCP_PORT1:-"80"}
+#
+HOSTPORT_HOSTVM_TCP_PORT2=${HOSTPORT_HOSTVM_TCP_PORT2:-"28000"}
+VMPORT_HOSTVM_TCP_PORT2=${VMPORT_HOSTVM_TCP_PORT2:-"8040"}
 #
 KUBECONFIG_PATH=${KUBECONFIG_PATH:-${CURRENT_DIR_PATH}/config}
 #
@@ -57,6 +63,7 @@ Vagrant.configure("2") do |config|
     k8s.vm.box = "$VAGRANT_IMAGE_K8S"
     k8s.vm.hostname = "controlvm"
     k8s.vm.network "private_network", ip: "192.168.0.10", netmask: "255.255.255.0", ipv6: "fd00::10", ipv6_prefix_length: 64
+    k8s.vm.network "forwarded_port", guest: ${VMPORT_K8SVM_TCP_PORT1}, host: ${HOSTPORT_CONTROLVM_TCP_PORT1}
     k8s.vm.network "forwarded_port", guest: 6443, host: ${HOSTPORT_API_SERVER}
     k8s.vm.provider "virtualbox" do |vb|
       vb.memory = "$VM_MEMORY"
@@ -104,7 +111,7 @@ Vagrant.configure("2") do |config|
     k8s.vm.box = "$VAGRANT_IMAGE_K8S"
     k8s.vm.hostname = "workervm"
     k8s.vm.network "private_network", ip: "192.168.0.11", netmask: "255.255.255.0", ipv6: "fd00::11", ipv6_prefix_length: 64
-    k8s.vm.network "forwarded_port", guest: 27000, host: ${HOSTPORT_CONTROLVM_TCP_PORT1}
+    k8s.vm.network "forwarded_port", guest: ${VMPORT_K8SVM_TCP_PORT1}, host: ${HOSTPORT_WORKERVM_TCP_PORT1}
     k8s.vm.provider "virtualbox" do |vb|
       vb.memory = "$VM_MEMORY"
       vb.cpus = "$VM_CPUS"
@@ -158,8 +165,8 @@ Vagrant.configure("2") do |config|
     ubuntu.vm.box = "$VAGRANT_IMAGE_UBUNTU"
     ubuntu.vm.hostname = "hostvm"
     ubuntu.vm.network "private_network", ip: "192.168.0.2", netmask: "255.255.255.0", ipv6: "fd00::2", ipv6_prefix_length: 64
-    ubuntu.vm.network "forwarded_port", guest: 80, host: ${HOSTPORT_HOSTVM_TCP_PORT1}
-    ubuntu.vm.network "forwarded_port", guest: ${VMPORT_HOSTVM_PYROSCOPE}, host: ${HOSTPORT_HOSTVM_TCP_PORT2}
+    ubuntu.vm.network "forwarded_port", guest: ${VMPORT_HOSTVM_TCP_PORT1}, host: ${HOSTPORT_HOSTVM_TCP_PORT1}
+    ubuntu.vm.network "forwarded_port", guest: ${VMPORT_HOSTVM_TCP_PORT2}, host: ${HOSTPORT_HOSTVM_TCP_PORT2}
 
     ubuntu.vm.provider "virtualbox" do |vb|
       vb.memory = "$VM_MEMORY"

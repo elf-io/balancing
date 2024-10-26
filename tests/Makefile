@@ -8,11 +8,11 @@ init_env: init_vagrant install_proscope showInfo
 init_vagrant: installE2eTools clean
 	@echo "================== init vagrant cluster"
 	cd ./vagrant ;  \
-		  HOSTPORT_CONTROLVM_TCP_PORT1=$(E2E_HOSTPORT_CONTROLVM_PROXY_SERVER) \
-		  HOSTPORT_HOSTVM_TCP_PORT1=$(E2E_HOSTPORT_HOSTVM_PROXY_SERVER) \
+		  HOSTPORT_API_SERVER=$(E2E_HOSTPORT_API_SERVER) \
+		  HOSTPORT_CONTROLVM_TCP_PORT1=$(E2E_HOSTPORT_CONTROLVM_PROXY_SERVER) HOSTPORT_WORKERVM_TCP_PORT1=$(E2E_HOSTPORT_WORKERVM_PROXY_SERVER) VMPORT_K8SVM_TCP_PORT1=$(E2E_VMPORT_PROXY_SERVER) \
+		  HOSTPORT_HOSTVM_TCP_PORT1=$(E2E_HOSTPORT_HOSTVM_PROXY_SERVER) VMPORT_HOSTVM_TCP_PORT1=$(E2E_VMPORT_HOSTVM_PROXY_SERVER) \
+		  HOSTPORT_HOSTVM_TCP_PORT2=$(E2E_PYROSCOPE_HOST_PORT)  VMPORT_HOSTVM_TCP_PORT2=$(E2E_PYROSCOPE_VM_PORT) \
 		  KUBECONFIG_PATH=$(E2E_KUBECONFIG_PATH) \
-		  HOSTPORT_HOSTVM_TCP_PORT2=$(E2E_PYROSCOPE_HOST_PORT)  \
-		  VMPORT_HOSTVM_PYROSCOPE=$(E2E_PYROSCOPE_VM_PORT)  \
 		  VAGRANT_IMAGE_K8S=$(E2E_VAGRANT_IMAGE_K8S) \
 		  VAGRANT_IMAGE_UBUNTU=$(E2E_VAGRANT_IMAGE_UBUNTU) \
 		  ./setupCluster.sh on
@@ -204,14 +204,14 @@ install_example_app:
 	echo "deploy proxy server " ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  proxyserver &>/dev/null || true ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) install  proxyserver ./charts/proxyserver \
-					--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
+					--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) --set server.hostPort=$(E2E_VMPORT_PROXY_SERVER) \
 			|| { ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ;\
 			echo " deploy proxy on host node" ; \
 			IMAGE=` helm template test ./charts/proxyserver --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  sudo docker stop server || true ; ) ; \
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" sudo docker rm server || true ; ) ; \
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" \
-				sudo docker run -d -p 80:80 --name server "$${IMAGE}" ; \
+				sudo docker run -d -p $(E2E_VMPORT_HOSTVM_PROXY_SERVER):80 --name server "$${IMAGE}" ; \
 			)
 	echo "deploy backend server " ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  backendserver &>/dev/null || true ; \
@@ -227,10 +227,12 @@ install_example_app:
 	@echo "========================================================"
 	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
 	@echo "   kubectl get pod -o wide -A                           "
-	@echo "   visit the proxy server on kubernetes : "
-	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_HOSTVM_PROXY_SERVER) | jq .                          "
-	@echo "   visit the proxy server on host : "
+	@echo "   visit the proxy server on controler vm : "
 	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_CONTROLVM_PROXY_SERVER) | jq .                          "
+	@echo "   visit the proxy server on controler vm : "
+	@echo "                curl http://127.0.0.1:$() | jq .                          "
+	@echo "   visit the proxy server on host : "
+	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_HOSTVM_PROXY_SERVER) | jq .                          "
 	@echo "========================================================"
 
 
