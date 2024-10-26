@@ -32,9 +32,11 @@ init_vagrant: installE2eTools clean
 	@echo "   kubectl get pod -o wide -A                           "
 	@echo "========================================================"
 
+
 .PHONY: installE2eTools
 installE2eTools:
 	$(ROOT_DIR)/tests/scripts/installE2eTools.sh
+
 
 .PHONY: install_proscope
 install_proscope:
@@ -48,16 +50,23 @@ install_proscope:
 		echo "visit pyroscope: http://$${HOST_IP}:$(E2E_PYROSCOPE_HOST_PORT)" ; \
       fi
 
-.PHONY: showInfo
-showInfo:
-	@HOST_IP=$$( ip r get 8.8.8.8 | grep -oE "src [\.0-9]+" | grep -oE "[\.0-9]+" ) ; \
-		echo "visit pyroscope: http://$${HOST_IP}:$(E2E_PYROSCOPE_HOST_PORT)"
-		echo "visit proxy server on $(E2E_VM_HOST): http://127.0.0.1:$(E2E_HOSTPORT_HOSTVM_PROXY_SERVER)"
-		echo "visit proxy server on master node: http://127.0.0.1:$(E2E_HOSTPORT_CONTROLVM_PROXY_SERVER)"
+
+.PHONY: show_info
+show_info:
+	@ KUBECONFIG=$(E2E_KUBECONFIG_PATH)  kubectl get pod -o wide -A
 	@echo "========================================================"
 	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
 	@echo "   kubectl get pod -o wide -A                           "
+	@echo "   visit the proxy server on controler vm : "
+	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_CONTROLVM_PROXY_SERVER) | jq .                          "
+	@echo "   visit the proxy server on worker vm : "
+	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_WORKERVM_PROXY_SERVER) | jq .                          "
+	@echo "   visit the proxy server on host vm : "
+	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_HOSTVM_PROXY_SERVER) | jq .                          "
+	@HOST_IP=$$( ip r get 8.8.8.8 | grep -oE "src [\.0-9]+" | grep -oE "[\.0-9]+" ) ; \
+	 echo "   visit pyroscope: http://$${HOST_IP}:$(E2E_PYROSCOPE_HOST_PORT)"
 	@echo "========================================================"
+
 
 #==================
 
@@ -229,9 +238,9 @@ install_example_app:
 	@echo "   kubectl get pod -o wide -A                           "
 	@echo "   visit the proxy server on controler vm : "
 	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_CONTROLVM_PROXY_SERVER) | jq .                          "
-	@echo "   visit the proxy server on controler vm : "
-	@echo "                curl http://127.0.0.1:$() | jq .                          "
-	@echo "   visit the proxy server on host : "
+	@echo "   visit the proxy server on worker vm : "
+	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_WORKERVM_PROXY_SERVER) | jq .                          "
+	@echo "   visit the proxy server on host vm : "
 	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_HOSTVM_PROXY_SERVER) | jq .                          "
 	@echo "========================================================"
 
