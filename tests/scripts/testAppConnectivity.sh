@@ -23,6 +23,9 @@ echo "KUBECONFIG ${KUBECONFIG} "
 echo "K8S_PROXY_SERVER_MAPPING_PORT ${K8S_PROXY_SERVER_MAPPING_PORT}"
 echo "HOST_PROXY_SERVER_MAPPING_PORT ${HOST_PROXY_SERVER_MAPPING_PORT}"
 
+FAIL_ACCOUNT=0
+TEST_ACCOUNT=0
+
 
 # 定义颜色的 ANSI 转义码
 RED='\033[0;31m'
@@ -38,15 +41,17 @@ VisitK8s(){
   echo ""
   echo "-------------- to K8S: ${LOCALVAR_TITLE} -----------------"
   echo "visit the ${LOCALVAR_METHOD} server ${LOCALVAR_URL} from k8s pod"
-  echo '   curl -s 127.0.0.1:'${K8S_PROXY_SERVER_MAPPING_PORT}' -d "{\"BackendUrl\":\"'${LOCALVAR_URL}'\",\"Timeout\":5,\"ForwardType\":\"'${LOCALVAR_METHOD}'\", \"EchoData\":\"Hello!\"}" '
-  MSG=$( curl -s 127.0.0.1:${K8S_PROXY_SERVER_MAPPING_PORT} -d "{\"BackendUrl\":\"${LOCALVAR_URL}\",\"Timeout\":5,\"ForwardType\":\"${LOCALVAR_METHOD}\", \"EchoData\":\"Hello!\"}"  ) \
+  echo '   curl -s 127.0.0.1:'${K8S_PROXY_SERVER_MAPPING_PORT}' -d "{\"BackendUrl\":\"'${LOCALVAR_URL}'\",\"Timeout\":5,\"ForwardType\":\"'${LOCALVAR_METHOD}'\", \"EchoData\":\"Hello\"}" | jq . '
+  MSG=$( curl -s 127.0.0.1:${K8S_PROXY_SERVER_MAPPING_PORT} -d "{\"BackendUrl\":\"${LOCALVAR_URL}\",\"Timeout\":5,\"ForwardType\":\"${LOCALVAR_METHOD}\", \"EchoData\":\"Hello\"}"  ) \
      || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
   echo "${MSG}" | jq .
   if echo "${MSG}" | jq '.BackendResponse' | grep -e "${LOCALVAR_EXPECT}" &>/dev/null ; then
         echo -e "--------------------${GREEN}result: pass${NC}-------------------"
   else
         echo -e "--------------------${RED}result: fail${NC}---------------------"
+        (( FAIL_ACCOUNT = FAIL_ACCOUNT + 1 ))
   fi
+  (( TEST_ACCOUNT = TEST_ACCOUNT + 1 ))
   echo ""
 }
 
@@ -59,15 +64,17 @@ VisitHost(){
   echo ""
   echo "-------------- to Host: ${LOCALVAR_TITLE} -----------------"
   echo "visit the ${LOCALVAR_METHOD} server ${LOCALVAR_URL} from k8s pod"
-  echo '   curl -s 127.0.0.1:'${HOST_PROXY_SERVER_MAPPING_PORT}' -d "{\"BackendUrl\":\"'${LOCALVAR_URL}'\",\"Timeout\":5,\"ForwardType\":\"'${LOCALVAR_METHOD}'\", \"EchoData\":\"Hello!\"}" '
-  MSG=$( curl -s 127.0.0.1:${HOST_PROXY_SERVER_MAPPING_PORT} -d "{\"BackendUrl\":\"${LOCALVAR_URL}\",\"Timeout\":5,\"ForwardType\":\"${LOCALVAR_METHOD}\", \"EchoData\":\"Hello!\"}"  ) \
+  echo '   curl -s 127.0.0.1:'${HOST_PROXY_SERVER_MAPPING_PORT}' -d "{\"BackendUrl\":\"'${LOCALVAR_URL}'\",\"Timeout\":5,\"ForwardType\":\"'${LOCALVAR_METHOD}'\", \"EchoData\":\"Hello\"}" | jq . '
+  MSG=$( curl -s 127.0.0.1:${HOST_PROXY_SERVER_MAPPING_PORT} -d "{\"BackendUrl\":\"${LOCALVAR_URL}\",\"Timeout\":5,\"ForwardType\":\"${LOCALVAR_METHOD}\", \"EchoData\":\"Hello\"}"  ) \
      || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
   echo "${MSG}" | jq .
   if echo "${MSG}" | jq '.BackendResponse' | grep -e "${LOCALVAR_EXPECT}" &>/dev/null ; then
         echo -e "--------------------${GREEN}result: pass${NC}-------------------"
   else
         echo -e "--------------------${RED}result: fail${NC}---------------------"
+        (( FAIL_ACCOUNT = FAIL_ACCOUNT + 1 ))
   fi
+  (( TEST_ACCOUNT = TEST_ACCOUNT + 1 ))
   echo ""
 }
 
@@ -108,36 +115,64 @@ TestBasicConnectity(){
     done
 }
 
+GetServicePort(){
+    LOCAL_SERVICE_NAME="$1"
+    LOCAL_SERVICE_NAMESPACE="$2"
+
+    INFO=$( kubectl  get service backendserver-service-normal | sed '1d' | awk '{print $5}' | tr ',' '\n' )
+    for LINE in $INFO ; do
+       PROTOCOL=${LINE##*/}
+       TMP=${LINE%%/*}
+       PORT=${TMP%%:*}
+       NODEPORT=${TMP##*:}
+       echo "$PROTOCOL"
+       echo "$PORT"
+       echo "$NODEPORT"
+    done
+}
+
 TestService(){
       echo "===================== test balancing: k8s service  ========================="
       NODE_IP_LIST=$(kubectl  get node -o wide | sed '1 d' | awk '{print $6}' )
 
-      echo ""
-      NORMAL_CLUSTER_IP=$( kubectl  get service backendserver-service-normal | sed '1 d' | awk '{print $3}' )
-      VisitK8s "http://${NORMAL_CLUSTER_IP}:80"  "http"  \
-                "http: visit the cluster ip of backend-server normal service"  "backendserver"
-      VisitK8s "${NORMAL_CLUSTER_IP}:80"  "udp"  \
-                "http: visit the cluster ip of backend-server normal service"  "backendserver"
-
-      echo ""
-      NODE_PORT_LIST=$( kubectl  get service backendserver-service-normal | sed '1d' | awk '{print $5}' | tr ',' '\n' | awk -F ':' '{print $2}' | grep -Eo "[0-9]+" )
-      NODE_PORT_IP=""
-      for PORT in ${NODE_PORT_LIST}; do
-          for NODE_IP in ${NODE_IP_LIST} ; do
-              ADDR="${NODE_IP}:${PORT}"
-              VisitK8s "http://${ADDR}"  "http"  \
-                        "http: visit the nodePort ip of backend-server normal service"  "backendserver"
-              VisitK8s "${ADDR}"  "udp"  \
-                        "http: visit the nodePort ip of backend-server normal service"  "backendserver"
-          done
+      SERVICE_NAME=backendserver-service-external
+      NORMAL_CLUSTER_IP=$( kubectl  get service ${SERVICE_NAME} | sed '1 d' | awk '{print $3}' )
+      EXTERNAL_IP=$( kubectl  get service $SERVICE_NAME   | sed '1 d' | awk '{print $4}' )
+      PORTINFO=$( kubectl  get service ${SERVICE_NAME} | sed '1d' | awk '{print $5}' | tr ',' '\n' )
+      for LINE in $PORTINFO ; do
+           PROTOCOL=${LINE##*/}
+           TMP=${LINE%%/*}
+           PORT=${TMP%%:*}
+           NODEPORT=${TMP##*:}
+           echo "service PORT: protocol=$PROTOCOL PORT=$PORT NODEPORT=$NODEPORT"
+           if [ "$PROTOCOL" == "TCP" ] ; then
+                METHOD="http"
+                PORT_URL="http://${NORMAL_CLUSTER_IP}:${PORT}"
+                EXTERNAL_URL="http://${EXTERNAL_IP}:${PORT}"
+           else
+                METHOD="udp"
+                PORT_URL="${NORMAL_CLUSTER_IP}:${PORT}"
+                EXTERNAL_URL="${EXTERNAL_IP}:${PORT}"
+           fi
+           # cluster ip + port
+           VisitK8s "${PORT_URL}"  "${METHOD}"  \
+                      "http: visit the cluster ip $NORMAL_CLUSTER_IP PORT=$PORT protocol=$PROTOCOL, to backend-server service"  "backendserver"
+          #
+           VisitK8s "${EXTERNAL_URL}"  "${METHOD}"  \
+                      "http: visit the external ip $EXTERNAL_IP PORT=$PORT protocol=$PROTOCOL, to backend-server service"  "backendserver"
+          # node port
+          if [ -n "$NODEPORT" ] ; then
+              for NODE_IP in ${NODE_IP_LIST} ; do
+                   if [ "$PROTOCOL" == "TCP" ] ; then
+                        URL="http://${NODE_IP}:${NODEPORT}"
+                   else
+                        URL="${NODE_IP}:${NODEPORT}"
+                   fi
+                  VisitK8s "${URL}"  "$METHOD"  \
+                        "http: visit the nodeIp $NODE_IP NODEPORT=$NODEPORT protocol=$PROTOCOL , to backend-server service"  "backendserver"
+              done
+          fi
       done
-
-      echo ""
-      EXTERNAL_IP=$( kubectl  get service backendserver-service-external   | sed '1 d' | awk '{print $4}' )
-      VisitK8s "http://${EXTERNAL_IP}:80"  "http"  \
-                "http: visit the external ip of backend-server normal service"  "backendserver"
-      VisitK8s "${EXTERNAL_IP}:80"  "udp"  \
-                "http: visit the external ip of backend-server normal service"  "backendserver"
 
       echo ""
       LOCAL_SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-service-local | sed '1 d' | awk '{print $3}' )
@@ -153,6 +188,7 @@ TestService(){
       VisitK8s "${AFFINITY_SERVICE_CLUSTER_IP}:80"  "udp"  \
                 "http: visit the clusterIp of backend-server affinity service"  "backendserver"
 
+      # DOTO: TEST on host client
 }
 
 TestRedirectPolicy(){
@@ -177,42 +213,44 @@ TestBalancingPolicy(){
 
     ADDRESS=$( kubectl  get BalancingPolicy balancing-matchaddress | sed '1d' | awk '{print $2}' )
     VisitK8s "http://${ADDRESS}:80"  "http"  \
-              "http: visit the virtual address of backend-server localRedirect service"  "redirectserver"
+              "http: visit the virtual address of backend-server balancing service"  "redirectserver"
     VisitK8s "${ADDRESS}:80"  "udp"  \
-              "udp: visit the virtual address of backend-server localRedirect service"  "redirectserver"
+              "udp: visit the virtual address of backend-server balancing service"  "redirectserver"
     VisitHost "http://${ADDRESS}:80"  "http"  \
-              "http: visit the virtual address of backend-server localRedirect service"  "redirectserver"
+              "http: visit the virtual address of backend-server balancing service"  "redirectserver"
     VisitHost "${ADDRESS}:80"  "udp"  \
-              "udp: visit the virtual address of backend-server localRedirect service"  "redirectserver"
+              "udp: visit the virtual address of backend-server balancing service"  "redirectserver"
 
 
     SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-balancing-pod | sed '1 d' | awk '{print $3}' )
     VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
-              "http: visit the pod ip of backend-server localRedirect service"  "redirectserver"
+              "http: visit the pod ip of backend-server balancing service"  "redirectserver"
     VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
-              "udp: visit the pod ip of backend-server localRedirect service"  "redirectserver"
+              "udp: visit the pod ip of backend-server balancing service"  "redirectserver"
 
 
     SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-balancing-hostport | sed '1 d' | awk '{print $3}' )
     VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
-              "http: visit the hostPort of backend-server localRedirect service"  "redirectserver"
+              "http: visit the hostPort of backend-server balancing service"  "redirectserver"
     VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
-              "udp: visit the hostPort of backend-server localRedirect service"  "redirectserver"
+              "udp: visit the hostPort of backend-server balancing service"  "redirectserver"
     VisitHost "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
-              "http: visit the hostPort of backend-server localRedirect service"  "redirectserver"
+              "http: visit the hostPort of backend-server balancing service"  "redirectserver"
     VisitHost "${SERVICE_CLUSTER_IP}:80"  "udp"  \
-              "udp: visit the hostPort of backend-server localRedirect service"  "redirectserver"
+              "udp: visit the hostPort of backend-server balancing service"  "redirectserver"
 
 
     SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-balancing-nodeproxy | sed '1 d' | awk '{print $3}' )
     VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
-              "http: visit the nodeProxy of backend-server localRedirect service"  "redirectserver"
+              "http: visit the nodeProxy of backend-server balancing service"  "redirectserver"
     VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
-              "udp: visit the nodeProxy of backend-server localRedirect service"  "redirectserver"
+              "udp: visit the nodeProxy of backend-server balancing service"  "redirectserver"
     VisitHost "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
-              "http: visit the nodeProxy of backend-server localRedirect service"  "redirectserver"
+              "http: visit the nodeProxy of backend-server balancing service"  "redirectserver"
     VisitHost "${SERVICE_CLUSTER_IP}:80"  "udp"  \
-              "udp: visit the nodeProxy of backend-server localRedirect service"  "redirectserver"
+              "udp: visit the nodeProxy of backend-server balancing service"  "redirectserver"
+
+    # DOTO: TEST on host client
 
 }
 
@@ -227,4 +265,13 @@ elif [ "$1"x == "redirect"x ]; then
 else
     echo "unknow args: $@ "
     exit 1
+fi
+
+echo "================================================="
+if ((FAIL_ACCOUNT==0)) ; then
+  echo -e "${GREEN}${CURRENT_FILENAME}: ${TEST_ACCOUNT} tests pass ${NC}"
+else
+  echo -e "${GREEN}${CURRENT_FILENAME}: $((TEST_ACCOUNT-FAIL_ACCOUNT)) tests pass${NC}"
+  echo -e "${RED}${CURRENT_FILENAME}: ${FAIL_ACCOUNT} tests failed ${NC}"
+  exit 1
 fi

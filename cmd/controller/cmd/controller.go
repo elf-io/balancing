@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	InformerListInvterval = time.Second * 60
+	InformerListInvterval = time.Second * 60 * 5
 )
 
 var scheme = runtime.NewScheme()

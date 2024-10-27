@@ -98,4 +98,5 @@ controller 进行限制，只能有一个 BalancingPolicy / LocalRedirectPolicy 
 
  支持  affinity ，无论是以 cluster ip / nodeport / externalIP，都可根据 service 中定义的持久化时间进行亲和访问 （ 如果持久化后端 pod 销毁，目前还是会 继续转发 ，需要 增强） 
 
- 
+实现 nodeEntry 中 ，在 主机的 隧道 IP 上 生效 指定 port 的 DNAT
+
