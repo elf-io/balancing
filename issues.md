@@ -77,7 +77,17 @@ pod 所在节点的 nodePort
 
 ============ 问题
 
-controller 进行限制，只能有一个 BalancingPolicy / LocalRedirectPolicy 绑定 同名 service   , 否则 agent 侧会 相互覆盖数据
+高优先级：
+	controller 进行限制，只能有一个 BalancingPolicy / LocalRedirectPolicy 绑定 同名 service   , 否则 agent 侧会 相互覆盖数据
+
+    貌似每次启动，calico node 都歇菜了 ？ 测试和 其它 ebpf 程序的 工程兼容性
+
+	支持  affinity ，无论是以 cluster ip / nodeport / externalIP，都可根据 service 中定义的持久化时间进行亲和访问 （ 如果持久化后端 pod 销毁，目前还是会 继续转发 ，需要 增强）
+
+	实现 nodeEntry 中 ，在 主机的 隧道 IP 上 生效 指定 port 的 DNAT
+
+	实现 nodeEntry 中 ，在 主机的 隧道 IP 上 生效 指定 port 的 DNAT
+
 
 目前只支持 ipv4， 不支持 ipv6
 
@@ -87,16 +97,7 @@ controller 进行限制，只能有一个 BalancingPolicy / LocalRedirectPolicy 
 
 程序启动时，会清除 service backend node map， 实现数据完整同步 。 这样，可能会带来 短暂的 service 访问失败
 
-貌似每次启动，calico node 都歇菜了 ？ 测试和 其它 ebpf 程序的 工程兼容性
-
-测试 udp
-
-支持 crd redirect 和 balancing
-
 支持 解析ip 的 指标
 
 
- 支持  affinity ，无论是以 cluster ip / nodeport / externalIP，都可根据 service 中定义的持久化时间进行亲和访问 （ 如果持久化后端 pod 销毁，目前还是会 继续转发 ，需要 增强） 
-
-实现 nodeEntry 中 ，在 主机的 隧道 IP 上 生效 指定 port 的 DNAT
 
