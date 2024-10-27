@@ -5,7 +5,7 @@
 1. ` make build_local_image  -e USE_PROXY_SOURCE=true  `
    ` make build_local_image  -e APT_HTTP_PROXY=http://10.64.0.3:7890 `
 
-2. ` make build_local_test_app_image  -e APT_HTTP_PROXY=http://10.64.0.3:7890 `
+2. ` make build_local_test_app_image   `
 
 3. ` make e2e_init  `
 
@@ -14,8 +14,8 @@
 ```
 make e2e_deploy
 #or
-make e2e_deploy -e PROJECT_IMAGE_TAG=228ebcbda632481f9bf7471983d4dab2fc06b74e \
-                -e TEST_APP_IMAGE_TAG=5b44647869130c82d9582eedc9b5c553aece80b7
+make e2e_deploy -e PROJECT_IMAGE_TAG=8877a79da7c0a9f159363660b5b23e5458480aea \
+                -e TEST_APP_IMAGE_TAG=aa7693a44e205c13e9bd3bee63260c9c1048ce24
 ```
 
 5. 

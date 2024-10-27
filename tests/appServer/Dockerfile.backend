@@ -13,12 +13,7 @@ RUN go build -o udp_server udp_server.go
 #================================
 FROM ubuntu:24.10
 
-ARG APT_HTTP_PROXY
-RUN [ -z "${APT_HTTP_PROXY}" ] || { echo "use APT_HTTP_PROXY=${APT_HTTP_PROXY}" ; export http_proxy=${APT_HTTP_PROXY} ; } ; \
-    apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
-
 COPY --from=builder /app/http_server /app/udp_server /usr/sbin
-
 RUN chmod +x /usr/sbin/udp_server && chmod +x /usr/sbin/http_server
 
 EXPOSE 80
