@@ -9,6 +9,13 @@ ARG GOLANG_IMAGE=docker.io/library/golang:1.23.1
 FROM --platform=${TARGETPLATFORM} ${GOLANG_IMAGE} as gops-cni-builder
 COPY /images/build-gops.sh /build-gops.sh
 
+ARG USE_PROXY_SOURCE
+COPY /images/sources-debian12.list /sources.list
+RUN [ "$USE_PROXY_SOURCE" != "true" ] && exit 0 ; \
+      rm -f /etc/apt/sources.list ; \
+      rm -rf /etc/apt/sources.list.d ; \
+      cp /sources.list /etc/apt/sources.list
+
 #with debian 11 os
 RUN apt-get update && apt-get install -y binutils-aarch64-linux-gnu binutils-x86-64-linux-gnu
 
@@ -36,8 +43,6 @@ RUN  make GOARCH=${TARGETARCH}   \
         RACE=${RACE} NOSTRIP=${NOSTRIP} NOOPT=${NOOPT} \
         DESTDIR_BIN=/tmp/install/${TARGETOS}/${TARGETARCH}/bin \
         build_controller_bin
-
-
 
 #====== release image =======
 

@@ -2,7 +2,8 @@
 
 ## local develop
 
-1. ` make build_local_image -e  APT_HTTP_PROXY=http://10.64.0.3:7890 `
+1. ` make build_local_image  -e USE_PROXY_SOURCE=true  `
+   ` make build_local_image  -e APT_HTTP_PROXY=http://10.64.0.3:7890 `
 
 2. ` make build_local_test_app_image  -e APT_HTTP_PROXY=http://10.64.0.3:7890 `
 
