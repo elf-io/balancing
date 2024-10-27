@@ -189,6 +189,11 @@ deploy_project:
 		exit 0
 		make show_info
 
+
+.PHONY: uninstall_kube_proxy
+uninstall_kube_proxy:
+
+
 .PHONY: install_example_app
 install_example_app:
 	@echo "---------- install applicatio on kubernetes"
