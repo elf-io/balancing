@@ -414,6 +414,9 @@ check_doc:
 
 #=================================
 
+.PHONY: installBuildTool
+installBuildTool:
+	apt-get update && apt-get install -y clang llvm gcc-multilib libbpf-dev
 
 .PHONY: installDevTool
 installDevTool:
