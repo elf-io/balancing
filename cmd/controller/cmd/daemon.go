@@ -46,6 +46,6 @@ func DaemonMain() {
 			rootLogger.Sugar().Warnf("Received singal %+v ", sig)
 			os.Exit(1)
 		}
-	}
+	}()
 	select {}
 }
