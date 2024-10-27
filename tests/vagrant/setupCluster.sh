@@ -14,6 +14,8 @@ VAGRANT_IMAGE_UBUNTU=${VAGRANT_IMAGE_UBUNTU:-"alvistack/ubuntu-24.04"}
 VM_MEMORY=${VM_MEMORY:-$((${VM_MEMORY:-1024}*8))}
 VM_CPUS=${VM_CPUS:-"4"}
 
+SKIP_KUBE_PROXY=${SKIP_KUBE_PROXY:-""}
+
 # HOST PORT MAPPING
 HOSTPORT_API_SERVER=${HOSTPORT_API_SERVER:-"26443"}
 #
@@ -90,6 +92,7 @@ Vagrant.configure("2") do |config|
       /home/vagrant/scripts/getImages.sh
       chmod +x /home/vagrant/scripts/setUpMaster.sh
       export WORKER_JOIN_SCRIPT_PATH=/home/vagrant/scripts/join.sh
+      export SKIP_KUBE_PROXY=${SKIP_KUBE_PROXY}
       sudo /home/vagrant/scripts/setUpMaster.sh
       sudo /home/vagrant/scripts/setKubelet.sh  eth1
       chmod +x /home/vagrant/scripts/installCalico.sh

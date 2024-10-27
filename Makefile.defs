@@ -158,6 +158,9 @@ E2E_KUBECONFIG_PATH="$(ROOT_DIR)/tests/vagrant/config"
 E2E_VAGRANT_IMAGE_K8S=alvistack/kubernetes-1.30
 E2E_VAGRANT_IMAGE_UBUNTU=alvistack/ubuntu-24.04
 
+#E2E_SKIP_KUBE_PROXY := false
+E2E_SKIP_KUBE_PROXY := true
+
 E2E_VM_HOST=hostvm
 E2E_VM_MASTER=controlvm
 E2E_VM_WORKER=workervm

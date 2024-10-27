@@ -1,4 +1,4 @@
-#！/bin/bash
+#!/bin/bash
 ## SPDX-License-Identifier: Apache-2.0
 ## Copyright Authors of Spider
 
@@ -16,8 +16,8 @@ PROJECT_ROOT_PATH=$( cd ${CURRENT_DIR_PATH}/../.. && pwd )
 
 which jq &>/dev/null || { echo "please install jq" ; exit 1 ; }
 
-K8S_PROXY_SERVER_MAPPING_PORT=${K8S_PROXY_SERVER_MAPPING_PORT:-"27000"}
-HOST_PROXY_SERVER_MAPPING_PORT=${HOST_PROXY_SERVER_MAPPING_PORT:-"26440"}
+K8S_PROXY_SERVER_MAPPING_PORT=${K8S_PROXY_SERVER_MAPPING_PORT:-"27001"}
+HOST_PROXY_SERVER_MAPPING_PORT=${HOST_PROXY_SERVER_MAPPING_PORT:-"27002"}
 
 echo "KUBECONFIG ${KUBECONFIG} "
 echo "K8S_PROXY_SERVER_MAPPING_PORT ${K8S_PROXY_SERVER_MAPPING_PORT}"
@@ -38,7 +38,8 @@ VisitK8s(){
   echo ""
   echo "-------------- to K8S: ${LOCALVAR_TITLE} -----------------"
   echo "visit the ${LOCALVAR_METHOD} server ${LOCALVAR_URL} from k8s pod"
-  MSG=$( curl -s 127.0.0.1:${K8S_PROXY_SERVER_MAPPING_PORT} -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
+  echo '   curl -s 127.0.0.1:'${K8S_PROXY_SERVER_MAPPING_PORT}' -d "{\"BackendUrl\":\"'${LOCALVAR_URL}'\",\"Timeout\":5,\"ForwardType\":\"'${LOCALVAR_METHOD}'\", \"EchoData\":\"Hello!\"}" '
+  MSG=$( curl -s 127.0.0.1:${K8S_PROXY_SERVER_MAPPING_PORT} -d "{\"BackendUrl\":\"${LOCALVAR_URL}\",\"Timeout\":5,\"ForwardType\":\"${LOCALVAR_METHOD}\", \"EchoData\":\"Hello!\"}"  ) \
      || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
   echo "${MSG}" | jq .
   if echo "${MSG}" | jq '.BackendResponse' | grep -e "${LOCALVAR_EXPECT}" &>/dev/null ; then
@@ -58,7 +59,8 @@ VisitHost(){
   echo ""
   echo "-------------- to Host: ${LOCALVAR_TITLE} -----------------"
   echo "visit the ${LOCALVAR_METHOD} server ${LOCALVAR_URL} from k8s pod"
-  MSG=$( curl -s 127.0.0.1:${HOST_PROXY_SERVER_MAPPING_PORT} -d '{"BackendUrl":"'${LOCALVAR_URL}'","Timeout":5,"ForwardType":"'${LOCALVAR_METHOD}'", "EchoData":"Hello, HTTP!"}'  ) \
+  echo '   curl -s 127.0.0.1:'${HOST_PROXY_SERVER_MAPPING_PORT}' -d "{\"BackendUrl\":\"'${LOCALVAR_URL}'\",\"Timeout\":5,\"ForwardType\":\"'${LOCALVAR_METHOD}'\", \"EchoData\":\"Hello!\"}" '
+  MSG=$( curl -s 127.0.0.1:${HOST_PROXY_SERVER_MAPPING_PORT} -d "{\"BackendUrl\":\"${LOCALVAR_URL}\",\"Timeout\":5,\"ForwardType\":\"${LOCALVAR_METHOD}\", \"EchoData\":\"Hello!\"}"  ) \
      || { echo "failed to visit the proxy server on master node" ; exit 1 ; }
   echo "${MSG}" | jq .
   if echo "${MSG}" | jq '.BackendResponse' | grep -e "${LOCALVAR_EXPECT}" &>/dev/null ; then
@@ -108,41 +110,49 @@ TestBasicConnectity(){
 
 TestService(){
       echo "===================== test balancing: k8s service  ========================="
-      NODE_IP=$( kubectl  get node -o wide | sed -n '2 p' | awk '{print $6}' )
+      NODE_IP_LIST=$(kubectl  get node -o wide | sed '1 d' | awk '{print $6}' )
 
       echo ""
-      echo "----------- test balancing of k8S service: visit the cluster ip of backend-server normal service "
       NORMAL_CLUSTER_IP=$( kubectl  get service backendserver-service-normal | sed '1 d' | awk '{print $3}' )
-      VisitServiceForAll "http://${NORMAL_CLUSTER_IP}:80"  "http"
-      VisitServiceForAll "${NORMAL_CLUSTER_IP}:80"  "udp"
+      VisitK8s "http://${NORMAL_CLUSTER_IP}:80"  "http"  \
+                "http: visit the cluster ip of backend-server normal service"  "backendserver"
+      VisitK8s "${NORMAL_CLUSTER_IP}:80"  "udp"  \
+                "http: visit the cluster ip of backend-server normal service"  "backendserver"
 
       echo ""
-      echo "----------- test balancing of k8S service: visit the nodePort of backend-server normal service "
       NODE_PORT_LIST=$( kubectl  get service backendserver-service-normal | sed '1d' | awk '{print $5}' | tr ',' '\n' | awk -F ':' '{print $2}' | grep -Eo "[0-9]+" )
       NODE_PORT_IP=""
       for PORT in ${NODE_PORT_LIST}; do
-          ADDR="${NODE_IP}:${PORT}"
-          VisitServiceForAll "http://${ADDR}:80"  "http"
-          VisitServiceForAll "${ADDR}:80"  "udp"
+          for NODE_IP in ${NODE_IP_LIST} ; do
+              ADDR="${NODE_IP}:${PORT}"
+              VisitK8s "http://${ADDR}"  "http"  \
+                        "http: visit the nodePort ip of backend-server normal service"  "backendserver"
+              VisitK8s "${ADDR}"  "udp"  \
+                        "http: visit the nodePort ip of backend-server normal service"  "backendserver"
+          done
       done
 
       echo ""
-      echo "----------- test balancing of k8S service: visit the externalIp of backend-server normal service "
       EXTERNAL_IP=$( kubectl  get service backendserver-service-external   | sed '1 d' | awk '{print $4}' )
-      VisitServiceForAll "http://${EXTERNAL_IP}:80"  "http"
-      VisitServiceForAll "${EXTERNAL_IP}:80"  "udp"
+      VisitK8s "http://${EXTERNAL_IP}:80"  "http"  \
+                "http: visit the external ip of backend-server normal service"  "backendserver"
+      VisitK8s "${EXTERNAL_IP}:80"  "udp"  \
+                "http: visit the external ip of backend-server normal service"  "backendserver"
 
       echo ""
-      echo "----------- test balancing of k8S service: visit the clusterIp of backend-server local service "
       LOCAL_SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-service-local | sed '1 d' | awk '{print $3}' )
-      VisitServiceForAll "http://${LOCAL_SERVICE_CLUSTER_IP}:80"  "http"
-      VisitServiceForAll "${LOCAL_SERVICE_CLUSTER_IP}:80"  "udp"
+      VisitK8s "http://${LOCAL_SERVICE_CLUSTER_IP}:80"  "http"  \
+                "http: visit the clusterIp of backend-server local service"  "backendserver.*workervm"
+      VisitK8s "${LOCAL_SERVICE_CLUSTER_IP}:80"  "udp"  \
+                "http: visit the clusterIp of backend-server local service"  "backendserver.*workervm"
 
       echo ""
-      echo "----------- test balancing of k8S service: visit the clusterIp of backend-server affinity service "
       AFFINITY_SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-service-affinity | sed '1 d' | awk '{print $3}' )
-      VisitServiceForAll "http://${AFFINITY_SERVICE_CLUSTER_IP}:80"  "http"
-      VisitServiceForAll "${AFFINITY_SERVICE_CLUSTER_IP}:80"  "udp"
+      VisitK8s "http://${AFFINITY_SERVICE_CLUSTER_IP}:80"  "http"  \
+                "http: visit the clusterIp of backend-server affinity service"  "backendserver"
+      VisitK8s "${AFFINITY_SERVICE_CLUSTER_IP}:80"  "udp"  \
+                "http: visit the clusterIp of backend-server affinity service"  "backendserver"
+
 }
 
 TestRedirectPolicy(){
@@ -150,15 +160,15 @@ TestRedirectPolicy(){
 
     SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-redirect-service | sed '1 d' | awk '{print $3}' )
     VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
-              "http: visit the clusterIp of backend-server localRedirect service"  "redirectserver.*controlvm"
+              "http: visit the clusterIp of backend-server localRedirect service"  "redirectserver.*workervm"
     VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
-              "udp: visit the clusterIp of backend-server localRedirect service"  "redirectserver.*controlvm"
+              "udp: visit the clusterIp of backend-server localRedirect service"  "redirectserver.*workervm"
 
     ADDRESS=$( kubectl  get LocalRedirectPolicy redirect-matchaddress | sed '1d' | awk '{print $2}' )
     VisitK8s "http://${ADDRESS}:80"  "http"  \
-              "http: visit the virtual address of backend-server localRedirect service"  "redirectserver.*controlvm"
+              "http: visit the virtual address of backend-server localRedirect service"  "redirectserver.*workervm"
     VisitK8s "${ADDRESS}:80"  "udp"  \
-              "udp: visit the virtual address of backend-server localRedirect service"  "redirectserver.*controlvm"
+              "udp: visit the virtual address of backend-server localRedirect service"  "redirectserver.*workervm"
 
 }
 

@@ -15,6 +15,7 @@ init_vagrant: installE2eTools clean
 		  KUBECONFIG_PATH=$(E2E_KUBECONFIG_PATH) \
 		  VAGRANT_IMAGE_K8S=$(E2E_VAGRANT_IMAGE_K8S) \
 		  VAGRANT_IMAGE_UBUNTU=$(E2E_VAGRANT_IMAGE_UBUNTU) \
+		  SKIP_KUBE_PROXY=$(E2E_SKIP_KUBE_PROXY) \
 		  ./setupCluster.sh on
 	@echo "===================== deploy prometheus CRD ========== "
 	# https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml ; } \
@@ -247,7 +248,7 @@ install_example_app:
 
 .PHONY: test_connectivity
 test_connectivity:
-	export K8S_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_CONTROLVM_PROXY_SERVER) ; \
+	export K8S_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_WORKERVM_PROXY_SERVER) ; \
  		export HOST_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_HOSTVM_PROXY_SERVER) ;\
  		export KUBECONFIG=$(E2E_KUBECONFIG_PATH) ; \
  		./scripts/testAppConnectivity.sh basic || { echo "failed to test the connectivity" ; exit 1 ; } ;  \

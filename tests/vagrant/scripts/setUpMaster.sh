@@ -14,6 +14,7 @@ POD_CIRD=${POD_CIRD:-"172.20.0.0/16,fc01::/48"}
 LOCAL_CLUSTERIP_CIDR=${LOCAL_CLUSTERIP_CIDR:-"172.21.0.0/16,fc02::/108"}
 WORKER_JOIN_SCRIPT_PATH=${WORKER_JOIN_SCRIPT_PATH:-"${CURRENT_DIR_PATH}/join.sh"}
 
+SKIP_KUBE_PROXY=${SKIP_KUBE_PROXY:-""}
 
 setUpMaster(){
     
@@ -23,11 +24,19 @@ setUpMaster(){
     IPV6_ADDRESS=$( ip addr show ${KUBELET_INTERFACE} | grep "inet6 " |  grep -v "scope link" | awk '{print $2}' | cut -d'/' -f1 )
     echo "set up master on interface ${KUBELET_INTERFACE} with ipv4 ${IPV4_ADDRESS} and ipv6 ${IPV6_ADDRESS}"
 
+    OPTION=""
+    if [ "$SKIP_KUBE_PROXY" == "true" ] || [ "$SKIP_KUBE_PROXY" == "TRUE" ]  ; then
+        echo "skip the installation of kube-proxy"
+        OPTION+=" --skip-phases=addon/kube-proxy "
+    else
+        echo "install kube-proxy"
+    fi
+
     kubeadm init  --v=5  --upload-certs --apiserver-advertise-address ${IPV4_ADDRESS} \
             --pod-network-cidr=${POD_CIRD}  --service-cidr ${LOCAL_CLUSTERIP_CIDR} \
             --token-ttl 0  --apiserver-cert-extra-sans 127.0.0.1 \
             --control-plane-endpoint ${IPV4_ADDRESS}:6443 \
-            --kubernetes-version ${K8S_VERSION}
+            --kubernetes-version ${K8S_VERSION} ${OPTION}
 
     rm -rf /home/vagrant/.kube
     mkdir -p /home/vagrant/.kube

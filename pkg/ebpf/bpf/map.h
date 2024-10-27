@@ -235,7 +235,8 @@ struct event_value {
     __u8   failure_code;
 
     __u8   nat_mode;    /* 用于标识发生了哪种 IP 地址的 nat， 参考 NAT_MODE_* 标志 */
-    __u8   pad[7];
+    __u8   protocol;
+    __u8   pad[6];
 } ;
 
 // BPF_MAP_TYPE_PERF_EVENT_ARRAY 中的 key 和 value 并不存放真正的 数据， key 用来存放 cpu 索引， values 存放指向 perf event buffer 的地址
