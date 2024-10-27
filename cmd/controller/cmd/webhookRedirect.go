@@ -37,7 +37,7 @@ func (s *webhookRedirect) ValidateCreate(ctx context.Context, obj runtime.Object
 	bp, ok := obj.(*balancingv1beta1.LocalRedirectPolicy)
 	if !ok {
 		s.l.Sugar().Errorf("expected a LocalRedirectPolicy but got a %T", obj)
-		return apierrors.NewBadRequest("failed to get LocalRedirectPolicy")
+		return nil, apierrors.NewBadRequest("failed to get LocalRedirectPolicy")
 	}
 
 	logger := s.l.Named("LocalRedirectMutating").With(
@@ -53,7 +53,7 @@ func (s *webhookRedirect) ValidateUpdate(ctx context.Context, oldObj, newObj run
 	newBp, ok := newObj.(*balancingv1beta1.LocalRedirectPolicy)
 	if !ok {
 		s.l.Sugar().Errorf("expected a LocalRedirectPolicy but got a %T", newObj)
-		return apierrors.NewBadRequest("failed to get LocalRedirectPolicy")
+		return nil, apierrors.NewBadRequest("failed to get LocalRedirectPolicy")
 	}
 	oldBp := oldObj.(*balancingv1beta1.LocalRedirectPolicy)
 

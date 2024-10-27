@@ -37,7 +37,7 @@ func (s *webhookBalacning) ValidateCreate(ctx context.Context, obj runtime.Objec
 	bp, ok := obj.(*balancingv1beta1.BalancingPolicy)
 	if !ok {
 		s.l.Sugar().Errorf("expected a BalancingPolicy but got a %T", obj)
-		return apierrors.NewBadRequest("failed to get BalancingPolicy")
+		return nil, apierrors.NewBadRequest("failed to get BalancingPolicy")
 	}
 
 	logger := s.l.Named("BalacningPolicyMutating").With(
@@ -53,7 +53,7 @@ func (s *webhookBalacning) ValidateUpdate(ctx context.Context, oldObj, newObj ru
 	newBp, ok := newObj.(*balancingv1beta1.BalancingPolicy)
 	if !ok {
 		s.l.Sugar().Errorf("expected a BalancingPolicy but got a %T", newObj)
-		return apierrors.NewBadRequest("failed to get BalancingPolicy")
+		return nil, apierrors.NewBadRequest("failed to get BalancingPolicy")
 	}
 	oldBp := oldObj.(*balancingv1beta1.BalancingPolicy)
 
