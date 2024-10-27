@@ -90,7 +90,9 @@ func SetupController() {
 		rootLogger.Sugar().Fatalf("unable to set up readiness check: %v", err)
 	}
 
-	t := &webhookBalacning{}
+	t := &webhookBalacning{
+		l: rootLogger.Named("balancingWebhook"),
+	}
 	err = ctrl.NewWebhookManagedBy(mgr).
 		For(&balancingv1beta1.BalancingPolicy{}).
 		WithDefaulter(t).
@@ -100,7 +102,9 @@ func SetupController() {
 		rootLogger.Sugar().Fatalf("unable to NewWebhookManagedBy for BalancingPolicy : %v", err)
 	}
 
-	m := &webhookRedirect{}
+	m := &webhookRedirect{
+		l: rootLogger.Named("localRedirectWebhook"),
+	}
 	err = ctrl.NewWebhookManagedBy(mgr).
 		For(&balancingv1beta1.LocalRedirectPolicy{}).
 		WithDefaulter(m).
