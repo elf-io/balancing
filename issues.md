@@ -100,6 +100,7 @@ service 中targetPort 是名字，就歇菜了
 
 	实现 nodeEntry 中 ，在 主机的 隧道 IP 上 生效 指定 port 的 DNAT
 
+	metrics
 
 目前只支持 ipv4， 不支持 ipv6
 
