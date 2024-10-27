@@ -76,6 +76,18 @@ pod 所在节点的 nodePort
 
 
 ============ 问题
+service 中targetPort 是名字，就歇菜了
+	ports:
+     - name: metrics
+        port: 5821
+        protocol: TCP
+        targetPort: metrics
+
+		{"level":"DEBUG","ts":"2024-10-27T14:44:20.937Z","agent":"agent.ebpf","caller":"ebpf/ebpfPrintMap.go:518",
+		"msg":"raw ebpf event: { CgroupId:7508, IsIpv4:1, SvcId:4266137004, IsSuccess:1, NatType:service, NatMode:ServiceClusterIP, Protocol:tcp, 
+	OriginalDestV4Ip:172.21.72.254, OriginalDestV6Ip:::, OriginalDestPort:5822, NatV4Ip:192.168.0.11, NatV6Ip:::, 
+	NatPort:0 , Pid:3548, FailureCode: } "}
+
 
 高优先级：
 	controller 进行限制，只能有一个 BalancingPolicy / LocalRedirectPolicy 绑定 同名 service   , 否则 agent 侧会 相互覆盖数据

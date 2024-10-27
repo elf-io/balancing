@@ -23,7 +23,7 @@ spec:
   ports:
     - name: metrics
       port: {{ .Values.balancingAgent.prometheus.port }}
-      targetPort: metrics
+      targetPort: {{ .Values.balancingAgent.prometheus.port }}
       protocol: TCP
   selector:
     {{- include "project.balancingAgent.selectorLabels" . | nindent 4 }}
@@ -54,12 +54,12 @@ spec:
     {{- if .Values.balancingController.prometheus.enabled }}
     - name: metrics
       port: {{ .Values.balancingController.prometheus.port }}
-      targetPort: metrics
+      targetPort: {{ .Values.balancingController.prometheus.port }}
       protocol: TCP
     {{- end }}
     - name: webhook
       port: {{ .Values.balancingController.webhookPort }}
-      targetPort: webhook
+      targetPort: {{ .Values.balancingController.webhookPort }}
       protocol: TCP
   selector:
     {{- include "project.balancingController.selectorLabels" . | nindent 4 }}

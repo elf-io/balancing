@@ -91,9 +91,7 @@ Vagrant.configure("2") do |config|
       chmod +x /home/vagrant/scripts/getImages.sh
       /home/vagrant/scripts/getImages.sh
       chmod +x /home/vagrant/scripts/setUpMaster.sh
-      export WORKER_JOIN_SCRIPT_PATH=/home/vagrant/scripts/join.sh
-      export SKIP_KUBE_PROXY=${SKIP_KUBE_PROXY}
-      sudo /home/vagrant/scripts/setUpMaster.sh
+      sudo WORKER_JOIN_SCRIPT_PATH=/home/vagrant/scripts/join.sh  SKIP_KUBE_PROXY=${SKIP_KUBE_PROXY} /home/vagrant/scripts/setUpMaster.sh
       sudo /home/vagrant/scripts/setKubelet.sh  eth1
       chmod +x /home/vagrant/scripts/installCalico.sh
       /home/vagrant/scripts/installCalico.sh

@@ -159,7 +159,7 @@ deploy_project:
 			done ; \
 		fi  ; \
 		echo "begin to deploy on kubernetes" ; \
-		helm --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall -n $(E2E_INSTALL_NAMESPACE) project || true  ;\
+		helm --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall -n $(E2E_INSTALL_NAMESPACE) project --wait || true  ;\
 		HELM_OPTION="" ; \
     	if [ -n "$(E2E_PYROSCOPE_VM_PORT)" ] ; then \
 			echo "add env" ; \
@@ -215,7 +215,7 @@ install_example_app:
 			fi \
 		done
 	echo "deploy proxy server " ; \
-			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  proxyserver &>/dev/null || true ; \
+			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  proxyserver --wait  || true ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) install  proxyserver ./charts/proxyserver \
 					--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) --set server.hostPort=$(E2E_VMPORT_PROXY_SERVER) \
 			|| { ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; } ;\
@@ -227,12 +227,12 @@ install_example_app:
 				sudo docker run -d -p $(E2E_VMPORT_HOSTVM_PROXY_SERVER):80 --name server "$${IMAGE}" ; \
 			)
 	echo "deploy backend server " ; \
-			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  backendserver &>/dev/null || true ; \
+			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  backendserver --wait || true ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) install  backendserver ./charts/backendserver \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| {   ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
 	echo "deploy redirect server " ; \
-			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  redirectserver &>/dev/null || true ; \
+			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  redirectserver --wait || true ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) install  redirectserver ./charts/redirectserver \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| { ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
