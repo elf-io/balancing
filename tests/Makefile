@@ -2,7 +2,10 @@ include ../Makefile.defs
 
 
 .PHONY: init_env
-init_env: init_vagrant install_proscope show_info
+init_env: init_vagrant install_proscope
+	@echo "========================================================"
+	@ KUBECONFIG=$(E2E_KUBECONFIG_PATH)  kubectl get pod -o wide -A
+	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
 
 .PHONY: init_vagrant
 init_vagrant: installE2eTools clean
