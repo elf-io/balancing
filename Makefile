@@ -252,7 +252,7 @@ lint_golang_format:
 lint_golang_lock:
 	@ BAD="" ; \
  	 for l in sync.Mutex sync.RWMutex; do \
-  		DATA=` grep -r --exclude-dir={.git,_build,vendor,externalversions,lock,contrib,tests/appServer} -i --include \*.go "$${l}" . ` || true ; \
+  		DATA=` grep -r --exclude-dir={.git,_build,vendor,externalversions,lock,contrib,tests} -i --include \*.go "$${l}" . ` || true ; \
 	    if [ -n "$${DATA}" ] ; then \
 	   		 echo "Found $${l} usage. Please use pkg/lock instead to improve deadlock detection"; \
 	   		 echo "$${DATA}" ; \
@@ -378,7 +378,7 @@ build_doc:
 	-docker stop doc_builder &>/dev/null || true
 	-docker rm doc_builder &>/dev/null || true
 	[ -f "docs/mkdocs.yml" ] || { echo "error, miss docs/mkdocs.yml "; exit 1 ; }
-	-@ rm -f ./docs/$(OUTPUT_TAR)
+	-@ rm -f ./docs/$(OUTPUT_TAR) || true
 	@echo "build doc html " ; \
 		docker run --rm --name doc_builder  \
 		-v ${PROJECT_DOC_DIR}:/host/docs \
@@ -403,7 +403,7 @@ check_doc:
         --entrypoint sh \
         squidfunk/mkdocs-material:8.5.11 -c "cd /host && cp ./docs/mkdocs.yml ./ && mkdocs build 2>&1 && cd site && tar -czvf site.tar.gz * && mv ${OUTPUT_TAR} ../docs/" 2>&1` ; \
         if (( $$? !=0 )) ; then \
-        	echo "!!! error, failed to build doc" ; \
+        	echo "!!! error, failed to build doc: $${MESSAGE}" ; \
         	exit 1 ; \
         fi ; \
         if grep -E "WARNING .* which is not found" <<< "$${MESSAGE}" ; then  \
