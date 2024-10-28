@@ -98,10 +98,10 @@ build_local_controller_image:
 build_local_test_app_image: APT_HTTP_PROXY :=
 build_local_test_app_image:
 	docker build --build-arg APT_HTTP_PROXY=$(APT_HTTP_PROXY) \
-		--file cd ./tests/appServer/Dockerfile.proxy \
+		--file ./tests/appServer/Dockerfile.proxy \
 		--tag $(TEST_APP_PROXY_SERVER_IMAGE) .
 	docker build --build-arg APT_HTTP_PROXY=$(APT_HTTP_PROXY) \
-		--file cd ./tests/appServer/Dockerfile.backend \
+		--file ./tests/appServer/Dockerfile.backend \
 		--tag $(TEST_APP_BACKEND_SERVER_IMAGE) .
 
 
