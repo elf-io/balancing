@@ -375,8 +375,8 @@ build_doc: OUTPUT_TAR := site.tar.gz
 build_doc:
 	-@rm -rf $(DOC_OUTPUT)
 	-@mkdir -p $(DOC_OUTPUT)
-	-docker stop doc_builder &>/dev/null
-	-docker rm doc_builder &>/dev/null
+	-docker stop doc_builder &>/dev/null || true
+	-docker rm doc_builder &>/dev/null || true
 	[ -f "docs/mkdocs.yml" ] || { echo "error, miss docs/mkdocs.yml "; exit 1 ; }
 	-@ rm -f ./docs/$(OUTPUT_TAR)
 	@echo "build doc html " ; \
