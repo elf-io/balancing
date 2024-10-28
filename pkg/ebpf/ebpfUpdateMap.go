@@ -11,7 +11,7 @@ import (
 // ------------------------- update ----------------------------------
 
 func (s *EbpfProgramStruct) UpdateMapService(keyList []bpf_cgroupMapkeyService, valueList []bpf_cgroupMapvalueService) error {
-	if keyList == nil || valueList == nil || len(keyList) == 0 || len(valueList) == 0 {
+	if len(keyList) == 0 || len(valueList) == 0 {
 		return fmt.Errorf("empty parameter")
 	}
 	if len(keyList) != len(valueList) {
@@ -30,7 +30,7 @@ func (s *EbpfProgramStruct) UpdateMapService(keyList []bpf_cgroupMapkeyService, 
 }
 
 func (s *EbpfProgramStruct) UpdateMapBackend(keyList []bpf_cgroupMapkeyBackend, valueList []bpf_cgroupMapvalueBackend) error {
-	if keyList == nil || valueList == nil || len(keyList) == 0 || len(valueList) == 0 {
+	if len(keyList) == 0 || len(valueList) == 0 {
 		return fmt.Errorf("empty parameter")
 	}
 	if len(keyList) != len(valueList) {
@@ -49,7 +49,7 @@ func (s *EbpfProgramStruct) UpdateMapBackend(keyList []bpf_cgroupMapkeyBackend, 
 }
 
 func (s *EbpfProgramStruct) UpdateMapNodeIp(keyList []bpf_cgroupMapkeyNodeIp, valueList []uint32) error {
-	if keyList == nil || valueList == nil || len(keyList) == 0 || len(valueList) == 0 {
+	if len(keyList) == 0 || len(valueList) == 0 {
 		return fmt.Errorf("empty parameter")
 	}
 	if len(keyList) != len(valueList) {
@@ -68,7 +68,7 @@ func (s *EbpfProgramStruct) UpdateMapNodeIp(keyList []bpf_cgroupMapkeyNodeIp, va
 }
 
 func (s *EbpfProgramStruct) UpdateMapNodeProxyIp(keyList []uint32, valueList []bpf_cgroupMapvalueNodeProxyIp) error {
-	if keyList == nil || valueList == nil || len(keyList) == 0 || len(valueList) == 0 {
+	if len(keyList) == 0 || len(valueList) == 0 {
 		return fmt.Errorf("empty parameter")
 	}
 	if len(keyList) != len(valueList) {
@@ -87,7 +87,7 @@ func (s *EbpfProgramStruct) UpdateMapNodeProxyIp(keyList []uint32, valueList []b
 }
 
 func (s *EbpfProgramStruct) UpdateMapNatRecord(keyList []bpf_cgroupMapkeyNatRecord, valueList []bpf_cgroupMapvalueNatRecord) error {
-	if keyList == nil || valueList == nil || len(keyList) == 0 || len(valueList) == 0 {
+	if len(keyList) == 0 || len(valueList) == 0 {
 		return fmt.Errorf("empty parameter")
 	}
 	if len(keyList) != len(valueList) {
@@ -106,7 +106,7 @@ func (s *EbpfProgramStruct) UpdateMapNatRecord(keyList []bpf_cgroupMapkeyNatReco
 }
 
 func (s *EbpfProgramStruct) UpdateMapAffinity(keyList []bpf_cgroupMapkeyAffinity, valueList []bpf_cgroupMapvalueAffinity) error {
-	if keyList == nil || valueList == nil || len(keyList) == 0 || len(valueList) == 0 {
+	if len(keyList) == 0 || len(valueList) == 0 {
 		return fmt.Errorf("empty parameter")
 	}
 	if len(keyList) != len(valueList) {
@@ -136,7 +136,7 @@ func (s *EbpfProgramStruct) UpdateMapConfigure(index uint32, value uint32) error
 // ------------------------- delete ----------------------------------
 
 func (s *EbpfProgramStruct) DeleteMapService(keyList []bpf_cgroupMapkeyService) error {
-	if keyList == nil || len(keyList) == 0 {
+	if len(keyList) == 0 {
 		return nil
 	}
 	c, e := s.BpfObjCgroup.MapService.BatchDelete(keyList, &ebpf.BatchOptions{})
@@ -150,7 +150,7 @@ func (s *EbpfProgramStruct) DeleteMapService(keyList []bpf_cgroupMapkeyService) 
 }
 
 func (s *EbpfProgramStruct) DeleteMapBackend(keyList []bpf_cgroupMapkeyBackend) error {
-	if keyList == nil || len(keyList) == 0 {
+	if len(keyList) == 0 {
 		return nil
 	}
 	c, e := s.BpfObjCgroup.MapBackend.BatchDelete(keyList, &ebpf.BatchOptions{})
@@ -164,7 +164,7 @@ func (s *EbpfProgramStruct) DeleteMapBackend(keyList []bpf_cgroupMapkeyBackend) 
 }
 
 func (s *EbpfProgramStruct) DeleteMapNodeIp(keyList []bpf_cgroupMapkeyNodeIp) error {
-	if keyList == nil || len(keyList) == 0 {
+	if len(keyList) == 0 {
 		return nil
 	}
 	c, e := s.BpfObjCgroup.MapNodeIp.BatchDelete(keyList, &ebpf.BatchOptions{})
@@ -178,7 +178,7 @@ func (s *EbpfProgramStruct) DeleteMapNodeIp(keyList []bpf_cgroupMapkeyNodeIp) er
 }
 
 func (s *EbpfProgramStruct) DeleteMapNodeProxyIp(keyList []uint32) error {
-	if keyList == nil || len(keyList) == 0 {
+	if len(keyList) == 0 {
 		return nil
 	}
 	c, e := s.BpfObjCgroup.MapNodeProxyIp.BatchDelete(keyList, &ebpf.BatchOptions{})
@@ -192,7 +192,7 @@ func (s *EbpfProgramStruct) DeleteMapNodeProxyIp(keyList []uint32) error {
 }
 
 func (s *EbpfProgramStruct) DeleteMapAffinity(keyList []bpf_cgroupMapkeyAffinity) error {
-	if keyList == nil || len(keyList) == 0 {
+	if len(keyList) == 0 {
 		return nil
 	}
 	c, e := s.BpfObjCgroup.MapAffinity.BatchDelete(keyList, &ebpf.BatchOptions{})
@@ -206,7 +206,7 @@ func (s *EbpfProgramStruct) DeleteMapAffinity(keyList []bpf_cgroupMapkeyAffinity
 }
 
 func (s *EbpfProgramStruct) DeleteMapNatRecord(keyList []bpf_cgroupMapkeyNatRecord) error {
-	if keyList == nil || len(keyList) == 0 {
+	if len(keyList) == 0 {
 		return nil
 	}
 	c, e := s.BpfObjCgroup.MapNatRecord.BatchDelete(keyList, &ebpf.BatchOptions{})
