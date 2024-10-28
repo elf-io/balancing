@@ -19,7 +19,7 @@ func (s *ebpfWriter) UpdateNode(l *zap.Logger, node *corev1.Node, onlyUpdateTime
 		return fmt.Errorf("empty node")
 	}
 	node.ObjectMeta.CreationTimestamp = metav1.Time{
-		time.Now(),
+		Time: time.Now(),
 	}
 
 	index := node.Name

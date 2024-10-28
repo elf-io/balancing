@@ -27,7 +27,7 @@ func (s *ReconcilerBalancing) Reconcile(ctx context.Context, req ctrl.Request) (
 	CheckPolicyValidity := func(policy *balancing.BalancingPolicy) error {
 		if idStr, ok := policy.Annotations[types.AnnotationServiceID]; ok {
 			if _, e := utils.StringToUint32(idStr); e != nil {
-				return fmt.Errorf("policy %s has an invalid serviceID annotation %s, skip", idStr)
+				return fmt.Errorf("policy %s has an invalid serviceID annotation %s, skip", policy.Name,, idStr)
 			}
 		} else {
 			return fmt.Errorf("policy %s miss serviceID annotation, skip", policy.Name)

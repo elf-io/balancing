@@ -40,7 +40,7 @@ func (s *ebpfWriter) UpdateServiceByService(l *zap.Logger, svc *corev1.Service, 
 
 	// use it to record last update time
 	svc.ObjectMeta.CreationTimestamp = metav1.Time{
-		time.Now(),
+		Time: time.Now(),
 	}
 
 	index := svc.Namespace + "/" + svc.Name
@@ -126,7 +126,7 @@ func (s *ebpfWriter) UpdateServiceByEndpointSlice(l *zap.Logger, epSlice *discov
 		return fmt.Errorf("empty EndpointSlice")
 	}
 	epSlice.ObjectMeta.CreationTimestamp = metav1.Time{
-		time.Now(),
+		Time: time.Now(),
 	}
 
 	// for default/kubernetes ，there is no owner

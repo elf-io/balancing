@@ -122,7 +122,7 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 
 	// Allow the current process to lock memory for eBPF resources.
 	if err := rlimit.RemoveMemlock(); err != nil {
-		return fmt.Errorf("failed to RemoveMemlock:", err)
+		return fmt.Errorf("failed to RemoveMemlock: %v", err)
 	}
 
 	// attach to cgroup

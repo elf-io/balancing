@@ -27,7 +27,7 @@ func (s *ReconcilerRedirect) Reconcile(ctx context.Context, req ctrl.Request) (c
 	CheckPolicyValidity := func(policy *balancing.LocalRedirectPolicy) error {
 		if idStr, ok := policy.Annotations[types.AnnotationServiceID]; ok {
 			if _, e := utils.StringToUint32(idStr); e != nil {
-				return fmt.Errorf("policy %s has an invalid serviceID annotation %s, skip", idStr)
+				return fmt.Errorf("policy %s has an invalid serviceID annotation %s, skip", policy.Name, idStr)
 			}
 		} else {
 			return fmt.Errorf("policy %s miss serviceID annotation, skip", policy.Name)

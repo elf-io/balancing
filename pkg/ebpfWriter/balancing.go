@@ -47,10 +47,9 @@ func (s *ebpfWriter) getBalancingNatMode(policy *balancingv1beta1.BalancingPolic
 			s.log.Sugar().Errorf("unknown RedirectMode in policy %s", policy.Name)
 			return nil
 		}
-	} else {
-		return &ebpf.NatModeBalancingAddress
 	}
-	return nil
+	return &ebpf.NatModeBalancingAddress
+
 }
 
 func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1beta1.BalancingPolicy) error {

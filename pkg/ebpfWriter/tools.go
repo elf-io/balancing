@@ -399,7 +399,7 @@ LOOP_policyPort:
 					}
 				}
 				if !findPort {
-					return nil, fmt.Errorf("failed to find backend port %v for BalancingPolicy %v", policy.Name)
+					return nil, fmt.Errorf("failed to find backend port %v for BalancingPolicy %v", policyPort.Name, policy.Name)
 				}
 				svc.Spec.Ports = append(svc.Spec.Ports, newport)
 				continue LOOP_policyPort
