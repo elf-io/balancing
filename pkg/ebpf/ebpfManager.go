@@ -4,10 +4,11 @@ package ebpf
 
 // refer to https://github.com/cilium/pwru/blob/main/build.go
 // TARGETARCH = amd64 / arm64
-//go:generate sh -c "echo Generating for $TARGETARCH"
+// generate bpf_cgroup_x86_bpfel.go or bpf_cgroup_x86_bpfel.go
+//go:generate sh -c "echo Generating ebpf for $TARGETARCH"
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target $TARGETARCH -cc clang -no-strip bpf_cgroup  bpf/cgroup.c
 
-// get vet ./...
+// get vet ./...  and generate bpf_cgroup_bpf.go
 // //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -no-strip -cc clang -target bpf -cflags "-D__TARGET_ARCH_x86"  bpf_cgroup   bpf/cgroup.c
 
 import (
