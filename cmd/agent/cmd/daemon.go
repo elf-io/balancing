@@ -83,8 +83,7 @@ func DaemonMain() {
 	writer := ebpfWriter.NewEbpfWriter(Client, bpfManager, InformerListInvterval, rootLogger.Named("ebpfWriter"))
 	// before informer, clean all map data to keep all data up to date
 	if err := writer.CleanEbpfMapData(); err != nil {
-		// 处理错误
-		fmt.Println("Error:", err)
+		rootLogger.Sugar().Fatalf("failed to CleanEbpfMapData: %v \n", err)
 	}
 
 	// setup informer

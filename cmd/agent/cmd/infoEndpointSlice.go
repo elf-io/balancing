@@ -3,7 +3,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	"github.com/elf-io/balancing/pkg/k8s"
 	"github.com/google/go-cmp/cmp"
@@ -37,7 +36,7 @@ func (s *EndpoingSliceReconciler) HandlerAdd(obj interface{}) {
 	logger.Sugar().Infof("HandlerAdd process EndpointSlice: %+v", name)
 	if err := s.writer.UpdateServiceByEndpointSlice(logger, eds, false); err != nil {
 		// 处理错误
-		fmt.Println("Error:", err)
+		s.log.Sugar().Errorf("Error: %v", err)
 	}
 
 }
@@ -76,7 +75,7 @@ func (s *EndpoingSliceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	logger.Sugar().Infof("HandlerUpdate process EndpointSlice: %+s", name)
 	if err := s.writer.UpdateServiceByEndpointSlice(logger, newEds, NoChange); err != nil {
 		// 处理错误
-		fmt.Println("Error:", err)
+		logger.Sugar().Errorf("Error: %v", err)
 	}
 
 }
@@ -96,7 +95,7 @@ func (s *EndpoingSliceReconciler) HandlerDelete(obj interface{}) {
 	logger.Sugar().Infof("HandlerDelete process EndpointSlice: %s", name)
 	if err := s.writer.DeleteServiceByEndpointSlice(logger, eds); err != nil {
 		// 处理错误
-		fmt.Println("Error:", err)
+		s.log.Sugar().Errorw("Error:", err)
 	}
 
 }

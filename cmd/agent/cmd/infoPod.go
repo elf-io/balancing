@@ -43,8 +43,7 @@ func (s *PodReconciler) HandlerAdd(obj interface{}) {
 	if changed := podLabel.PodLabelHandle.UpdatePodInfo(nil, pod); changed {
 		// inform the balancing policy
 		if err := s.writer.UpdateBalancingByPod(logger, pod); err != nil {
-			// 处理错误
-			fmt.Println("Error:", err)
+			logger.Sugar().Errorf("%v", err)
 		}
 
 		// inform the localRedirect poliy
@@ -89,7 +88,7 @@ func (s *PodReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		// inform the balancing policy
 		if err := s.writer.UpdateBalancingByPod(logger, newPod); err != nil {
 			// 处理错误
-			fmt.Println("Error:", err)
+			logger.Sugar().Errorf("%v", err)
 		}
 
 		// inform the localRedirect poliy
@@ -97,7 +96,7 @@ func (s *PodReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			// data changed, try to update the ebpf data
 			if err := s.writer.UpdateRedirectByPod(logger, newPod); err != nil {
 				// 处理错误
-				fmt.Println("Error:", err)
+				logger.Sugar().Errorf("%v", err)
 			}
 		}
 	}
@@ -124,7 +123,7 @@ func (s *PodReconciler) HandlerDelete(obj interface{}) {
 		// inform the balancing policy
 		if err := s.writer.DeleteBalancingByPod(logger, pod); err != nil {
 			// 处理错误
-			fmt.Println("Error:", err)
+			logger.Sugar().Errorf("%v", err)
 		}
 
 		// inform the localRedirect poliy
@@ -132,7 +131,7 @@ func (s *PodReconciler) HandlerDelete(obj interface{}) {
 			// data changed, try to update the ebpf data
 			if err := s.writer.DeleteRedirectByPod(logger, pod); err != nil {
 				// 处理错误
-				fmt.Println("Error:", err)
+				logger.Sugar().Errorf("%v", err)
 			}
 		}
 	}

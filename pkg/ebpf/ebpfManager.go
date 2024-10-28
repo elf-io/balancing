@@ -206,42 +206,39 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 	if strings.ToLower(types.AgentConfig.EbpfLogLevel) == types.LogLevelEbpfDebug {
 		s.l.Sugar().Infof("ebpf debug level: verbose")
 		if err := s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelVerbose); err != nil {
-			// 处理错误
-			fmt.Println("Error:", err)
+			s.l.Sugar().Fatalf("%v", err)
 		}
 	} else if strings.ToLower(types.AgentConfig.EbpfLogLevel) == types.LogLevelEbpfInfo {
 		s.l.Sugar().Infof("ebpf debug level: info")
 		if err := s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelInfo); err != nil {
-			// 处理错误
-			fmt.Println("Error:", err)
+			s.l.Sugar().Fatalf("%v", err)
 		}
 	} else {
 		s.l.Sugar().Infof("ebpf debug level: error")
 		if err := s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelError); err != nil {
-			// 处理错误
-			fmt.Println("Error:", err)
+			s.l.Sugar().Fatalf("%v", err)
 		}
 	}
 	if types.AgentConfig.Configmap.EnableIPv4 {
 		s.l.Sugar().Infof("ebpf ipv4 enabled: true")
 		if err := s.UpdateMapConfigure(MapConfigureKeyIndexIpv4Enabled, MapConfigureValueEnabled); err != nil {
-			s.l.Sugar().Errorf("failed to UpdateMapConfigure: %v", err)
+			s.l.Sugar().Fatalf("%v", err)
 		}
 	} else {
 		s.l.Sugar().Infof("ebpf ipv4 enabled: false")
 		if err := s.UpdateMapConfigure(MapConfigureKeyIndexIpv4Enabled, MapConfigureValueDisabled); err != nil {
-			s.l.Sugar().Errorf("failed to UpdateMapConfigure: %v", err)
+			s.l.Sugar().Fatalf("%v", err)
 		}
 	}
 	if types.AgentConfig.Configmap.EnableIPv6 {
 		s.l.Sugar().Infof("ebpf ipv6 enabled: true")
 		if err := s.UpdateMapConfigure(MapConfigureKeyIndexIpv6Enabled, MapConfigureValueEnabled); err != nil {
-			s.l.Sugar().Errorf("failed to UpdateMapConfigure: %v", err)
+			s.l.Sugar().Fatalf("%v", err)
 		}
 	} else {
 		s.l.Sugar().Infof("ebpf ipv6 enabled: false")
 		if err := s.UpdateMapConfigure(MapConfigureKeyIndexIpv6Enabled, MapConfigureValueDisabled); err != nil {
-			s.l.Sugar().Errorf("failed to UpdateMapConfigure: %v", err)
+			s.l.Sugar().Fatalf("%v", err)
 		}
 	}
 

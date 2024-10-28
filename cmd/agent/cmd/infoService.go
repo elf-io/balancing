@@ -3,7 +3,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	"github.com/elf-io/balancing/pkg/utils"
 	"github.com/google/go-cmp/cmp"
@@ -60,8 +59,7 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 		}
 		// use a copied service in case of  modification
 		if err := s.writer.UpdateServiceByService(logger, &newSvc, false); err != nil {
-			// 处理错误
-			fmt.Println("Error:", err)
+			logger.Sugar().Errorf("%v", err)
 		}
 	}
 	// update localRedirect
@@ -73,8 +71,7 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 		}
 		// use a copied service in case of  modification
 		if err := s.writer.UpdateRedirectByService(logger, &newSvc); err != nil {
-			// 处理错误
-			fmt.Println("Error:", err)
+			logger.Sugar().Errorf("%v", err)
 		}
 	}
 	// update balancing
@@ -86,8 +83,7 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 		}
 		// use a copied service in case of  modification
 		if err := s.writer.UpdateBalancingByService(logger, &newSvc); err != nil {
-			// 处理错误
-			fmt.Println("Error:", err)
+			logger.Sugar().Errorf("%v", err)
 		}
 	}
 }
@@ -136,8 +132,7 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		}
 		// use a copied service in case of  modification
 		if err := s.writer.UpdateServiceByService(logger, &svc, NoChange); err != nil {
-			// 处理错误
-			fmt.Println("Error:", err)
+			logger.Sugar().Errorf("%v", err)
 		}
 	}
 
@@ -150,8 +145,7 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		}
 		// use a copied service in case of  modification
 		if err := s.writer.UpdateRedirectByService(logger, &svc); err != nil {
-			// 处理错误
-			fmt.Println("Error:", err)
+			logger.Sugar().Errorf("%v", err)
 		}
 	}
 	// update balancing
@@ -163,8 +157,7 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		}
 		// use a copied service in case of  modification
 		if err := s.writer.UpdateBalancingByService(logger, &svc); err != nil {
-			// 处理错误
-			fmt.Println("Error:", err)
+			logger.Sugar().Errorf("%v", err)
 		}
 	}
 }
@@ -188,19 +181,16 @@ func (s *ServiceReconciler) HandlerDelete(obj interface{}) {
 	logger.Sugar().Infof("HandlerDelete process service %+v", svc)
 	// update service
 	if err := s.writer.DeleteServiceByService(logger, svc); err != nil {
-		// 处理错误
-		fmt.Println("Error:", err)
+		logger.Sugar().Errorf("%v", err)
 	}
 
 	// update localRedirect
 	if err := s.writer.DeleteRedirectByService(logger, svc); err != nil {
-		// 处理错误
-		fmt.Println("Error:", err)
+		logger.Sugar().Errorf("%v", err)
 	}
 	// update balancing
 	if err := s.writer.DeleteBalancingByService(logger, svc); err != nil {
-		// 处理错误
-		fmt.Println("Error:", err)
+		logger.Sugar().Errorf("%v", err)
 	}
 }
 

@@ -3,7 +3,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	"github.com/elf-io/balancing/pkg/nodeId"
 	"github.com/elf-io/balancing/pkg/types"
@@ -47,7 +46,7 @@ func (s *NodeReconciler) HandlerAdd(obj interface{}) {
 	// update the nodeip and nodeProxyIp for balancing
 	if err := s.writer.UpdateBalancingByNode(logger, node); err != nil {
 		// 处理错误
-		fmt.Println("Error:", err)
+		logger.Sugar().Errorw("Error:", err)
 	}
 
 }
@@ -77,7 +76,7 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	// update database
 	if _, _, _, err := nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(newNode); err != nil {
 		// 处理错误
-		fmt.Println("Error:", err)
+		s.log.Sugar().Errorf("Error: %v", err)
 	}
 
 	NoChange := true
@@ -94,15 +93,13 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	}
 	// before UpdateBalancingByNode, s.writer.UpdateNode firstly
 	if err := s.writer.UpdateNode(logger, newNode, NoChange); err != nil {
-		// 处理错误
-		fmt.Println("Error:", err)
+		logger.Sugar().Errorf("Error: %v", err)
 	}
 	if !NoChange {
 		// node ip or nodePoryIP changes, update the nodeip and nodeProxyIp for balancing
 		// before UpdateBalancingByNode, s.writer.UpdateNode firstly
 		if err := s.writer.UpdateBalancingByNode(logger, newNode); err != nil {
-			// 处理错误
-			fmt.Println("Error:", err)
+			logger.Sugar().Errorf("Error: %v", err)
 		}
 	}
 
@@ -126,12 +123,12 @@ func (s *NodeReconciler) HandlerDelete(obj interface{}) {
 	// before UpdateBalancingByNode, UpdateNode firstly
 	if err := s.writer.DeleteNode(logger, node); err != nil {
 		// 处理错误
-		fmt.Println("Error:", err)
+		logger.Sugar().Errorf("Error: %v", err)
 	}
 	// before UpdateBalancingByNode, UpdateNode firstly
 	if err := s.writer.UpdateBalancingByNode(logger, node); err != nil {
 		// 处理错误
-		fmt.Println("Error:", err)
+		logger.Sugar().Errorf("Error: %v", err)
 	}
 }
 
