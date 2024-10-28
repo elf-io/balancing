@@ -120,7 +120,6 @@ func (s *podIdManager) initPodId() {
 	}
 
 	s.log.Sugar().Infof("succeeded to get all pod uid information, total %d: %+v", s.podInfo.Count(), s.podInfo.GetAll())
-	return
 }
 
 func (s *podIdManager) Update(oldPod, newPod *corev1.Pod) {
@@ -142,7 +141,6 @@ func (s *podIdManager) Update(oldPod, newPod *corev1.Pod) {
 			s.log.Sugar().Debugf("pod uid information, total %d: %+v", s.podInfo.Count(), s.podInfo.GetAll())
 		}
 	}
-	return
 }
 
 // pid 用于查询 关联 pod name
@@ -181,5 +179,5 @@ func (s *podIdManager) LookupPodByPid(pid uint32) (podName, namespace, container
 	}
 
 	err = fmt.Errorf("no data of PodName for pid %d", pid)
-	return
+
 }

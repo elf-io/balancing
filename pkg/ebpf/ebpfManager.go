@@ -407,7 +407,6 @@ func (s *EbpfProgramStruct) UnloadAllEbpfMap() {
 		s.EbpfMaps.MapService.Close()
 	}
 	s.EbpfMaps = nil
-	return
 }
 
 // ------------------------------------------- map

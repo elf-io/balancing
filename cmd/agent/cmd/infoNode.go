@@ -53,8 +53,8 @@ func (s *NodeReconciler) HandlerAdd(obj interface{}) {
 }
 
 func checkNodeProxyIPChanged(oldNode, newNode *corev1.Node, entryKey string) bool {
-	oldEntryIP, _ := oldNode.ObjectMeta.Annotations[entryKey]
-	newEntryIP, _ := newNode.ObjectMeta.Annotations[entryKey]
+	oldEntryIP := oldNode.ObjectMeta.Annotations[entryKey]
+	newEntryIP := newNode.ObjectMeta.Annotations[entryKey]
 	return oldEntryIP != newEntryIP
 }
 
