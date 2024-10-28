@@ -162,7 +162,7 @@ func (s *ebpfWriter) fakeEndpointSliceForBalancingPolicy(policy *balancingv1beta
 					}
 				}
 			default:
-				return nil, fmt.Errorf("unknow redirect mode %v", policy.Spec.BalancingBackend.ServiceEndpoint.RedirectMode)
+				return nil, fmt.Errorf("unknown redirect mode %v", policy.Spec.BalancingBackend.ServiceEndpoint.RedirectMode)
 			}
 
 			t.NodeName = &v.NodeName
@@ -212,7 +212,7 @@ func FakeServiceForRedirectPolicy(policy *balancingv1beta1.LocalRedirectPolicy) 
 	for _, v := range policy.Spec.RedirectFrontend.AddressMatcher.ToPorts {
 		p, e := utils.StringToInt32(v.Port)
 		if e != nil {
-			return nil, fmt.Errorf("unspported port %v for LocalRedirectPolicy %v: %v", v.Port, policy.Name, e)
+			return nil, fmt.Errorf("unsupported port %v for LocalRedirectPolicy %v: %v", v.Port, policy.Name, e)
 		}
 		t := corev1.ServicePort{
 			Name: v.Name,
@@ -223,14 +223,14 @@ func FakeServiceForRedirectPolicy(policy *balancingv1beta1.LocalRedirectPolicy) 
 		} else if strings.Compare(strings.ToLower(v.Protocol), strings.ToLower(string(corev1.ProtocolUDP))) == 0 {
 			t.Protocol = corev1.ProtocolUDP
 		} else {
-			return nil, fmt.Errorf("unspported protocol %v for LocalRedirectPolicy %v", v.Protocol, policy.Name)
+			return nil, fmt.Errorf("unsupported protocol %v for LocalRedirectPolicy %v", v.Protocol, policy.Name)
 		}
 		ok := false
 		for _, m := range policy.Spec.LocalRedirectBackend.ToPorts {
 			if m.Name == v.Name && strings.Compare(strings.ToLower(m.Protocol), strings.ToLower(v.Protocol)) == 0 {
 				p, e := utils.StringToInt32(m.Port)
 				if e != nil {
-					return nil, fmt.Errorf("unspported port %v for LocalRedirectPolicy %v: %v", v.Port, policy.Name, e)
+					return nil, fmt.Errorf("unsupported port %v for LocalRedirectPolicy %v: %v", v.Port, policy.Name, e)
 				}
 				t.TargetPort = intstr.FromInt32(p)
 				ok = true
@@ -275,7 +275,7 @@ func FakeServiceForBalancingPolicyByAddressMatcher(policy *balancingv1beta1.Bala
 	for _, v := range policy.Spec.BalancingFrontend.AddressMatcher.ToPorts {
 		p, e := utils.StringToInt32(v.Port)
 		if e != nil {
-			return nil, fmt.Errorf("unspported port %v for BalancingPolicy %v: %v", v.Port, policy.Name, e)
+			return nil, fmt.Errorf("unsupported port %v for BalancingPolicy %v: %v", v.Port, policy.Name, e)
 		}
 		t := corev1.ServicePort{
 			Name: v.Name,
@@ -286,7 +286,7 @@ func FakeServiceForBalancingPolicyByAddressMatcher(policy *balancingv1beta1.Bala
 		} else if strings.Compare(strings.ToLower(v.Protocol), strings.ToLower(string(corev1.ProtocolUDP))) == 0 {
 			t.Protocol = corev1.ProtocolUDP
 		} else {
-			return nil, fmt.Errorf("unspported protocol %v for BalancingPolicy %v", v.Protocol, policy.Name)
+			return nil, fmt.Errorf("unsupported protocol %v for BalancingPolicy %v", v.Protocol, policy.Name)
 		}
 		ok := false
 		if policy.Spec.BalancingBackend.ServiceEndpoint != nil {
@@ -294,7 +294,7 @@ func FakeServiceForBalancingPolicyByAddressMatcher(policy *balancingv1beta1.Bala
 				if m.Name == v.Name && strings.Compare(strings.ToLower(m.Protocol), strings.ToLower(v.Protocol)) == 0 {
 					p, e := utils.StringToInt32(m.Port)
 					if e != nil {
-						return nil, fmt.Errorf("unspported port %v for BalancingPolicy %v: %v", m.Port, policy.Name, e)
+						return nil, fmt.Errorf("unsupported port %v for BalancingPolicy %v: %v", m.Port, policy.Name, e)
 					}
 					t.TargetPort = intstr.FromInt32(p)
 					ok = true
@@ -306,7 +306,7 @@ func FakeServiceForBalancingPolicyByAddressMatcher(policy *balancingv1beta1.Bala
 				if m.Name == v.Name && strings.Compare(strings.ToLower(m.Protocol), strings.ToLower(v.Protocol)) == 0 {
 					p, e := utils.StringToInt32(m.Port)
 					if e != nil {
-						return nil, fmt.Errorf("unspported port %v for BalancingPolicy %v: %v", v.Port, policy.Name, e)
+						return nil, fmt.Errorf("unsupported port %v for BalancingPolicy %v: %v", v.Port, policy.Name, e)
 					}
 					t.TargetPort = intstr.FromInt32(p)
 					ok = true
@@ -358,7 +358,7 @@ LOOP_policyPort:
 	for _, policyPort := range policy.Spec.BalancingFrontend.ServiceMatcher.ToPorts {
 		port, e := utils.StringToInt32(policyPort.Port)
 		if e != nil {
-			return nil, fmt.Errorf("unspported port %v for BalancingPolicy %v: %v", policyPort.Port, policy.Name, e)
+			return nil, fmt.Errorf("unsupported port %v for BalancingPolicy %v: %v", policyPort.Port, policy.Name, e)
 		}
 		for _, svcPort := range oldSvc.Spec.Ports {
 			if strings.ToLower(string(svcPort.Protocol)) == strings.ToLower(policyPort.Protocol) && svcPort.Port == port {
@@ -376,7 +376,7 @@ LOOP_policyPort:
 						if toPort.Name == policyPort.Name && strings.ToLower(toPort.Protocol) == strings.ToLower(policyPort.Protocol) {
 							port, e := utils.StringToInt32(toPort.Port)
 							if e != nil {
-								return nil, fmt.Errorf("unspported backend port %v for BalancingPolicy %v: %v", toPort, policy.Name, e)
+								return nil, fmt.Errorf("unsupported backend port %v for BalancingPolicy %v: %v", toPort, policy.Name, e)
 							}
 							newport.TargetPort = intstr.FromInt32(port)
 							findPort = true
@@ -388,7 +388,7 @@ LOOP_policyPort:
 						if toPort.Name == policyPort.Name && strings.ToLower(toPort.Protocol) == strings.ToLower(policyPort.Protocol) {
 							p, e := utils.StringToInt32(toPort.Port)
 							if e != nil {
-								return nil, fmt.Errorf("unspported port %v for BalancingPolicy %v: %v", port, policy.Name, e)
+								return nil, fmt.Errorf("unsupported port %v for BalancingPolicy %v: %v", port, policy.Name, e)
 							}
 							newport.TargetPort = intstr.FromInt32(p)
 							findPort = true

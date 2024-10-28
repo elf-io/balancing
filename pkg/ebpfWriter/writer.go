@@ -167,7 +167,7 @@ func (s *ebpfWriter) GetPolicyBySvcId(natType uint8, svcId uint32) (namespace st
 			err = fmt.Errorf("did not find any data")
 		}
 	default:
-		err = fmt.Errorf("unknow natType %d", natType)
+		err = fmt.Errorf("unknown natType %d", natType)
 	}
 	return
 }

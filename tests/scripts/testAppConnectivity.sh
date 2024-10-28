@@ -263,7 +263,7 @@ elif [ "$1"x == "balancing"x ]; then
 elif [ "$1"x == "redirect"x ]; then
     TestRedirectPolicy
 else
-    echo "unknow args: $@ "
+    echo "unknown args: $@ "
     exit 1
 fi
 

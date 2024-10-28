@@ -42,7 +42,7 @@ func (s *ebpfWriter) getBalancingNatMode(policy *balancingv1beta1.BalancingPolic
 		case balancingv1beta1.RedirectModeNodeProxy:
 			return &ebpf.NatModeBalancingNodeProxy
 		default:
-			s.log.Sugar().Errorf("unknow RedirectMode in policy %s", policy.Name)
+			s.log.Sugar().Errorf("unknown RedirectMode in policy %s", policy.Name)
 			return nil
 		}
 	} else {
