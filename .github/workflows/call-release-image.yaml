@@ -2,7 +2,10 @@ name: Call Release Image
 
 env:
   ONLINE_REGISTER: ghcr.io
-  BUILD_PLATFORM: linux/amd64,linux/arm64
+  # https://github.com/xdp-project/xdp-tools/issues/4
+  # gcc-multilib is not available on arm64
+  #BUILD_PLATFORM: linux/amd64,linux/arm64
+  BUILD_PLATFORM: linux/amd64
   ONLINE_REGISTER_USER: ${{ github.actor }}
   ONLINE_REGISTER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 

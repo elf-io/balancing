@@ -115,4 +115,6 @@ service 中targetPort 是名字，就歇菜了
 支持 解析ip 的 指标
 
 
-
+arm64 ebpf 构建
+# https://github.com/xdp-project/xdp-tools/issues/4
+# gcc-multilib is not available on arm64
