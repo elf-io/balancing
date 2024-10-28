@@ -134,32 +134,32 @@ func (s *ebpfWriter) fakeEndpointSliceForBalancingPolicy(policy *balancingv1beta
 					continue
 				}
 				if len(ipv4) > 0 {
-					uniqe := true
+					uniqueFlag := true
 				CHECK_IP_LOOP1:
 					for _, c := range eds.Endpoints {
 						for _, x := range c.Addresses {
 							if strings.ToLower(x) == strings.ToLower(ipv4) {
-								uniqe = false
+								uniqueFlag = false
 								break CHECK_IP_LOOP1
 							}
 						}
 					}
-					if uniqe {
+					if uniqueFlag {
 						t.Addresses = append(t.Addresses, ipv4)
 					}
 				}
 				if len(ipv6) > 0 {
-					uniqe := true
+					uniqueFlag := true
 				CHECK_IP_LOOP2:
 					for _, c := range eds.Endpoints {
 						for _, x := range c.Addresses {
 							if strings.ToLower(x) == strings.ToLower(ipv6) {
-								uniqe = false
+								uniqueFlag = false
 								break CHECK_IP_LOOP2
 							}
 						}
 					}
-					if uniqe {
+					if uniqueFlag {
 						t.Addresses = append(t.Addresses, ipv6)
 					}
 				}

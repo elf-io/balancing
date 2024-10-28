@@ -54,7 +54,7 @@ type ebpfWriter struct {
 
 	// ---- for service
 	ebpfServiceLock *lock.Mutex
-	// index: namesapce/serviceName
+	// index: namespace/serviceName
 	serviceData map[string]*SvcEndpointData
 
 	// ---- for node

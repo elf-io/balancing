@@ -17,7 +17,7 @@ import (
 type SvcEndpointData struct {
 	Svc *corev1.Service
 	// one endpointslice store 100 endpoints by default
-	// index: namesapce/endpointSliceName
+	// index: namespace/endpointSliceName
 	EpsliceList map[string]*discovery.EndpointSlice
 	// identical to the serviceId in the ebpf map, it is used for event to find policy
 	// so only just update ServiceId before updating ebpf map

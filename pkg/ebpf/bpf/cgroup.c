@@ -235,7 +235,7 @@ static __always_inline int execute_nat(struct bpf_sock_addr *ctx , __u32 debug_l
         struct mapvalue_affinity *affinityValue = get_affinity_and_update(ctx, svcval.affinity_second , ip_proto , debug_level ) ;
         if (affinityValue) {
             // update
-            debugf(DEBUG_INFO, "nat by sencondary affinity, for %pI4:%d\n" , &dst_ip  , dst_port   );
+            debugf(DEBUG_INFO, "nat by secondary affinity, for %pI4:%d\n" , &dst_ip  , dst_port   );
             nat_ip = affinityValue->nat_ip ;
             nat_port = affinityValue->nat_port  ;
             goto set_nat ;

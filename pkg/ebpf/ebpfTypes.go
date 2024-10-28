@@ -254,7 +254,7 @@ func MapConfigureStr(key, value uint32) string {
 		} else if value == MapConfigureValueDebugLevelError {
 			return "debugLevel: error"
 		} else {
-			return "debugLevel: uknown"
+			return "debugLevel: unknown"
 		}
 	case MapConfigureKeyIndexIpv4Enabled:
 		if value == 0 {
