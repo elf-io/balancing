@@ -32,6 +32,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/elf-io/balancing/pkg/lock"
 	"io/ioutil"
 	"log"
 	"main/common"
@@ -39,12 +40,11 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"sync"
 	"time"
 )
 
 var requestCount int
-var mutex sync.Mutex
+var mutex lock.Mutex
 
 func main() {
 	// Define command-line flags

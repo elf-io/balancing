@@ -1,4 +1,4 @@
-# debug
+# debug eBPF
 
 ## debug ebpf
 
