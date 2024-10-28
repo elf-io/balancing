@@ -222,10 +222,6 @@ validate_crd_sdk:
 
 #=============== lint
 
-.PHONY: golang_format
-golang_format:
-	find . ! \( -path './vendor' -prune \) ! \( -path './_build' -prune \) ! \( -path './.git' -prune \) ! \( -path '*.validate.go' -prune \) \
-            -type f -name '*.go' | xargs gofmt -w -d -l -s
 
 .PHONY: lint_golang_everything
 lint_golang_everything: lint_golang_lock lint_test_label lint_golang_format

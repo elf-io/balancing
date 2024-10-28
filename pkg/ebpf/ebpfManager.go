@@ -480,5 +480,3 @@ func (s *EbpfProgramStruct) UnloadAllEbpfMap() {
 // 	}
 // 	return nil
 // }
-
-
