@@ -265,33 +265,47 @@ func (s *EbpfProgramStruct) UnloadProgramp() error {
 	}
 
 	// unping and close ebpf map
-	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapBackend.Unpin(); err != nil {
-		// 处理错误
-		fmt.Println("Error:", err)
+	if s.BpfObjCgroup.bpf_cgroupMaps.MapBackend != nil {
+		if err := s.BpfObjCgroup.bpf_cgroupMaps.MapBackend.Unpin(); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
-	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapService.Unpin(); err != nil {
-		// 处理错误
-		fmt.Println("Error:", err)
+	if s.BpfObjCgroup.bpf_cgroupMaps.MapService != nil {
+		if err := s.BpfObjCgroup.bpf_cgroupMaps.MapService.Unpin(); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
-	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapAffinity.Unpin(); err != nil {
-		// 处理错误
-		fmt.Println("Error:", err)
+	if s.BpfObjCgroup.bpf_cgroupMaps.MapAffinity != nil {
+		if err := s.BpfObjCgroup.bpf_cgroupMaps.MapAffinity.Unpin(); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
-	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapNodeIp.Unpin(); err != nil {
-		// 处理错误
-		fmt.Println("Error:", err)
+	if s.BpfObjCgroup.bpf_cgroupMaps.MapNodeIp != nil {
+		if err := s.BpfObjCgroup.bpf_cgroupMaps.MapNodeIp.Unpin(); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
-	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapNodeProxyIp.Unpin(); err != nil {
-		// 处理错误
-		fmt.Println("Error:", err)
+	if s.BpfObjCgroup.bpf_cgroupMaps.MapNodeProxyIp != nil {
+		if err := s.BpfObjCgroup.bpf_cgroupMaps.MapNodeProxyIp.Unpin(); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
-	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapNatRecord.Unpin(); err != nil {
-		// 处理错误
-		fmt.Println("Error:", err)
+	if s.BpfObjCgroup.bpf_cgroupMaps.MapNatRecord != nil {
+		if err := s.BpfObjCgroup.bpf_cgroupMaps.MapNatRecord.Unpin(); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
-	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapEvent.Unpin(); err != nil {
-		// 处理错误
-		fmt.Println("Error:", err)
+	if s.BpfObjCgroup.bpf_cgroupMaps.MapEvent != nil {
+		if err := s.BpfObjCgroup.bpf_cgroupMaps.MapEvent.Unpin(); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
 
 	fmt.Printf("Closing progs ...\n")

@@ -224,7 +224,7 @@ validate_crd_sdk:
 
 
 .PHONY: lint_golang_everything
-lint_golang_everything: lint_golang_lock lint_test_label lint_golang_format
+lint_golang_everything: lint_golang_lock lint_test_label lint_golang_format lint_ebpf
 
 
 define lint_go_format
@@ -305,6 +305,19 @@ lint_image_trivy:
       (($$?==0)) || { echo "error, failed to check dockerfile trivy", $(IMAGE_NAME)  && exit 1 ; } ; \
       echo "trivy check: $(IMAGE_NAME) pass"
 
+
+.PHONY: generate_ebpf
+generate_ebpf:
+	$(GO_GENERATE) ./...
+
+
+.PHONY: lint_ebpf
+lint_ebpf:
+	make generate_ebpf
+	if ! test -z "$$(git status --porcelain)"; then \
+  			echo "please run 'make generate_ebpf' to update 'pkg/ebpf/bpf_cgroup_bpf.go' " ; \
+  			exit 1 ; \
+  		fi ; echo "succeed to check ebpf"
 
 
 #=========== unit test
