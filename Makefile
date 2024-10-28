@@ -415,6 +415,10 @@ check_doc:
 	@ echo "all doc is ok "
 
 
+.PHONY: injectLicense
+injectLicense:
+	./tools/scripts/injectLicense.sh
+
 #=================================
 
 .PHONY: installBuildTool
