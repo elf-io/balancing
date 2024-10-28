@@ -308,7 +308,7 @@ lint_image_trivy:
 
 .PHONY: generate_ebpf
 generate_ebpf:
-	make installDevTool
+	sudo apt-get update && sudo apt-get install -y clang llvm gcc-multilib libbpf-dev
 	$(GO_GENERATE) ./...
 
 
@@ -438,11 +438,11 @@ injectLicense:
 
 .PHONY: installBuildTool
 installBuildTool:
-	sudo apt-get update && sudo apt-get install -y clang llvm gcc-multilib libbpf-dev
+	apt-get update && apt-get install -y clang llvm gcc-multilib libbpf-dev
 
 .PHONY: installDevTool
 installDevTool:
-	sudo apt-get update && sudo apt-get install -y clang llvm gcc-multilib libbpf-dev linux-headers-$$(uname -r)
+	apt-get update && apt-get install -y clang llvm gcc-multilib libbpf-dev linux-headers-$$(uname -r)
 
 
 
