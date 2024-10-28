@@ -10,6 +10,7 @@ import (
 )
 
 var BinName = filepath.Base(os.Args[0])
+
 // var rootLogger *zap.Logger
 
 var RootCmd = &cobra.Command{
