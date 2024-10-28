@@ -13,4 +13,5 @@ var CmdCleanMap = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(CmdCleanMap)
+
 }
