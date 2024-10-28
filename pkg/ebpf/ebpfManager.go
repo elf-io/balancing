@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package ebpf
 
-//go:generate sh -c "echo Generating for $TARGET_GOARCH"
-//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target $TARGET_GOARCH -cc clang -no-strip bpf_cgroup  bpf/cgroup.c
+// refer to https://github.com/cilium/pwru/blob/main/build.go
+//go:generate sh -c "echo Generating for $TARGETARCH"
+//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target $TARGETARCH -cc clang -no-strip bpf_cgroup  bpf/cgroup.c
 
 // .. //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -no-strip -cc clang -target bpf -cflags "-D__TARGET_ARCH_x86"  bpf_cgroup   bpf/cgroup.c
 
