@@ -224,17 +224,25 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 	}
 	if types.AgentConfig.Configmap.EnableIPv4 {
 		s.l.Sugar().Infof("ebpf ipv4 enabled: true")
-		s.UpdateMapConfigure(MapConfigureKeyIndexIpv4Enabled, MapConfigureValueEnabled)
+		if err := s.UpdateMapConfigure(MapConfigureKeyIndexIpv4Enabled, MapConfigureValueEnabled); err != nil {
+			s.l.Sugar().Errorf("failed to UpdateMapConfigure: %v", err)
+		}
 	} else {
 		s.l.Sugar().Infof("ebpf ipv4 enabled: false")
-		s.UpdateMapConfigure(MapConfigureKeyIndexIpv4Enabled, MapConfigureValueDisabled)
+		if err := s.UpdateMapConfigure(MapConfigureKeyIndexIpv4Enabled, MapConfigureValueDisabled); err != nil {
+			s.l.Sugar().Errorf("failed to UpdateMapConfigure: %v", err)
+		}
 	}
 	if types.AgentConfig.Configmap.EnableIPv6 {
 		s.l.Sugar().Infof("ebpf ipv6 enabled: true")
-		s.UpdateMapConfigure(MapConfigureKeyIndexIpv6Enabled, MapConfigureValueEnabled)
+		if err := s.UpdateMapConfigure(MapConfigureKeyIndexIpv6Enabled, MapConfigureValueEnabled); err != nil {
+			s.l.Sugar().Errorf("failed to UpdateMapConfigure: %v", err)
+		}
 	} else {
 		s.l.Sugar().Infof("ebpf ipv6 enabled: false")
-		s.UpdateMapConfigure(MapConfigureKeyIndexIpv6Enabled, MapConfigureValueDisabled)
+		if err := s.UpdateMapConfigure(MapConfigureKeyIndexIpv6Enabled, MapConfigureValueDisabled); err != nil {
+			s.l.Sugar().Errorf("failed to UpdateMapConfigure: %v", err)
+		}
 	}
 
 	return nil

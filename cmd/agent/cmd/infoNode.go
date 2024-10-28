@@ -37,9 +37,11 @@ func (s *NodeReconciler) HandlerAdd(obj interface{}) {
 	// before UpdateNode, BuildNodeId firstly
 	if _, _, _, err := nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(node); err != nil {
 		// 处理错误
-		fmt.Println("Error:", err)
+		logger.Sugar().Errorf("Error: %v", err)
 	}
-	s.writer.UpdateNode(logger, node, false)
+	if err := s.writer.UpdateNode(logger, node, false); err != nil {
+		logger.Sugar().Errorf("Error: %v", err)
+	}
 
 	// before UpdateBalancingByNode, UpdateNode firstly
 	// update the nodeip and nodeProxyIp for balancing
@@ -48,7 +50,6 @@ func (s *NodeReconciler) HandlerAdd(obj interface{}) {
 		fmt.Println("Error:", err)
 	}
 
-	return
 }
 
 func checkNodeProxyIPChanged(oldNode, newNode *corev1.Node, entryKey string) bool {

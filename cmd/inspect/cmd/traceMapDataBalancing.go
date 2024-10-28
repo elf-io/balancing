@@ -58,10 +58,14 @@ var CmdTraceMapByBalancing = &cobra.Command{
 			log.Fatalf("Failed to generate serviceId from policy %s: %s ", policyName, idStr)
 		}
 
-		bpf.PrintMapService(&ebpf.NAT_TYPE_BALANCING, &svcV4Id)
+		if e := bpf.PrintMapService(&ebpf.NAT_TYPE_BALANCING, &svcV4Id); e != nil {
+			fmt.Printf("error: %v\n", e)
+		}
 		fmt.Printf("\n")
 
-		bpf.PrintMapBackend(&ebpf.NAT_TYPE_BALANCING, &svcV4Id)
+		if e := bpf.PrintMapBackend(&ebpf.NAT_TYPE_BALANCING, &svcV4Id); e != nil {
+			fmt.Printf("error: %v\n", e)
+		}
 		fmt.Printf("\n")
 
 		// todo: ipv6

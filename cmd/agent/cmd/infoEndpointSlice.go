@@ -40,7 +40,6 @@ func (s *EndpoingSliceReconciler) HandlerAdd(obj interface{}) {
 		fmt.Println("Error:", err)
 	}
 
-	return
 }
 
 func (s *EndpoingSliceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
@@ -80,7 +79,6 @@ func (s *EndpoingSliceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		fmt.Println("Error:", err)
 	}
 
-	return
 }
 
 func (s *EndpoingSliceReconciler) HandlerDelete(obj interface{}) {
@@ -101,7 +99,6 @@ func (s *EndpoingSliceReconciler) HandlerDelete(obj interface{}) {
 		fmt.Println("Error:", err)
 	}
 
-	return
 }
 
 func NewEndpointSliceInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, writer ebpfWriter.EbpfWriter) {

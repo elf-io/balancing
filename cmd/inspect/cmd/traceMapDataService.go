@@ -55,10 +55,14 @@ var CmdTraceMapByService = &cobra.Command{
 		if svcV4Id == 0 {
 			fmt.Printf("the service %s/%s does not have ipv4 data\n", namespace, serviceName)
 		} else {
-			bpf.PrintMapService(&ebpf.NAT_TYPE_SERVICE, &svcV4Id)
+			if e := bpf.PrintMapService(&ebpf.NAT_TYPE_SERVICE, &svcV4Id); e != nil {
+				fmt.Printf("error: %v\n", e)
+			}
 			fmt.Printf("\n")
 
-			bpf.PrintMapBackend(&ebpf.NAT_TYPE_SERVICE, &svcV4Id)
+			if e := bpf.PrintMapBackend(&ebpf.NAT_TYPE_SERVICE, &svcV4Id); e != nil {
+				fmt.Printf("error: %v\n", e)
+			}
 			fmt.Printf("\n")
 		}
 
