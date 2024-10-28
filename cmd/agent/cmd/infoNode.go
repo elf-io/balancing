@@ -106,7 +106,6 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		}
 	}
 
-	return
 }
 
 func (s *NodeReconciler) HandlerDelete(obj interface{}) {
@@ -134,8 +133,6 @@ func (s *NodeReconciler) HandlerDelete(obj interface{}) {
 		// 处理错误
 		fmt.Println("Error:", err)
 	}
-
-	return
 }
 
 func NewNodeInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, writer ebpfWriter.EbpfWriter) {

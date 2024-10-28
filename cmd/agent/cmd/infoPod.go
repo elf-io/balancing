@@ -57,7 +57,6 @@ func (s *PodReconciler) HandlerAdd(obj interface{}) {
 		}
 	}
 
-	return
 }
 
 func (s *PodReconciler) HandlerUpdate(oldObj, newObj interface{}) {
@@ -102,8 +101,6 @@ func (s *PodReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			}
 		}
 	}
-
-	return
 }
 
 func (s *PodReconciler) HandlerDelete(obj interface{}) {
@@ -139,8 +136,6 @@ func (s *PodReconciler) HandlerDelete(obj interface{}) {
 			}
 		}
 	}
-
-	return
 }
 
 func NewPodInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, writer ebpfWriter.EbpfWriter) {

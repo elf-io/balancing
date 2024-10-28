@@ -26,7 +26,9 @@ var CmdPrintMapService = &cobra.Command{
 
 		fmt.Printf("\n")
 		fmt.Printf("print the ebpf map of service:\n")
-		bpf.PrintMapService(nil, nil)
+		if err := bpf.PrintMapService(nil, nil); err != nil {
+			fmt.Println("Error:", err)
+		}
 		fmt.Printf("\n")
 	},
 }

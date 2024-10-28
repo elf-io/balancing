@@ -23,7 +23,9 @@ var CmdPrintMapConfigure = &cobra.Command{
 
 		fmt.Printf("\n")
 		fmt.Printf("print the ebpf map of configure:\n")
-		bpf.PrintMapConfigure()
+		if err := bpf.PrintMapConfigure(); err != nil {
+			fmt.Println("Error:", err)
+		}
 		fmt.Printf("\n")
 	},
 }
