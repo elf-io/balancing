@@ -1,5 +1,10 @@
 #!/bin/bash
 
+set -x
+set -o errexit
+set -o nounset
+set -o pipefail
+
 CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
 PROJECT_ROOT_PATH="${CURRENT_DIR_PATH}/../.."
 cd ${PROJECT_ROOT_PATH}
