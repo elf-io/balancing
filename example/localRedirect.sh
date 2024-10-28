@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright 2024 Authors of elf-io
+# SPDX-License-Identifier: Apache-2.0
 
 # localredirectpolicy: redirect the request to the pod in the local node
 
