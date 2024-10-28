@@ -3,6 +3,7 @@
 package ebpf
 
 // refer to https://github.com/cilium/pwru/blob/main/build.go
+// TARGETARCH = amd64 / arm64
 //go:generate sh -c "echo Generating for $TARGETARCH"
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target $TARGETARCH -cc clang -no-strip bpf_cgroup  bpf/cgroup.c
 
