@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package cmd
 
 import (
@@ -20,12 +22,15 @@ var CmdTraceMapByService = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		namespace := args[0]
 		serviceName := args[1]
-		fmt.Printf("trace the service data of ebpf map for the service %s/%s \n", namespace, serviceName)
-		fmt.Printf("\n")
+		fmt.Printf("trace the service data of ebpf map for the service %s/%s 
+", namespace, serviceName)
+		fmt.Printf("
+")
 
 		bpf := ebpf.NewEbpfProgramMananger(nil)
 		if err := bpf.LoadAllEbpfMap(""); err != nil {
-			fmt.Printf("failed to load ebpf Map: %v\n", err)
+			fmt.Printf("failed to load ebpf Map: %v
+", err)
 			os.Exit(2)
 		}
 		defer bpf.UnloadAllEbpfMap()
@@ -51,13 +56,16 @@ var CmdTraceMapByService = &cobra.Command{
 		// for ipv4 data
 		svcV4Id, _ := ebpf.GenerateSvcV4Id(service)
 		if svcV4Id == 0 {
-			fmt.Printf("the service %s/%s does not have ipv4 data\n", namespace, serviceName)
+			fmt.Printf("the service %s/%s does not have ipv4 data
+", namespace, serviceName)
 		} else {
 			bpf.PrintMapService(&ebpf.NAT_TYPE_SERVICE, &svcV4Id)
-			fmt.Printf("\n")
+			fmt.Printf("
+")
 
 			bpf.PrintMapBackend(&ebpf.NAT_TYPE_SERVICE, &svcV4Id)
-			fmt.Printf("\n")
+			fmt.Printf("
+")
 		}
 
 		// todo: ipv6

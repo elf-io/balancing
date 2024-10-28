@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package cmd
 
 import (
@@ -14,13 +16,16 @@ var CmdPrintMapAll = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		bpf := ebpf.NewEbpfProgramMananger(nil)
 		if err := bpf.LoadAllEbpfMap(""); err != nil {
-			fmt.Printf("failed to load ebpf Map: %v\n", err)
+			fmt.Printf("failed to load ebpf Map: %v
+", err)
 			os.Exit(2)
 		}
 		defer bpf.UnloadAllEbpfMap()
 
-		fmt.Printf("\n")
-		fmt.Printf("print all data of the ebpf map:\n")
+		fmt.Printf("
+")
+		fmt.Printf("print all data of the ebpf map:
+")
 		bpf.PrintMapAffinity()
 		bpf.PrintMapNatRecord()
 		bpf.PrintMapService(nil, nil)
@@ -28,7 +33,8 @@ var CmdPrintMapAll = &cobra.Command{
 		bpf.PrintMapNodeIp()
 		bpf.PrintMapNodeProxyIp()
 		bpf.PrintMapConfigure()
-		fmt.Printf("\n")
+		fmt.Printf("
+")
 	},
 }
 

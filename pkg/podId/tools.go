@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package podId
 
 import (
@@ -54,7 +56,8 @@ func getPodAndContainerID(pid uint32) (podId string, containerId string, host bo
 
 	file, err := os.Open(cgroupPath)
 	if err != nil {
-		err = fmt.Errorf("Error opening cgroup file: %v\n", err)
+		err = fmt.Errorf("Error opening cgroup file: %v
+", err)
 		return
 	}
 	defer file.Close()

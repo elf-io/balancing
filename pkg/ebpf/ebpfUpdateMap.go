@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package ebpf
 
 import (
@@ -243,7 +245,8 @@ func (s *EbpfProgramStruct) CleanMapService() (int, error) {
 				// end
 				finished = true
 			} else {
-				return 0, fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+				return 0, fmt.Errorf("failed to batchlookup for %v
+", mapPtr.String())
 			}
 		}
 		if c == 0 {
@@ -287,7 +290,8 @@ func (s *EbpfProgramStruct) CleanMapBackend() (int, error) {
 				// end
 				finished = true
 			} else {
-				return 0, fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+				return 0, fmt.Errorf("failed to batchlookup for %v
+", mapPtr.String())
 			}
 		}
 		if c == 0 {
@@ -331,7 +335,8 @@ func (s *EbpfProgramStruct) CleanMapNodeIp() (int, error) {
 				// end
 				finished = true
 			} else {
-				return 0, fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+				return 0, fmt.Errorf("failed to batchlookup for %v
+", mapPtr.String())
 			}
 		}
 		if c == 0 {
@@ -375,7 +380,8 @@ func (s *EbpfProgramStruct) CleanMapNodeProxyIp() (int, error) {
 				// end
 				finished = true
 			} else {
-				return 0, fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+				return 0, fmt.Errorf("failed to batchlookup for %v
+", mapPtr.String())
 			}
 		}
 		if c == 0 {
@@ -419,7 +425,8 @@ func (s *EbpfProgramStruct) CleanMapAffinity() (int, error) {
 				// end
 				finished = true
 			} else {
-				return 0, fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+				return 0, fmt.Errorf("failed to batchlookup for %v
+", mapPtr.String())
 			}
 		}
 		if c == 0 {
@@ -463,7 +470,8 @@ func (s *EbpfProgramStruct) CleanMapNatRecord() (int, error) {
 				// end
 				finished = true
 			} else {
-				return 0, fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+				return 0, fmt.Errorf("failed to batchlookup for %v
+", mapPtr.String())
 			}
 		}
 		if c == 0 {

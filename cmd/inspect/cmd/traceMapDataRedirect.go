@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package cmd
 
 import (
@@ -20,12 +22,15 @@ var CmdTraceMapByRedirect = &cobra.Command{
 	Args:  cobra.RangeArgs(1, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		policyName := args[0]
-		fmt.Printf("get all the ebpf map data relevant to the localredirect policy %s \n", policyName)
-		fmt.Printf("\n")
+		fmt.Printf("get all the ebpf map data relevant to the localredirect policy %s 
+", policyName)
+		fmt.Printf("
+")
 
 		bpf := ebpf.NewEbpfProgramMananger(nil)
 		if err := bpf.LoadAllEbpfMap(""); err != nil {
-			fmt.Printf("failed to load ebpf Map: %v\n", err)
+			fmt.Printf("failed to load ebpf Map: %v
+", err)
 			os.Exit(2)
 		}
 		defer bpf.UnloadAllEbpfMap()
@@ -57,10 +62,12 @@ var CmdTraceMapByRedirect = &cobra.Command{
 		}
 
 		bpf.PrintMapService(&ebpf.NAT_TYPE_REDIRECT, &svcV4Id)
-		fmt.Printf("\n")
+		fmt.Printf("
+")
 
 		bpf.PrintMapBackend(&ebpf.NAT_TYPE_REDIRECT, &svcV4Id)
-		fmt.Printf("\n")
+		fmt.Printf("
+")
 
 		// todo: ipv6
 

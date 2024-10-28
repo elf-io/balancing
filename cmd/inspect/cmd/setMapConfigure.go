@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package cmd
 
 import (
@@ -38,15 +40,18 @@ var CmdSetMapConfigureDebugLevel = &cobra.Command{
 
 		bpf := ebpf.NewEbpfProgramMananger(nil)
 		if err := bpf.LoadAllEbpfMap(""); err != nil {
-			fmt.Printf("failed to load ebpf Map: %v\n", err)
+			fmt.Printf("failed to load ebpf Map: %v
+", err)
 			os.Exit(2)
 		}
 		defer bpf.UnloadAllEbpfMap()
 		if e := bpf.UpdateMapConfigure(key, value); e != nil {
-			fmt.Printf("failed to set ebpf Map: %v\n", e)
+			fmt.Printf("failed to set ebpf Map: %v
+", e)
 			os.Exit(3)
 		}
-		fmt.Printf("succeeded to set ebpf Map configure: %s\n", ebpf.MapConfigureStr(key, value))
+		fmt.Printf("succeeded to set ebpf Map configure: %s
+", ebpf.MapConfigureStr(key, value))
 	},
 }
 
@@ -74,15 +79,18 @@ var CmdSetMapConfigureIpv4 = &cobra.Command{
 
 		bpf := ebpf.NewEbpfProgramMananger(nil)
 		if err := bpf.LoadAllEbpfMap(""); err != nil {
-			fmt.Printf("failed to load ebpf Map: %v\n", err)
+			fmt.Printf("failed to load ebpf Map: %v
+", err)
 			os.Exit(2)
 		}
 		defer bpf.UnloadAllEbpfMap()
 		if e := bpf.UpdateMapConfigure(key, value); e != nil {
-			fmt.Printf("failed to set ebpf Map: %v\n", e)
+			fmt.Printf("failed to set ebpf Map: %v
+", e)
 			os.Exit(3)
 		}
-		fmt.Printf("succeeded to set ebpf Map configure: %s\n", ebpf.MapConfigureStr(key, value))
+		fmt.Printf("succeeded to set ebpf Map configure: %s
+", ebpf.MapConfigureStr(key, value))
 	},
 }
 
@@ -110,15 +118,18 @@ var CmdSetMapConfigureIpv6 = &cobra.Command{
 
 		bpf := ebpf.NewEbpfProgramMananger(nil)
 		if err := bpf.LoadAllEbpfMap(""); err != nil {
-			fmt.Printf("failed to load ebpf Map: %v\n", err)
+			fmt.Printf("failed to load ebpf Map: %v
+", err)
 			os.Exit(2)
 		}
 		defer bpf.UnloadAllEbpfMap()
 		if e := bpf.UpdateMapConfigure(key, value); e != nil {
-			fmt.Printf("failed to set ebpf Map: %v\n", e)
+			fmt.Printf("failed to set ebpf Map: %v
+", e)
 			os.Exit(3)
 		}
-		fmt.Printf("succeeded to set ebpf Map configure: %s\n", ebpf.MapConfigureStr(key, value))
+		fmt.Printf("succeeded to set ebpf Map configure: %s
+", ebpf.MapConfigureStr(key, value))
 	},
 }
 

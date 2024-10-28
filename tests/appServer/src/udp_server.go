@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 /*
 This program implements a simple UDP server.
 
@@ -66,7 +68,8 @@ func main() {
 	}
 	defer conn.Close()
 
-	fmt.Printf("UDP server is listening on port %s\n", *port)
+	fmt.Printf("UDP server is listening on port %s
+", *port)
 
 	buffer := make([]byte, 1024)
 	for {

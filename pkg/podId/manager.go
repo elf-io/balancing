@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package podId
 
 import (
@@ -107,7 +109,8 @@ func (s *podIdManager) initPodId() {
 			FieldSelector: fmt.Sprintf("spec.nodeName=%s", s.NodeName),
 		})
 		if err != nil {
-			s.log.Sugar().Fatalf("Error listing pods in namespace %s: %v\n", ns.Name, err)
+			s.log.Sugar().Fatalf("Error listing pods in namespace %s: %v
+", ns.Name, err)
 		}
 		for _, pod := range pods.Items {
 			s.log.Sugar().Debugf("save uid information of pod %s/%s", pod.Namespace, pod.Name)

@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package ebpf
 
 import (
@@ -20,7 +22,8 @@ func checkMount(mPath string, mountType string) (bool, error) {
 	// if err != nil {
 	// 	return false, fmt.Errorf("failed to read mount file: %v", err)
 	// }
-	// mss := strings.Split(string(ms), "\n")
+	// mss := strings.Split(string(ms), "
+")
 	// for _, m := range mss {
 	// 	if strings.Contains(m, fmt.Sprintf(" %s %s ", mountPath, mountType)) {
 	// 		return true, nil
@@ -35,7 +38,8 @@ func checkMount(mPath string, mountType string) (bool, error) {
 		mountsPath = path.Join(types.HostProcMountDir, mountsPath)
 	}
 
-	// fmt.Printf("mountsPath: %s ,  %s:%s\n", mountsPath, mPath, mountType)
+	// fmt.Printf("mountsPath: %s ,  %s:%s
+", mountsPath, mPath, mountType)
 
 	f, err := os.Open(mountsPath)
 	if err != nil {
@@ -47,7 +51,8 @@ func checkMount(mPath string, mountType string) (bool, error) {
 	for scanner.Scan() {
 		// example fields: cgroup2 /sys/fs/cgroup/unified cgroup2 rw,nosuid,nodev,noexec,relatime 0 0
 		mountLine := scanner.Text()
-		// fmt.Printf("%s \n", mountLine)
+		// fmt.Printf("%s 
+", mountLine)
 		fields := strings.Split(mountLine, " ")
 		if len(fields) >= 3 && fields[2] == mountType && strings.Compare(fields[1], mPath) == 0 {
 			return true, nil
@@ -63,11 +68,13 @@ func checkOrMountCgroupV2(cgroupRoot string) error {
 		return fmt.Errorf("failed to checkMount: %v", err)
 	} else {
 		if mount {
-			fmt.Printf("cgroupV2 %s is already mounted \n", cgroupRoot)
+			fmt.Printf("cgroupV2 %s is already mounted 
+", cgroupRoot)
 			return nil
 		}
 	}
-	fmt.Printf("begin to mount cgroupV2 fs: %s \n", cgroupRoot)
+	fmt.Printf("begin to mount cgroupV2 fs: %s 
+", cgroupRoot)
 
 	cgroupRootStat, err := os.Stat(cgroupRoot)
 	if err != nil {
@@ -85,7 +92,8 @@ func checkOrMountCgroupV2(cgroupRoot string) error {
 	if err := unix.Mount("none", cgroupRoot, "cgroup2", 0, ""); err != nil {
 		return fmt.Errorf("failed to mount %s: %w", cgroupRoot, err)
 	}
-	fmt.Printf("succeeded mounting cgroupV2 fs on %s \n", cgroupRoot)
+	fmt.Printf("succeeded mounting cgroupV2 fs on %s 
+", cgroupRoot)
 
 	return nil
 }
@@ -96,11 +104,13 @@ func checkOrMountBpfFs(bpfPath string) error {
 		return fmt.Errorf("failed to checkMount: %v", err)
 	} else {
 		if mount {
-			fmt.Printf("bpf %s is already mounted \n", bpfPath)
+			fmt.Printf("bpf %s is already mounted 
+", bpfPath)
 			return nil
 		}
 	}
-	fmt.Printf("begin to mount bpf fs: %s \n", bpfPath)
+	fmt.Printf("begin to mount bpf fs: %s 
+", bpfPath)
 
 	var err error
 	_, err = os.Stat(bpfPath)

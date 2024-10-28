@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package ebpf
 
 import (
@@ -24,13 +26,17 @@ func (s *EbpfProgramStruct) PrintMapService(filterNatType *uint8, filterSvcV4Id 
 	}
 	name := mapPtr.String()
 
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("map %s :   \n", name)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("map %s :   
+", name)
 	if filterNatType != nil {
-		fmt.Printf("    filterNatType %s \n", GetNatTypeStr(*filterNatType))
+		fmt.Printf("    filterNatType %s 
+", GetNatTypeStr(*filterNatType))
 	}
 	if filterSvcV4Id != nil {
-		fmt.Printf("    filterSvcV4Id %v \n", *filterSvcV4Id)
+		fmt.Printf("    filterSvcV4Id %v 
+", *filterSvcV4Id)
 	}
 
 	var cursor ebpf.MapBatchCursor
@@ -54,7 +60,8 @@ func (s *EbpfProgramStruct) PrintMapService(filterNatType *uint8, filterSvcV4Id 
 			if errors.Is(batchErr, ebpf.ErrKeyNotExist) {
 				finished = true
 			} else {
-				return fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+				return fmt.Errorf("failed to batchlookup for %v
+", mapPtr.String())
 			}
 		}
 		// Categorize current batch
@@ -70,7 +77,8 @@ func (s *EbpfProgramStruct) PrintMapService(filterNatType *uint8, filterSvcV4Id 
 				allKeysBalancing = append(allKeysBalancing, keys[i])
 				allValsBalancing = append(allValsBalancing, vals[i])
 			default:
-				fmt.Printf("Unknown NatType: %v : key=%s, value=%s\n", i, keys[i], vals[i])
+				fmt.Printf("Unknown NatType: %v : key=%s, value=%s
+", i, keys[i], vals[i])
 				count++
 			}
 		}
@@ -86,8 +94,10 @@ func (s *EbpfProgramStruct) PrintMapService(filterNatType *uint8, filterSvcV4Id 
 		fmt.Println("Service Entries: ")
 		for i := 0; i < len(allKeysService); i++ {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allValsService[i].SvcId) {
-				fmt.Printf("[%v]: key=%s, \n", kc, allKeysService[i])
-				fmt.Printf("     value=%s\n", allValsService[i])
+				fmt.Printf("[%v]: key=%s, 
+", kc, allKeysService[i])
+				fmt.Printf("     value=%s
+", allValsService[i])
 				kc++
 			}
 
@@ -102,8 +112,10 @@ func (s *EbpfProgramStruct) PrintMapService(filterNatType *uint8, filterSvcV4Id 
 	if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_REDIRECT) {
 		for i := 0; i < len(allKeysRedirect); i++ {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allValsRedirect[i].SvcId) {
-				fmt.Printf("[%v]: key=%s\n", kc, allKeysRedirect[i])
-				fmt.Printf("     value=%s\n", allValsRedirect[i])
+				fmt.Printf("[%v]: key=%s
+", kc, allKeysRedirect[i])
+				fmt.Printf("     value=%s
+", allValsRedirect[i])
 				kc++
 			}
 		}
@@ -117,8 +129,10 @@ func (s *EbpfProgramStruct) PrintMapService(filterNatType *uint8, filterSvcV4Id 
 	if filterNatType == nil || (filterNatType != nil && *filterNatType == NAT_TYPE_BALANCING) {
 		for i := 0; i < len(allKeysBalancing); i++ {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allValsBalancing[i].SvcId) {
-				fmt.Printf("[%v]: key=%s\n", kc, allKeysBalancing[i])
-				fmt.Printf("     value=%s\n", allValsBalancing[i])
+				fmt.Printf("[%v]: key=%s
+", kc, allKeysBalancing[i])
+				fmt.Printf("     value=%s
+", allValsBalancing[i])
 				kc++
 			}
 		}
@@ -127,9 +141,12 @@ func (s *EbpfProgramStruct) PrintMapService(filterNatType *uint8, filterSvcV4Id 
 	}
 
 	fmt.Println("")
-	fmt.Printf("end map %s: account %v \n", name, count)
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("\n")
+	fmt.Printf("end map %s: account %v 
+", name, count)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("
+")
 	return nil
 }
 
@@ -145,13 +162,17 @@ func (s *EbpfProgramStruct) PrintMapBackend(filterNatType *uint8, filterSvcV4Id 
 	}
 	name := mapPtr.String()
 
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("map %s :   \n", name)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("map %s :   
+", name)
 	if filterNatType != nil {
-		fmt.Printf("    filterNatType %s \n", GetNatTypeStr(*filterNatType))
+		fmt.Printf("    filterNatType %s 
+", GetNatTypeStr(*filterNatType))
 	}
 	if filterSvcV4Id != nil {
-		fmt.Printf("    filterSvcV4Id %v \n", *filterSvcV4Id)
+		fmt.Printf("    filterSvcV4Id %v 
+", *filterSvcV4Id)
 	}
 
 	var cursor ebpf.MapBatchCursor
@@ -175,7 +196,8 @@ func (s *EbpfProgramStruct) PrintMapBackend(filterNatType *uint8, filterSvcV4Id 
 			if errors.Is(batchErr, ebpf.ErrKeyNotExist) {
 				finished = true
 			} else {
-				return fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+				return fmt.Errorf("failed to batchlookup for %v
+", mapPtr.String())
 			}
 		}
 		// Categorize current batch
@@ -191,7 +213,8 @@ func (s *EbpfProgramStruct) PrintMapBackend(filterNatType *uint8, filterSvcV4Id 
 				allKeysBalancing = append(allKeysBalancing, keys[i])
 				allValsBalancing = append(allValsBalancing, vals[i])
 			default:
-				fmt.Printf("Unknown NatType: %v : key=%s, value=%s\n", i, keys[i], vals[i])
+				fmt.Printf("Unknown NatType: %v : key=%s, value=%s
+", i, keys[i], vals[i])
 				count++
 			}
 		}
@@ -207,8 +230,10 @@ func (s *EbpfProgramStruct) PrintMapBackend(filterNatType *uint8, filterSvcV4Id 
 		fmt.Println("Service Entries: ")
 		for i := 0; i < len(allKeysService); i++ {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allKeysService[i].SvcId) {
-				fmt.Printf("[%v]: key=%s\n", kc, allKeysService[i])
-				fmt.Printf("     value=%s\n", allValsService[i])
+				fmt.Printf("[%v]: key=%s
+", kc, allKeysService[i])
+				fmt.Printf("     value=%s
+", allValsService[i])
 				kc++
 			}
 		}
@@ -222,8 +247,10 @@ func (s *EbpfProgramStruct) PrintMapBackend(filterNatType *uint8, filterSvcV4Id 
 		fmt.Println("LocalRedirect Entries: ")
 		for i := 0; i < len(allKeysRedirect); i++ {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allKeysRedirect[i].SvcId) {
-				fmt.Printf("[%v]: key=%s\n", kc, allKeysRedirect[i])
-				fmt.Printf("     value=%s\n", allValsRedirect[i])
+				fmt.Printf("[%v]: key=%s
+", kc, allKeysRedirect[i])
+				fmt.Printf("     value=%s
+", allValsRedirect[i])
 				kc++
 			}
 		}
@@ -237,8 +264,10 @@ func (s *EbpfProgramStruct) PrintMapBackend(filterNatType *uint8, filterSvcV4Id 
 		fmt.Println("Balancing Entries: ")
 		for i := 0; i < len(allKeysBalancing); i++ {
 			if filterSvcV4Id == nil || (filterSvcV4Id != nil && *filterSvcV4Id == allKeysBalancing[i].SvcId) {
-				fmt.Printf("[%v]: key=%s\n", kc, allKeysBalancing[i])
-				fmt.Printf("     value=%s\n", allValsBalancing[i])
+				fmt.Printf("[%v]: key=%s
+", kc, allKeysBalancing[i])
+				fmt.Printf("     value=%s
+", allValsBalancing[i])
 				kc++
 			}
 		}
@@ -247,9 +276,12 @@ func (s *EbpfProgramStruct) PrintMapBackend(filterNatType *uint8, filterSvcV4Id 
 	}
 
 	fmt.Println("")
-	fmt.Printf("end map %s: account %v \n", name, count)
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("\n")
+	fmt.Printf("end map %s: account %v 
+", name, count)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("
+")
 	return nil
 }
 
@@ -267,8 +299,10 @@ func (s *EbpfProgramStruct) PrintMapNodeIp() error {
 	}
 	name := mapPtr.String()
 
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("map  %s\n", name)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("map  %s
+", name)
 	var cursor ebpf.MapBatchCursor
 	count := 0
 	for {
@@ -280,21 +314,27 @@ func (s *EbpfProgramStruct) PrintMapNodeIp() error {
 				// end
 				finished = true
 			} else {
-				return fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+				return fmt.Errorf("failed to batchlookup for %v
+", mapPtr.String())
 			}
 		}
 		for i := 0; i < len(keys) && i < c; i++ {
-			fmt.Printf("[%v]: key=%s\n", i, keys[i])
-			fmt.Printf("      value=%+v\n", vals[i])
+			fmt.Printf("[%v]: key=%s
+", i, keys[i])
+			fmt.Printf("      value=%+v
+", vals[i])
 		}
 		if finished {
 			break
 		}
 	}
 
-	fmt.Printf("end map %s: total items: %v \n", name, count)
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("\n")
+	fmt.Printf("end map %s: total items: %v 
+", name, count)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("
+")
 	return nil
 }
 
@@ -312,8 +352,10 @@ func (s *EbpfProgramStruct) PrintMapNodeProxyIp() error {
 	}
 	name := mapPtr.String()
 
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("map  %s\n", name)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("map  %s
+", name)
 	var cursor ebpf.MapBatchCursor
 	count := 0
 	for {
@@ -325,21 +367,27 @@ func (s *EbpfProgramStruct) PrintMapNodeProxyIp() error {
 				// end
 				finished = true
 			} else {
-				return fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+				return fmt.Errorf("failed to batchlookup for %v
+", mapPtr.String())
 			}
 		}
 		for i := 0; i < len(keys) && i < c; i++ {
-			fmt.Printf("[%v]: key=%+v\n", i, keys[i])
-			fmt.Printf("      value=%s\n", vals[i])
+			fmt.Printf("[%v]: key=%+v
+", i, keys[i])
+			fmt.Printf("      value=%s
+", vals[i])
 		}
 		if finished {
 			break
 		}
 	}
 
-	fmt.Printf("end map %s: total items: %v \n", name, count)
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("\n")
+	fmt.Printf("end map %s: total items: %v 
+", name, count)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("
+")
 	return nil
 }
 
@@ -357,8 +405,10 @@ func (s *EbpfProgramStruct) PrintMapAffinity() error {
 	}
 	name := mapPtr.String()
 
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("map  %s\n", name)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("map  %s
+", name)
 	var cursor ebpf.MapBatchCursor
 	count := 0
 	for {
@@ -370,21 +420,27 @@ func (s *EbpfProgramStruct) PrintMapAffinity() error {
 				// end
 				finished = true
 			} else {
-				return fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+				return fmt.Errorf("failed to batchlookup for %v
+", mapPtr.String())
 			}
 		}
 		for i := 0; i < len(keys) && i < c; i++ {
-			fmt.Printf("[%v]: key=%s\n", i, keys[i])
-			fmt.Printf("      value=%s\n", vals[i])
+			fmt.Printf("[%v]: key=%s
+", i, keys[i])
+			fmt.Printf("      value=%s
+", vals[i])
 		}
 		if finished {
 			break
 		}
 	}
 
-	fmt.Printf("end map %s: total items: %v \n", name, count)
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("\n")
+	fmt.Printf("end map %s: total items: %v 
+", name, count)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("
+")
 	return nil
 }
 
@@ -402,8 +458,10 @@ func (s *EbpfProgramStruct) PrintMapNatRecord() error {
 	}
 	name := mapPtr.String()
 
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("map  %s\n", name)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("map  %s
+", name)
 	var cursor ebpf.MapBatchCursor
 	count := 0
 	for {
@@ -415,21 +473,27 @@ func (s *EbpfProgramStruct) PrintMapNatRecord() error {
 				// end
 				finished = true
 			} else {
-				return fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+				return fmt.Errorf("failed to batchlookup for %v
+", mapPtr.String())
 			}
 		}
 		for i := 0; i < len(keys) && i < c; i++ {
-			fmt.Printf("[%v]: key=%s\n", i, keys[i])
-			fmt.Printf("      value=%s\n", vals[i])
+			fmt.Printf("[%v]: key=%s
+", i, keys[i])
+			fmt.Printf("      value=%s
+", vals[i])
 		}
 		if finished {
 			break
 		}
 	}
 
-	fmt.Printf("end map %s: total items: %v \n", name, count)
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("\n")
+	fmt.Printf("end map %s: total items: %v 
+", name, count)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("
+")
 	return nil
 }
 
@@ -447,8 +511,10 @@ func (s *EbpfProgramStruct) PrintMapConfigure() error {
 	}
 	name := mapPtr.String()
 
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("map  %s\n", name)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("map  %s
+", name)
 
 	var cursor ebpf.MapBatchCursor
 	count := 0
@@ -461,20 +527,25 @@ func (s *EbpfProgramStruct) PrintMapConfigure() error {
 				// end
 				finished = true
 			} else {
-				return fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
+				return fmt.Errorf("failed to batchlookup for %v
+", mapPtr.String())
 			}
 		}
 		for i := 0; i < len(keys) && i < c && i < MapConfigureKeyIndexEnd; i++ {
-			fmt.Printf("%s\n", MapConfigureStr(uint32(i), uint32(vals[i])))
+			fmt.Printf("%s
+", MapConfigureStr(uint32(i), uint32(vals[i])))
 		}
 		if finished {
 			break
 		}
 	}
 
-	fmt.Printf("end map %s: total items: %v \n", name, count)
-	fmt.Printf("------------------------------\n")
-	fmt.Printf("\n")
+	fmt.Printf("end map %s: total items: %v 
+", name, count)
+	fmt.Printf("------------------------------
+")
+	fmt.Printf("
+")
 	return nil
 }
 
@@ -520,7 +591,8 @@ func (s *EbpfProgramStruct) daemonGetEvent() {
 		select {
 		case s.Event <- t:
 		default:
-			s.l.Sugar().Warnf("failed to write data to event chan, miss data: %v \n", t)
+			s.l.Sugar().Warnf("failed to write data to event chan, miss data: %v 
+", t)
 		}
 	}
 }

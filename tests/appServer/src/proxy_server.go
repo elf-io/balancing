@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 /*
 This program implements a simple proxy server that can forward requests using either HTTP or UDP.
 
@@ -185,9 +187,11 @@ func main() {
 
 	// Start the HTTP server
 	address := fmt.Sprintf(":%s", *port)
-	fmt.Printf("Proxy server is listening on port %s\n", *port)
+	fmt.Printf("Proxy server is listening on port %s
+", *port)
 	if err := http.ListenAndServe(address, nil); err != nil {
-		fmt.Printf("Server failed to start: %v\n", err)
+		fmt.Printf("Server failed to start: %v
+", err)
 	}
 }
 

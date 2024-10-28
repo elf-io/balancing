@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 /*
 This program implements a simple HTTP server.
 
@@ -66,9 +68,11 @@ func main() {
 
 	// Start the HTTP server
 	address := fmt.Sprintf(":%s", *port)
-	fmt.Printf("Server is listening on port %s\n", *port)
+	fmt.Printf("Server is listening on port %s
+", *port)
 	if err := http.ListenAndServe(address, nil); err != nil {
-		fmt.Printf("Server failed to start: %v\n", err)
+		fmt.Printf("Server failed to start: %v
+", err)
 	}
 }
 

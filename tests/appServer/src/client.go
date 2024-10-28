@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package main
 
 import (
@@ -39,7 +41,8 @@ func testHTTPServer() {
 		log.Fatalf("Error marshalling request body: %v", err)
 	}
 
-	fmt.Printf("HTTP Request: %+v\n", requestData)
+	fmt.Printf("HTTP Request: %+v
+", requestData)
 
 	resp, err := http.Post("http://localhost:8080", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
@@ -58,7 +61,9 @@ func testHTTPServer() {
 		log.Fatalf("Error unmarshalling response: %v", err)
 	}
 
-	fmt.Printf("HTTP Server Response: %+v\n\n", response)
+	fmt.Printf("HTTP Server Response: %+v
+
+", response)
 }
 
 func testUDPServer() {
@@ -81,7 +86,8 @@ func testUDPServer() {
 		log.Fatalf("Error marshalling request body: %v", err)
 	}
 
-	fmt.Printf("UDP Request: %+v\n", requestData)
+	fmt.Printf("UDP Request: %+v
+", requestData)
 
 	_, err = conn.Write(requestBody)
 	if err != nil {
@@ -103,11 +109,14 @@ func testUDPServer() {
 		log.Fatalf("Error unmarshalling response: %v", err)
 	}
 
-	fmt.Printf("UDP Server Response: %+v\n\n", response)
+	fmt.Printf("UDP Server Response: %+v
+
+", response)
 }
 
 func testProxyServer(forwardType, backendUrl string) {
-	fmt.Printf("Testing Proxy Server with %s forwarding...\n", forwardType)
+	fmt.Printf("Testing Proxy Server with %s forwarding...
+", forwardType)
 
 	// Construct the request body
 	clientRequest := common.ProxyClientRequest{
@@ -122,7 +131,8 @@ func testProxyServer(forwardType, backendUrl string) {
 		log.Fatalf("Error marshalling request body: %v", err)
 	}
 
-	fmt.Printf("Proxy Request (%s): %+v\n", forwardType, clientRequest)
+	fmt.Printf("Proxy Request (%s): %+v
+", forwardType, clientRequest)
 
 	// Create a request to the Proxy server
 	resp, err := http.Post("http://localhost:8090", "application/json", bytes.NewBuffer(requestBody))
@@ -142,5 +152,7 @@ func testProxyServer(forwardType, backendUrl string) {
 		log.Fatalf("Error unmarshalling response: %v", err)
 	}
 
-	fmt.Printf("Proxy Server Response (%s): %+v\n\n", forwardType, response)
+	fmt.Printf("Proxy Server Response (%s): %+v
+
+", forwardType, response)
 }

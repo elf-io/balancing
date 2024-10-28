@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package ebpf
 
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -no-strip -cc clang -target bpf -cflags "-D__TARGET_ARCH_x86"  bpf_cgroup   bpf/cgroup.c
@@ -232,19 +234,23 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 func (s *EbpfProgramStruct) UnloadProgramp() error {
 
 	if s.CgroupLinkConnect != nil {
-		fmt.Printf("Closing  cgroup v2 ...\n")
+		fmt.Printf("Closing  cgroup v2 ...
+")
 		s.CgroupLinkConnect.Close()
 	}
 	if s.CgroupLinkSend != nil {
-		fmt.Printf("Closing  cgroup v2 ...\n")
+		fmt.Printf("Closing  cgroup v2 ...
+")
 		s.CgroupLinkSend.Close()
 	}
 	if s.CgroupLinkRecv != nil {
-		fmt.Printf("Closing  cgroup v2 ...\n")
+		fmt.Printf("Closing  cgroup v2 ...
+")
 		s.CgroupLinkRecv.Close()
 	}
 	if s.CgroupLinkPeer != nil {
-		fmt.Printf("Closing  cgroup v2 ...\n")
+		fmt.Printf("Closing  cgroup v2 ...
+")
 		s.CgroupLinkPeer.Close()
 	}
 
@@ -278,7 +284,8 @@ func (s *EbpfProgramStruct) UnloadProgramp() error {
 		s.BpfObjCgroup.bpf_cgroupMaps.MapEvent.Close()
 	}
 
-	fmt.Printf("Closing progs ...\n")
+	fmt.Printf("Closing progs ...
+")
 	s.BpfObjCgroup.bpf_cgroupPrograms.Close()
 	s.BpfObjCgroup.bpf_cgroupMaps.Close()
 
@@ -306,56 +313,64 @@ func (s *EbpfProgramStruct) LoadAllEbpfMap(mapPinDir string) error {
 	s.EbpfMaps.MapAffinity, err = ebpf.LoadPinnedMap(f, &ebpf.LoadPinOptions{})
 	if err != nil {
 		s.UnloadAllEbpfMap()
-		return fmt.Errorf("failed to load map %s\n", f)
+		return fmt.Errorf("failed to load map %s
+", f)
 	}
 
 	f = filepath.Join(mapdir, "map_configure")
 	s.EbpfMaps.MapConfigure, err = ebpf.LoadPinnedMap(f, &ebpf.LoadPinOptions{})
 	if err != nil {
 		s.UnloadAllEbpfMap()
-		return fmt.Errorf("failed to load map %s\n", f)
+		return fmt.Errorf("failed to load map %s
+", f)
 	}
 
 	f = filepath.Join(mapdir, "map_backend")
 	s.EbpfMaps.MapBackend, err = ebpf.LoadPinnedMap(f, &ebpf.LoadPinOptions{})
 	if err != nil {
 		s.UnloadAllEbpfMap()
-		return fmt.Errorf("failed to load map %s\n", f)
+		return fmt.Errorf("failed to load map %s
+", f)
 	}
 
 	f = filepath.Join(mapdir, "map_event")
 	s.EbpfMaps.MapEvent, err = ebpf.LoadPinnedMap(f, &ebpf.LoadPinOptions{})
 	if err != nil {
 		s.UnloadAllEbpfMap()
-		return fmt.Errorf("failed to load map %s\n", f)
+		return fmt.Errorf("failed to load map %s
+", f)
 	}
 
 	f = filepath.Join(mapdir, "map_nat_record")
 	s.EbpfMaps.MapNatRecord, err = ebpf.LoadPinnedMap(f, &ebpf.LoadPinOptions{})
 	if err != nil {
 		s.UnloadAllEbpfMap()
-		return fmt.Errorf("failed to load map %s\n", f)
+		return fmt.Errorf("failed to load map %s
+", f)
 	}
 
 	f = filepath.Join(mapdir, "map_node_ip")
 	s.EbpfMaps.MapNodeIp, err = ebpf.LoadPinnedMap(f, &ebpf.LoadPinOptions{})
 	if err != nil {
 		s.UnloadAllEbpfMap()
-		return fmt.Errorf("failed to load map %s\n", f)
+		return fmt.Errorf("failed to load map %s
+", f)
 	}
 
 	f = filepath.Join(mapdir, "map_node_proxy_ip")
 	s.EbpfMaps.MapNodeProxyIp, err = ebpf.LoadPinnedMap(f, &ebpf.LoadPinOptions{})
 	if err != nil {
 		s.UnloadAllEbpfMap()
-		return fmt.Errorf("failed to load map %s\n", f)
+		return fmt.Errorf("failed to load map %s
+", f)
 	}
 
 	f = filepath.Join(mapdir, "map_service")
 	s.EbpfMaps.MapService, err = ebpf.LoadPinnedMap(f, &ebpf.LoadPinOptions{})
 	if err != nil {
 		s.UnloadAllEbpfMap()
-		return fmt.Errorf("failed to load map %s\n", f)
+		return fmt.Errorf("failed to load map %s
+", f)
 	}
 
 	return nil
@@ -407,7 +422,8 @@ func (s *EbpfProgramStruct) UnloadAllEbpfMap() {
 // 		record, err := rd.Read()
 // 		if err != nil {
 // 			if errors.Is(err, ringbuf.ErrClosed) {
-// 				fmt.Printf("received signal, exiting reading events..\n")
+// 				fmt.Printf("received signal, exiting reading events..
+")
 // 				break
 // 			}
 // 			fmt.Printf("failed to read event: %v", err)
@@ -419,12 +435,14 @@ func (s *EbpfProgramStruct) UnloadAllEbpfMap() {
 // 			fmt.Printf("parsing ringbuf event: %s", err)
 // 			continue
 // 		}
-// 		// fmt.Printf("get event data: %v \n", t)
+// 		// fmt.Printf("get event data: %v 
+", t)
 //
 // 		select {
 // 		case s.Event <- t:
 // 		default:
-// 			fmt.Printf("error, failed to write data to event chan, miss data: %v \n", t)
+// 			fmt.Printf("error, failed to write data to event chan, miss data: %v 
+", t)
 // 		}
 // 	}
 //
@@ -461,7 +479,8 @@ func (s *EbpfProgramStruct) UnloadAllEbpfMap() {
 // 				return fmt.Errorf("failed to BatchDelete , reason: %v ", batchErr)
 // 			}
 // 		}
-// 		fmt.Printf("delted item account: %v \n", count)
+// 		fmt.Printf("delted item account: %v 
+", count)
 // 	} else {
 // 		if _, batchErr := s.BpfObjCgroup.MapFloatipV4.BatchDelete(keyList, &ebpf.BatchOptions{}); batchErr != nil {
 // 			return fmt.Errorf("failed to BatchDelete , reason: %v ", batchErr)
