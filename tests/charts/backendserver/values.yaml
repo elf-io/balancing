@@ -5,7 +5,7 @@ image:
   registry: ghcr.io
   repository: elf-io/balancing-backend-server
   pullPolicy: IfNotPresent
-  tag: "aa2f96c70ff4159d722fb863dfda1b705b9cc448"
+  tag: "af042d0bbceee93cd420188cb348d8e2f979a4fc"
   imagePullSecrets: []
   # - name: "image-pull-secret"
 
