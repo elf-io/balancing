@@ -308,6 +308,7 @@ lint_image_trivy:
 
 .PHONY: generate_ebpf
 generate_ebpf:
+	make installDevTool
 	$(GO_GENERATE) ./...
 
 
@@ -441,7 +442,7 @@ installBuildTool:
 
 .PHONY: installDevTool
 installDevTool:
-	apt-get update && apt-get install -y clang llvm gcc-multilib libbpf-dev linux-headers-$(uname -r) golang
+	apt-get update && apt-get install -y clang llvm gcc-multilib libbpf-dev linux-headers-$(uname -r)
 
 
 

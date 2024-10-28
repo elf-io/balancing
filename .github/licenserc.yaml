@@ -15,4 +15,5 @@ header:
       - 'vendor'
       - 'pkg/k8s'
       - 'api'
+      - 'pkg/ebpf/bpf_cgroup_bpf.go'
     comment: on-failure
