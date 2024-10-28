@@ -1,3 +1,5 @@
+#!/bin/bash
+
 NAME=http-server
 NAMESPACE=default
 IMAGE=localhost/weizhoulan/rdmatool:latest
