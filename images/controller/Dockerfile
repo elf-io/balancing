@@ -26,7 +26,7 @@ RUN chmod +x /build-gops.sh && /build-gops.sh
 
 #======= build bin ==========
 # use BUILDPLATFORM to cross build
-FROM --platform=${BUILDPLATFORM} ${GOLANG_IMAGE} as builder
+FROM --platform=${TARGETPLATFORM} ${GOLANG_IMAGE} as builder
 
 # docker build var
 ARG TARGETOS
