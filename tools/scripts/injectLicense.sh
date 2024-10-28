@@ -11,7 +11,7 @@ GO_FILE_LIST=$(find . -type f -name "*.go" ! -path "./vendor/*" ! -path "./chart
 
 for FILE in $GO_FILE_LIST ; do
     # 检查文件的前两行是否包含完整的许可证头
-    if ! head -n 2 "$FILE" | grep -q "${HEADER_TITLE}" || ! head -n 2 "$FILE" | grep -q "${SPDX_IDENTIFIER}"; then
+    if ! grep "SPDX-License-Identifier" $FILE &>/dev/null ; then
         echo "inject license header to $FILE"
         echo -e "$HEADER_TITLE\n$SPDX_IDENTIFIER\n$(cat $FILE)" > $FILE
     fi

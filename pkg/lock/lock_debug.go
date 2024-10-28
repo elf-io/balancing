@@ -1,5 +1,3 @@
-// Copyright 2024 Authors of elf-io
-// SPDX-License-Identifier: Apache-2.0
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Authors of Cilium
 
@@ -95,30 +93,30 @@ func printStackTo(sec float64, stack []byte, writer io.Writer) {
 
 	if bytes.Equal([]byte("goroutine"), stack[:len("goroutine")]) {
 		newLines = bytes.Count(stack, []byte{'
-'})
-		goroutineLine := bytes.IndexRune(stack, '[')
-		goRoutineNumber = stack[:goroutineLine]
-	}
+			'})
+			goroutineLine := bytes.IndexRune(stack, '[')
+			goRoutineNumber = stack[:goroutineLine]
+		}
 
-	fmt.Printf("goroutine=%v : Goroutine took lock %v seconds for more than %.2f seconds
-",
-		string(goRoutineNumber[len("goroutine"):len(goRoutineNumber)-1]), sec, selfishThresholdSec)
+		fmt.Printf("goroutine=%v : Goroutine took lock %v seconds for more than %.2f seconds
+		",
+		string(goRoutineNumber[len("goroutine") : len(goRoutineNumber)-1]), sec, selfishThresholdSec)
 
-	// A stack trace is usually in the following format:
-	// goroutine 1432 [running]:
-	// runtime/debug.Stack(0xc424c4a370, 0xc421f7f750, 0x1)
-	//   /usr/local/go/src/runtime/debug/stack.go:24 +0xa7
-	//   ...
-	// To know which trace belongs to which go routine we will append the
-	// go routine number to every line of the stack trace.
-	writer.Write(bytes.Replace(
-		stack,
-		[]byte{'
-'},
-		append([]byte{'
-'}, goRoutineNumber...),
-		// Don't replace the last '
-'
-		newLines-1),
-	)
-}
+		// A stack trace is usually in the following format:
+		// goroutine 1432 [running]:
+		// runtime/debug.Stack(0xc424c4a370, 0xc421f7f750, 0x1)
+		//   /usr/local/go/src/runtime/debug/stack.go:24 +0xa7
+		//   ...
+		// To know which trace belongs to which go routine we will append the
+		// go routine number to every line of the stack trace.
+		writer.Write(bytes.Replace(
+			stack,
+			[]byte{'
+				'},
+				append([]byte{'
+					'}, goRoutineNumber...),
+					// Don't replace the last '
+					'
+					newLines - 1),
+				)
+				}
