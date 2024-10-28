@@ -6,17 +6,17 @@ package common
 
 // UdpServerResponse represents the structure of the UDP server response data
 type UdpServerResponse struct {
-	ServerHostName   string `json:"ServerHostName"`   // The hostname of the server
-	ClientIP         string `json:"ClientIP"`         // The IP address of the client
-	ClientPort       string `json:"ClientPort"`       // The port of the client
-	ServerIP         string `json:"ServerIP"`         // The IP address of the server
-	ServerPort       string `json:"ServerPort"`       // The port on which the server is listening
-	IPVersion        string `json:"IPVersion"`        // The IP version (IPv4 or IPv6)
-	ClientEchoData   string `json:"ClientEchoData"`   // The data echoed from the client's request
-	RequestTimestamp string `json:"RequestTimestamp"` // The timestamp of the request
-	RequestCounter   int    `json:"RequestCounter"`   // The count of requests since the server started
-	ServerType       string `json:"ServerType"`       // The type of server (udp)
-	EnvList          map[string]string `json:"EnvList"` // The list of environment variables
+	ServerHostName   string            `json:"ServerHostName"`   // The hostname of the server
+	ClientIP         string            `json:"ClientIP"`         // The IP address of the client
+	ClientPort       string            `json:"ClientPort"`       // The port of the client
+	ServerIP         string            `json:"ServerIP"`         // The IP address of the server
+	ServerPort       string            `json:"ServerPort"`       // The port on which the server is listening
+	IPVersion        string            `json:"IPVersion"`        // The IP version (IPv4 or IPv6)
+	ClientEchoData   string            `json:"ClientEchoData"`   // The data echoed from the client's request
+	RequestTimestamp string            `json:"RequestTimestamp"` // The timestamp of the request
+	RequestCounter   int               `json:"RequestCounter"`   // The count of requests since the server started
+	ServerType       string            `json:"ServerType"`       // The type of server (udp)
+	EnvList          map[string]string `json:"EnvList"`          // The list of environment variables
 }
 
 //--------------------------------- for http server
@@ -35,7 +35,7 @@ type HttpServerResponse struct {
 	URL                string            `json:"URL"`                // The URL of the request
 	RequestCounter     int               `json:"RequestCounter"`     // The count of requests since the server started
 	ServerType         string            `json:"ServerType"`         // The type of server (http)
-	EnvList            map[string]string `json:"EnvList"`             // The list of environment variables
+	EnvList            map[string]string `json:"EnvList"`            // The list of environment variables
 }
 
 //--------------------------------- for proxy server
