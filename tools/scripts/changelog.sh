@@ -40,7 +40,7 @@ cd ${PROJECT_ROOT_PATH}
 
 #============================
 echo "-------------- generate latest release version tag --------------"
-LATEST_RELEASE_VERISON=$(curl --retry 10 -s https://api.github.com/repos/elf-io/spiderpool/releases | grep '"tag_name":' | grep -Eo "v([0-9]+\.[0-9]+\.[0-9])" | sort -r | head -n 1)
+LATEST_RELEASE_VERISON=$(curl --retry 10 -s https://api.github.com/repos/$(git remote get-url origin | sed -E 's/.*github.com[:\/]([^\/]+\/[^\/]+).git/\1/')/releases | grep '"tag_name":' | grep -Eo "v([0-9]+\.[0-9]+\.[0-9])" | sort -r | head -n 1) || true
 LATEST_RELEASE_VERISON=` grep -oE "[0-9]+\.[0-9]+\.[0-9]+" <<< "${LATEST_RELEASE_VERISON}" ` || true
 if [ -z "${LATEST_RELEASE_VERISON}" ] ; then
     LATEST_X=0
