@@ -23,7 +23,10 @@ var CmdPrintMapAffinity = &cobra.Command{
 
 		fmt.Printf("\n")
 		fmt.Printf("print the ebpf map of affinity:\n")
-		bpf.PrintMapAffinity()
+		if err := bpf.PrintMapAffinity(); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 		fmt.Printf("\n")
 	},
 }

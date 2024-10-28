@@ -484,3 +484,4 @@ func (s *EbpfProgramStruct) CleanMapNatRecord() (int, error) {
 	}
 	return count, nil
 }
+

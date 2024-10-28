@@ -23,9 +23,15 @@ var CmdPrintMapAll = &cobra.Command{
 
 		fmt.Printf("\n")
 		fmt.Printf("print all data of the ebpf map:\n")
-		bpf.PrintMapAffinity()
-		bpf.PrintMapNatRecord()
-		bpf.PrintMapService(nil, nil)
+		if err := bpf.PrintMapAffinity(); err != nil {
+			fmt.Println("Error:", err)
+		}
+		if err := bpf.PrintMapNatRecord(); err != nil {
+			fmt.Println("Error:", err)
+		}
+		if err := bpf.PrintMapService(nil, nil); err != nil {
+			fmt.Println("Error:", err)
+		}
 		bpf.PrintMapBackend(nil, nil)
 		bpf.PrintMapNodeIp()
 		bpf.PrintMapNodeProxyIp()
