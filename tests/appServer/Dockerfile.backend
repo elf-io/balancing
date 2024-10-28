@@ -1,0 +1,20 @@
+# docker build -t myproxy -f Dockerfile.proxy .
+# docker run -p 80:80 myproxy
+
+# 使用官方 Golang 镜像作为构建阶段
+FROM golang:1.23.1 AS builder
+
+WORKDIR /app
+
+COPY ./src .
+RUN go build -o http_server http_server.go
+RUN go build -o udp_server udp_server.go
+
+#================================
+FROM ubuntu:24.10
+
+COPY --from=builder /app/http_server /app/udp_server /usr/sbin
+RUN chmod +x /usr/sbin/udp_server && chmod +x /usr/sbin/http_server
+
+EXPOSE 80
+CMD ["sh", "-c", "/usr/sbin/udp_server -port 80 & /usr/sbin/http_server -port 80 "]

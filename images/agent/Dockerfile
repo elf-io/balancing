@@ -9,7 +9,13 @@ ARG GOLANG_IMAGE=docker.io/library/golang:1.23.1
 FROM --platform=${TARGETPLATFORM} ${GOLANG_IMAGE} as gops-cni-builder
 COPY /images/build-gops.sh /build-gops.sh
 
-#with debian 11 os
+ARG USE_PROXY_SOURCE
+COPY /images/sources-debian12.list /sources.list
+RUN [ "$USE_PROXY_SOURCE" != "true" ] && exit 0 ; \
+      rm -f /etc/apt/sources.list ; \
+      rm -rf /etc/apt/sources.list.d ; \
+      cp /sources.list /etc/apt/sources.list
+
 RUN apt-get update && apt-get install -y binutils-aarch64-linux-gnu binutils-x86-64-linux-gnu
 
 # build-gops.sh will build both archs at the same time
@@ -31,16 +37,16 @@ ARG NOOPT
 ARG APT_HTTP_PROXY
 
 ARG USE_PROXY_SOURCE
-#use alibaba debian source
-COPY /images/sources.list /sources.list
+COPY /images/sources-debian12.list /sources.list
 RUN [ "$USE_PROXY_SOURCE" != "true" ] && exit 0 ; \
       rm -f /etc/apt/sources.list ; \
-      cp /sources.list /etc/apt/sources.list ;  \
-      apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
+      rm -rf /etc/apt/sources.list.d ; \
+      cp /sources.list /etc/apt/sources.list
 
 COPY . /src
 WORKDIR /src
-RUN  [ -z "${APT_HTTP_PROXY}" ] || { echo "use APT_HTTP_PROXY=${APT_HTTP_PROXY}" ; export http_proxy=${APT_HTTP_PROXY} ; } ; make installDevTool
+RUN  [ -z "${APT_HTTP_PROXY}" ] || { echo "use APT_HTTP_PROXY=${APT_HTTP_PROXY}" ; export http_proxy=${APT_HTTP_PROXY} ; } ; \
+    make installBuildTool
 RUN  make GOARCH=${TARGETARCH}   \
         RACE=${RACE} NOSTRIP=${NOSTRIP} NOOPT=${NOOPT} \
         DESTDIR_BIN=/tmp/install/${TARGETOS}/${TARGETARCH}/bin \

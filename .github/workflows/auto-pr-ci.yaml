@@ -79,7 +79,7 @@ jobs:
               - '**/Makefile*'
               - '**/Dockerfile'
             all_e2e:
-              - 'test/e2e/**/*.go'
+              - 'tests/e2e/**/*.go'
               - 'vendor/github.com/elf-io/**/*.go'
 
       - name: Get Ref

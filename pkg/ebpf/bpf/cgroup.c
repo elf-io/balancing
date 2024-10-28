@@ -193,10 +193,12 @@ static __always_inline int execute_nat(struct bpf_sock_addr *ctx , __u32 debug_l
 	case SOCK_STREAM:
 		debugf(DEBUG_VERSBOSE,"SOCK_STREAM -> assuming TCP for %pI4:%d\n" , &dst_ip  , dst_port   );
 		ip_proto = IPPROTO_TCP;
+		evt.protocol = IPPROTO_TCP;
 		break;
 	case SOCK_DGRAM:
 		debugf(DEBUG_VERSBOSE,"SOCK_STREAM -> assuming UDP for %pI4:%d\n" , &dst_ip  , dst_port   );
 		ip_proto = IPPROTO_UDP;
+		evt.protocol = IPPROTO_UDP;
 		break;
 	default:
 		debugf(DEBUG_VERSBOSE,"Unknown socket type: %d for %pI4:%d\n", (int)ctx->type , &dst_ip  , dst_port  );

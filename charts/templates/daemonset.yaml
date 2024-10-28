@@ -146,6 +146,16 @@ spec:
               value: {{ .Values.balancingAgent.httpServer.port | quote }}
             - name: ENV_GOPS_LISTEN_PORT
               value: {{ .Values.balancingAgent.debug.gopsPort | quote }}
+            - name: ENV_NODE_ENTRY_INTERFACE_NAME
+              value: {{ .Values.balancingAgent.nodeEntryInterface | quote }}
+            - name : ENV_ENABLE_IPV4
+              value: {{ .Values.feature.enableIPv4 | quote }}
+            - name : ENV_ENABLE_IPV6
+              value: {{ .Values.feature.enableIPv6 | quote }}
+            - name: ENV_LOCAL_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
             - name: ENV_POD_NAME
               valueFrom:
                 fieldRef:
@@ -169,8 +179,7 @@ spec:
               mountPath: /host/proc
             - name: ebpf-map
               mountPath: /sys/fs
-            - name: cgroup-fs
-              mountPath: /run/balancing
+              mountPropagation: Bidirectional
             {{- if .Values.balancingAgent.extraVolumes }}
             {{- include "tplvalues.render" ( dict "value" .Values.balancingAgent.extraVolumeMounts "context" $ ) | nindent 12 }}
             {{- end }}

@@ -66,8 +66,8 @@ func StringToUint32(str string) (uint32, error) {
 }
 
 var (
-	KubeConfigPath = filepath.Join(os.Getenv("HOME"), ".kube", "config")
-	ScInPodPath    = "/var/run/secrets/kubernetes.io/serviceaccount"
+	DefaultKubeConfigPath = filepath.Join(os.Getenv("HOME"), ".kube", "config")
+	ScInPodPath           = "/var/run/secrets/kubernetes.io/serviceaccount"
 )
 
 func ExistFile(filePath string) bool {
@@ -88,14 +88,24 @@ func ExistDir(dirPath string) bool {
 	return false
 }
 
-func AutoK8sConfig() (*rest.Config, error) {
+// KubeConfigPath is for agent on hosts out of the cluster
+// apiServerHostAddress is for agent and controller pod in the cluster when kube-proxy is not running
+func AutoK8sConfig(KubeConfigPath, apiServerHostAddress string) (*rest.Config, error) {
 	var config *rest.Config
 	var err error
 
-	if ExistFile(KubeConfigPath) == true {
+	if len(KubeConfigPath) != 0 {
 		config, err = clientcmd.BuildConfigFromFlags("", KubeConfigPath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get config from kube config=%v , info=%v", KubeConfigPath, err)
+		}
+		return config, nil
+	}
+
+	if ExistFile(DefaultKubeConfigPath) == true {
+		config, err = clientcmd.BuildConfigFromFlags("", DefaultKubeConfigPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get config from kube config=%v , info=%v", DefaultKubeConfigPath, err)
 		}
 
 	} else if ExistDir(ScInPodPath) == true {
@@ -103,7 +113,9 @@ func AutoK8sConfig() (*rest.Config, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to get config from serviceaccount=%v , info=%v", ScInPodPath, err)
 		}
-
+		if len(apiServerHostAddress) > 0 {
+			config.Host = apiServerHostAddress
+		}
 	} else {
 		return nil, fmt.Errorf("failed to get config ")
 	}
@@ -111,14 +123,24 @@ func AutoK8sConfig() (*rest.Config, error) {
 	return config, nil
 }
 
-func AutoCrdConfig() (*rest.Config, error) {
+// KubeConfigPath is for agent on hosts out of the cluster
+// apiServerHostAddress is for agent and controller pod in the cluster when kube-proxy is not running
+func AutoCrdConfig(KubeConfigPath, apiServerHostAddress string) (*rest.Config, error) {
 	var config *rest.Config
 	var err error
 
-	if ExistFile(KubeConfigPath) == true {
+	if len(KubeConfigPath) != 0 {
 		config, err = clientcmd.BuildConfigFromFlags("", KubeConfigPath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get config from kube config=%v , info=%v", KubeConfigPath, err)
+		}
+		return config, nil
+	}
+
+	if ExistFile(DefaultKubeConfigPath) == true {
+		config, err = clientcmd.BuildConfigFromFlags("", DefaultKubeConfigPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get config from kube config=%v , info=%v", DefaultKubeConfigPath, err)
 		}
 
 	} else if ExistDir(ScInPodPath) == true {
@@ -126,7 +148,9 @@ func AutoCrdConfig() (*rest.Config, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to get config from serviceaccount=%v , info=%v", ScInPodPath, err)
 		}
-
+		if len(apiServerHostAddress) > 0 {
+			config.Host = apiServerHostAddress
+		}
 	} else {
 		return nil, fmt.Errorf("failed to get config ")
 	}

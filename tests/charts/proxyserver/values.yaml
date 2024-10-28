@@ -1,0 +1,25 @@
+name: proxyserver
+hostnetwork: false
+
+image:
+  registry: ghcr.io
+  repository: elf-io/balancing-proxy_server
+  pullPolicy: IfNotPresent
+  tag: "aa2f96c70ff4159d722fb863dfda1b705b9cc448"
+  imagePullSecrets: []
+  # - name: "image-pull-secret"
+
+server:
+  port: 80
+  hostPort: 27000
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+extraEnv: []
+
+cmd:
+  cmdBinName: "/usr/sbin/proxy_server"
+  extraArgs: ["-port=80"]

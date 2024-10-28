@@ -80,7 +80,7 @@ spec:
 EOF
 
 
-
+# 访问指定 service 的端口时， 被解析到 endpointSelector 匹配的 pod 所在的 node 的 entryIP + port
 cat <<EOF | kubectl apply -f -
 apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
@@ -154,7 +154,5 @@ EOF
 
 
 kubectl get balancingpolicies
-
-
 
 

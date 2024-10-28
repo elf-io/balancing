@@ -110,7 +110,7 @@ func (s *podIdManager) initPodId() {
 			s.log.Sugar().Fatalf("Error listing pods in namespace %s: %v\n", ns.Name, err)
 		}
 		for _, pod := range pods.Items {
-			s.log.Sugar().Debugf("save id information of pod %s/%s", pod.Namespace, pod.Name)
+			s.log.Sugar().Debugf("save uid information of pod %s/%s", pod.Namespace, pod.Name)
 			if err := s.updatePodInfo(&pod); err != nil {
 				s.log.Sugar().Errorf("error: %s", err)
 			}

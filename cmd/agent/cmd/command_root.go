@@ -8,10 +8,7 @@ import (
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 	"os"
-	"os/signal"
 	"path/filepath"
-	"runtime/debug"
-	"syscall"
 )
 
 var BinName = filepath.Base(os.Args[0])
@@ -22,21 +19,6 @@ var rootCmd = &cobra.Command{
 	Use:   BinName,
 	Short: "short description",
 	Run: func(cmd *cobra.Command, args []string) {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
-		go func() {
-			for s := range c {
-				rootLogger.Sugar().Warnf("got signal=%+v \n", s)
-			}
-		}()
-
-		defer func() {
-			if e := recover(); nil != e {
-				rootLogger.Sugar().Errorf("Panic details: %v", e)
-				debug.PrintStack()
-				os.Exit(1)
-			}
-		}()
 		DaemonMain()
 	},
 }

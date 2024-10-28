@@ -1,0 +1,7 @@
+#!/bin/bash
+
+CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
+
+[ -f "${CURRENT_DIR_PATH}/config" ] || { echo "error, did not find ${CURRENT_DIR_PATH}/config" ; exit 1 ; }
+export KUBECONFIG=${CURRENT_DIR_PATH}/config
+kubectl "$@"

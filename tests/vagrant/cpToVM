@@ -1,0 +1,27 @@
+#!/bin/bash
+
+NODE_NAME="$1"
+HOST_PATH="$2"
+VM_PATH="$3"
+
+CURRENT_FILENAME=`basename $0`
+CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
+
+usage(){
+  echo "bad input"
+  echo "usage:"
+  echo "   ${CURRENT_FILENAME}  VM_Name  FromHostPath ToVmPath"
+  echo "           copy file or directory from host to VM"
+}
+(( $# != 3 )) && usage && exit 10
+
+if [ -z "$NODE_NAME" ] ; then
+  echo "error, must specify a VM name" >&2 && exit 2
+fi
+( [ ! -d "$HOST_PATH" ]  && [ ! -f "$HOST_PATH" ] ) && echo "error, no exist host path $HOST_PATH " >&2 && exit 4
+
+SSH_PORT=$(vagrant ssh-config ${NODE_NAME} | grep Port | awk '{print $2}')
+echo "copy host:$HOST_PATH to vm ${NODE_NAME}:${VM_PATH} with port ${SSH_PORT} "
+rsync -Pav -e "sshpass -p vagrant ssh -p ${SSH_PORT} -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"\
+    ${HOST_PATH}   vagrant@127.0.0.1:${VM_PATH}
+

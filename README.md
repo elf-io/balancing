@@ -8,4 +8,16 @@
 3 支持劫持 service 访问到本地 endpoint，适用于 clusterPedia、local coredns
 
 未来
-4 
+
+
+
+## 架构 
+
+### controller
+
+1. 为 balancing 和 localredirect 分配一个唯一的 u32 id 
+2. 校验 balancing 和 localredirect ，不允许它们之间引用相同的 service 或者 virtual address 
+
+### agent
+
+1. 为每个 node 分配一个唯一的 u32 id 

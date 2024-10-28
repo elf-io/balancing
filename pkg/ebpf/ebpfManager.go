@@ -37,10 +37,13 @@ type EbpfMaps struct {
 }
 
 type EbpfProgramStruct struct {
-	BpfObjCgroup bpf_cgroupObjects
-	CgroupLink   link.Link
-	Event        chan MapEventValue
-	l            *zap.Logger
+	BpfObjCgroup      bpf_cgroupObjects
+	CgroupLinkConnect link.Link
+	CgroupLinkSend    link.Link
+	CgroupLinkRecv    link.Link
+	CgroupLinkPeer    link.Link
+	Event             chan MapEventValue
+	l                 *zap.Logger
 
 	// for debug cli to load map alone
 	EbpfMaps *EbpfMaps
@@ -154,15 +157,9 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 
 	// 把 ebpf 程序再挂载到 cgroup
 	// https://github.com/cilium/ebpf/blob/main/link/cgroup.go#L43
-	s.CgroupLink, err = link.AttachCgroup(link.CgroupOptions{
-		Path:    types.CgroupV2Path,
-		Attach:  ebpf.AttachCGroupInet4Connect,
-		Program: s.BpfObjCgroup.bpf_cgroupPrograms.Sock4Connect,
-	})
-	if err != nil {
-		return fmt.Errorf("Error attaching Sock4Connect to cgroup: %v", err)
-	}
-	s.CgroupLink, err = link.AttachCgroup(link.CgroupOptions{
+	s.l.Sugar().Debugf("attach AttachCGroupUDP4Sendmsg")
+	// 返回的 CgroupLink 必须进行存储，否则会被 GC 而触发 attach 被释放的问题
+	s.CgroupLinkSend, err = link.AttachCgroup(link.CgroupOptions{
 		Path:    types.CgroupV2Path,
 		Attach:  ebpf.AttachCGroupUDP4Sendmsg,
 		Program: s.BpfObjCgroup.bpf_cgroupPrograms.Sock4Sendmsg,
@@ -170,7 +167,9 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 	if err != nil {
 		return fmt.Errorf("Error attaching Sock4Sendmsg to cgroup: %v", err)
 	}
-	s.CgroupLink, err = link.AttachCgroup(link.CgroupOptions{
+	s.l.Sugar().Debugf("attach AttachCGroupUDP4Recvmsg")
+	// 返回的 CgroupLink 必须进行存储，否则会被 GC 而触发 attach 被释放的问题
+	s.CgroupLinkRecv, err = link.AttachCgroup(link.CgroupOptions{
 		Path:    types.CgroupV2Path,
 		Attach:  ebpf.AttachCGroupUDP4Recvmsg,
 		Program: s.BpfObjCgroup.bpf_cgroupPrograms.Sock4Recvmsg,
@@ -178,13 +177,25 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 	if err != nil {
 		return fmt.Errorf("Error attaching Sock4Recvmsg to cgroup: %v", err)
 	}
-	s.CgroupLink, err = link.AttachCgroup(link.CgroupOptions{
+	s.l.Sugar().Debugf("attach AttachCgroupInet4GetPeername")
+	// 返回的 CgroupLink 必须进行存储，否则会被 GC 而触发 attach 被释放的问题
+	s.CgroupLinkPeer, err = link.AttachCgroup(link.CgroupOptions{
 		Path:    types.CgroupV2Path,
 		Attach:  ebpf.AttachCgroupInet4GetPeername,
 		Program: s.BpfObjCgroup.bpf_cgroupPrograms.Sock4Getpeername,
 	})
 	if err != nil {
 		return fmt.Errorf("Error attaching Sock4Getpeername to cgroup: %v", err)
+	}
+	s.l.Sugar().Debugf("attach AttachCGroupInet4Connect")
+	// 返回的 CgroupLink 必须进行存储，否则会被 GC 而触发 attach 被释放的问题
+	s.CgroupLinkConnect, err = link.AttachCgroup(link.CgroupOptions{
+		Path:    types.CgroupV2Path,
+		Attach:  ebpf.AttachCGroupInet4Connect,
+		Program: s.BpfObjCgroup.bpf_cgroupPrograms.Sock4Connect,
+	})
+	if err != nil {
+		return fmt.Errorf("Error attaching Sock4Connect to cgroup: %v", err)
 	}
 
 	go s.daemonGetEvent()
@@ -220,9 +231,21 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 
 func (s *EbpfProgramStruct) UnloadProgramp() error {
 
-	if s.CgroupLink != nil {
+	if s.CgroupLinkConnect != nil {
 		fmt.Printf("Closing  cgroup v2 ...\n")
-		s.CgroupLink.Close()
+		s.CgroupLinkConnect.Close()
+	}
+	if s.CgroupLinkSend != nil {
+		fmt.Printf("Closing  cgroup v2 ...\n")
+		s.CgroupLinkSend.Close()
+	}
+	if s.CgroupLinkRecv != nil {
+		fmt.Printf("Closing  cgroup v2 ...\n")
+		s.CgroupLinkRecv.Close()
+	}
+	if s.CgroupLinkPeer != nil {
+		fmt.Printf("Closing  cgroup v2 ...\n")
+		s.CgroupLinkPeer.Close()
 	}
 
 	// unping and close ebpf map

@@ -34,6 +34,12 @@ feature:
   ## @param feature.enableIPv6 enable ipv6
   enableIPv6: false
 
+  ## @param feature.apiServerHost the host address of api server, which should not be the clusterIP
+  apiServerHost: ""
+
+  ## @param feature.apiServerPort the host port of api server, which should not be the clusterIP
+  apiServerPort: ""
+
 ## @section balancingAgent parameters
 ##
 balancingAgent:
@@ -45,6 +51,9 @@ balancingAgent:
 
   ## @param balancingAgent.hostnetwork enable hostnetwork mode of balancingAgent pod
   hostnetwork: true
+
+  ## @param balancingAgent.nodeEntryInterface set the interface name of each node for entryIP
+  nodeEntryInterface: ""
 
   image:
     ## @param balancingAgent.image.registry the image registry of balancingAgent

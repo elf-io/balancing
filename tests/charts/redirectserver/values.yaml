@@ -1,0 +1,25 @@
+name: redirectserver
+hostnetwork: false
+
+image:
+  registry: ghcr.io
+  repository: elf-io/balancing-backend_server
+  pullPolicy: IfNotPresent
+  tag: "aa2f96c70ff4159d722fb863dfda1b705b9cc448"
+  imagePullSecrets: []
+  # - name: "image-pull-secret"
+
+server:
+  port: 80
+  hostPort: 20050
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+extraEnv: []
+
+cmd:
+  cmdBinName: "/bin/bash"
+  extraArgs: ["-c", "/usr/sbin/udp_server -port=80 & /usr/sbin/http_server -port=80"]

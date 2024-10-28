@@ -63,6 +63,12 @@ func buildEbpfMapDataForV4Service(natType uint8, svc *corev1.Service, edsList ma
 			if edp.NodeName != nil && len(*edp.NodeName) > 0 {
 				nodeid, _ = nodeId.NodeIdManagerHander.GetNodeId(*(edp.NodeName))
 			}
+
+			if svcPort.TargetPort.IntValue() == 0 {
+				// todo: parse the TargetPort with string type
+				return nil, nil, fmt.Errorf("target port '%s' of service %s/%s is string, not supported yet", svcPort.TargetPort.String(), svc.Namespace, svc.Name)
+			}
+
 			backMapVal := bpf_cgroupMapvalueBackend{
 				PodAddress: GetEndpointIPv4Address(edp),
 				NodeId:     nodeid,
@@ -340,6 +346,10 @@ func (s *EbpfProgramStruct) UpdateEbpfMapForService(l *zap.Logger, natType uint8
 }
 
 func (s *EbpfProgramStruct) DeleteEbpfMapForService(l *zap.Logger, natType uint8, svc *corev1.Service, edsList map[string]*discovery.EndpointSlice, natMode *uint8) error {
+
+	if svc == nil {
+		return fmt.Errorf("service is nill")
+	}
 
 	processIpv4 := false
 	processIpv6 := false

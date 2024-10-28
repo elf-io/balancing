@@ -15,3 +15,5 @@ data:
   conf.yml: |
     enableIPv4: {{ .Values.feature.enableIPv4 }}
     enableIPv6: {{ .Values.feature.enableIPv6 }}
+    apiServerHost: {{ .Values.feature.apiServerHost | quote }}
+    apiServerPort: {{ .Values.feature.apiServerPort | quote }}

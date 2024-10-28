@@ -52,6 +52,7 @@ type EventInfo struct {
 	PolicyName        string
 	NatType           string
 	NatMode           string
+	Protocol          string
 }
 
 func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
@@ -81,6 +82,7 @@ func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
 					ServiceId: fmt.Sprintf("%d", event.SvcId),
 					NatType:   ebpf.GetNatTypeStr(event.NatType),
 					NatMode:   ebpf.GetNatModeStr(event.NatMode),
+					Protocol:  ebpf.GetProtocolStr(event.Protocol),
 				}
 
 				eventInfo.ClientPodName, eventInfo.ClientNamespace, eventInfo.ClientContainerId, eventInfo.ClientPodUuid, eventInfo.IsHostApp, err = podId.PodIdHander.LookupPodByPid(event.Pid)

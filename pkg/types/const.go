@@ -23,9 +23,10 @@ const (
 
 	HostProcMountDir = "/host"
 
-	BpfFSPath    = "/sys/fs/bpf"
-	MapsPinpath  = BpfFSPath + "/elf"
-	CgroupV2Path = "/run/elf"
+	BpfFSPath   = "/sys/fs/bpf"
+	MapsPinpath = BpfFSPath + "/balancing"
+	// CgroupV2Path = "/run/balancing/cgroupv2"
+	CgroupV2Path = "/sys/fs/cgroup"
 
 	LogLevelEbpfDebug = "verbose"
 	LogLevelEbpfInfo  = "info"

@@ -25,10 +25,10 @@ webhooks:
       caBundle: {{ .ca.Cert | b64enc }}
       {{- end }}
     failurePolicy: Fail
-    name: balancingpolicy.balancing.balancing.io
+    name: balancingpolicies.balancing.elf.io
     rules:
       - apiGroups:
-          - balancing.balancing.io
+          - balancing.elf.io
         apiVersions:
           - v1beta1
         operations:
@@ -36,7 +36,7 @@ webhooks:
           - UPDATE
           - DELETE
         resources:
-          - balancingpolicys
+          - balancingpolicies
     sideEffects: None
   - admissionReviewVersions:
       - v1beta1
@@ -52,10 +52,10 @@ webhooks:
       caBundle: {{ .ca.Cert | b64enc }}
       {{- end }}
     failurePolicy: Fail
-    name: localredirectpolicy.balancing.balancing.io
+    name: localredirectpolicies.balancing.elf.io
     rules:
       - apiGroups:
-          - balancing.balancing.io
+          - balancing.elf.io
         apiVersions:
           - v1beta1
         operations:
@@ -63,7 +63,7 @@ webhooks:
           - UPDATE
           - DELETE
         resources:
-          - localredirectpolicys
+          - localredirectpolicies
     sideEffects: None
 
 ---
@@ -90,10 +90,10 @@ webhooks:
       caBundle: {{ .ca.Cert | b64enc }}
       {{- end }}
     failurePolicy: Fail
-    name: balancingpolicy.balancing.balancing.io
+    name: balancingpolicies.balancing.elf.io
     rules:
       - apiGroups:
-          - balancing.balancing.io
+          - balancing.elf.io
         apiVersions:
           - v1beta1
         operations:
@@ -101,7 +101,7 @@ webhooks:
           - UPDATE
           - DELETE
         resources:
-          - balancingpolicys
+          - balancingpolicies
     sideEffects: None
   - admissionReviewVersions:
       - v1
@@ -117,10 +117,10 @@ webhooks:
       caBundle: {{ .ca.Cert | b64enc }}
       {{- end }}
     failurePolicy: Fail
-    name: localredirectpolicy.balancing.balancing.io
+    name: localredirectpolicies.balancing.elf.io
     rules:
       - apiGroups:
-          - balancing.balancing.io
+          - balancing.elf.io
         apiVersions:
           - v1beta1
         operations:
@@ -128,7 +128,7 @@ webhooks:
           - UPDATE
           - DELETE
         resources:
-          - localredirectpolicys
+          - localredirectpolicies
     sideEffects: None
 
 {{- if eq .Values.balancingController.tls.method "certmanager" -}}

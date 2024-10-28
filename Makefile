@@ -60,6 +60,7 @@ echo "Build Image $(IMAGE_NAME):$(IMAGE_TAG)" ; \
 				--build-arg TARGETARCH=$(TARGETARCH) \
 				--build-arg TARGETOS=linux \
 				--build-arg APT_HTTP_PROXY=$(APT_HTTP_PROXY) \
+				--build-arg USE_PROXY_SOURCE=$(USE_PROXY_SOURCE) \
 				--file $(DOCKERFILE_PATH) \
 				--tag ${IMAGE_NAME}:$(IMAGE_TAG) .  || { sed -i '3 d' $(DOCKERFILE_PATH) ; sed -i '3 d' $(DOCKERFILE_PATH) ; exit 1 ;} ; \
 		echo "build success for ${IMAGE_NAME}:$(IMAGE_TAG) " ; \
@@ -77,6 +78,7 @@ build_local_agent_image: IMAGE_NAME := ${REGISTER}/${GIT_REPO}-agent
 build_local_agent_image: DOCKERFILE_PATH := $(ROOT_DIR)/images/agent/Dockerfile
 build_local_agent_image: IMAGE_TAG := $(GIT_COMMIT_VERSION)
 build_local_agent_image: APT_HTTP_PROXY :=
+build_local_agent_image: USE_PROXY_SOURCE :=
 build_local_agent_image:
 	$(BUILD_FINAL_IMAGE)
 
@@ -86,8 +88,17 @@ build_local_controller_image: IMAGE_NAME := ${REGISTER}/${GIT_REPO}-controller
 build_local_controller_image: DOCKERFILE_PATH := $(ROOT_DIR)/images/controller/Dockerfile
 build_local_controller_image: IMAGE_TAG := $(GIT_COMMIT_VERSION)
 build_local_controller_image: APT_HTTP_PROXY :=
+build_local_controller_image: USE_PROXY_SOURCE :=
 build_local_controller_image:
 	$(BUILD_FINAL_IMAGE)
+
+
+#=================
+.PHONY: build_local_test_app_image
+build_local_test_app_image: APT_HTTP_PROXY :=
+build_local_test_app_image:
+	cd ./tests/appServer && docker build --build-arg APT_HTTP_PROXY=$(APT_HTTP_PROXY) --file Dockerfile.proxy --tag $(TEST_APP_PROXY_SERVER_IMAGE) .
+	cd ./tests/appServer && docker build --build-arg APT_HTTP_PROXY=$(APT_HTTP_PROXY) --file Dockerfile.backend --tag $(TEST_APP_BACKEND_SERVER_IMAGE) .
 
 
 #================= update golang
@@ -319,25 +330,26 @@ unitest_tests:
 # ================ e2e
 
 .PHONY: e2e
-e2e:
-	make -C test check_images_ready
-	make -C test e2e
+e2e: e2e_clean e2e_init e2e_deploy
 
 .PHONY: e2e_init
 e2e_init:
-	make -C test check_images_ready
-	make -C test init_kind_env
-	make -C test deploy_project
-	make -C test install_example_app
+	make -C tests init_env
 
-.PHONY: e2e_run
-e2e_run:
-	make -C test e2e_test
+.PHONY: e2e_deploy
+e2e_deploy:
+	make -C tests check_images_ready
+	make -C tests check_test_app_images_ready
+	make -C tests deploy_project
+	make -C tests install_example_app
 
 .PHONY: e2e_clean
 e2e_clean:
-	make -C test clean
+	make -C tests clean
 
+.PHONY: e2e_test_connectivity
+e2e_test_connectivity:
+	make -C test test_connectivity
 
 #============ doc
 
@@ -405,6 +417,9 @@ check_doc:
 
 #=================================
 
+.PHONY: installBuildTool
+installBuildTool:
+	apt-get update && apt-get install -y clang llvm gcc-multilib libbpf-dev
 
 .PHONY: installDevTool
 installDevTool:

@@ -14,16 +14,16 @@ on:
       - synchronize
       - reopened
     paths:
-      - test/appServer/src/**
-      - test/appServer/Dockerfile.backend
-      - test/appServer/Dockerfile.proxy
+      - tests/appServer/src/**
+      - tests/appServer/Dockerfile.backend
+      - tests/appServer/Dockerfile.proxy
   push:
     branches:
       - main
     paths:
-      - test/appServer/src/**
-      - test/appServer/Dockerfile.backend
-      - test/appServer/Dockerfile.proxy
+      - tests/appServer/src/**
+      - tests/appServer/Dockerfile.backend
+      - tests/appServer/Dockerfile.proxy
   workflow_dispatch:
     inputs:
       ref:
@@ -47,11 +47,11 @@ jobs:
         include:
           # ====modify====
           - name: proxy_server
-            context: ./test/appServer
-            dockerfile: ./test/appServer/Dockerfile.proxy
+            context: ./tests/appServer
+            dockerfile: ./tests/appServer/Dockerfile.proxy
           - name: backend_server
-            context: ./test/appServer
-            dockerfile: ./test/appServer/Dockerfile.backend
+            context: ./tests/appServer
+            dockerfile: ./tests/appServer/Dockerfile.backend
 
     steps:
       - name: Set up Docker Buildx
