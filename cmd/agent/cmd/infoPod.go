@@ -3,6 +3,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	"github.com/elf-io/balancing/pkg/podId"
 	"github.com/elf-io/balancing/pkg/podLabel"
@@ -156,11 +157,14 @@ func NewPodInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, wri
 		log:    rootLogger.Named("PodReconciler"),
 		writer: writer,
 	}
-	info.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	t := cache.ResourceEventHandlerFuncs{
 		AddFunc:    r.HandlerAdd,
 		UpdateFunc: r.HandlerUpdate,
 		DeleteFunc: r.HandlerDelete,
-	})
+	}
+	if _, e := info.Informer().AddEventHandler(t); e != nil {
+		rootLogger.Sugar().Fatalf("failed to AddEventHandler %v", e)
+	}
 
 	// notice that there is no need to run Start methods in a separate goroutine.
 	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.
