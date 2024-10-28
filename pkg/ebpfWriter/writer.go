@@ -100,25 +100,25 @@ func NewEbpfWriter(c *kubernetes.Clientset, ebpfhandler ebpf.EbpfProgram, validi
 func (s *ebpfWriter) CleanEbpfMapData() error {
 	// before informer, clean all map data to keep all data up to date
 	s.log.Sugar().Infof("clean ebpf map backend when startup ")
-	if err := s.ebpfhandler.CleanMapBackend(); err != nil {
+	if _, err := s.ebpfhandler.CleanMapBackend(); err != nil {
 		// 处理错误
 		fmt.Println("Error:", err)
 	}
 
 	s.log.Sugar().Infof("clean ebpf map service when startup ")
-	if err := s.ebpfhandler.CleanMapService(); err != nil {
+	if _, err := s.ebpfhandler.CleanMapService(); err != nil {
 		// 处理错误
 		fmt.Println("Error:", err)
 	}
 
 	s.log.Sugar().Infof("clean ebpf map nodeIp when startup ")
-	if err := s.ebpfhandler.CleanMapNodeIp(); err != nil {
+	if _, err := s.ebpfhandler.CleanMapNodeIp(); err != nil {
 		// 处理错误
 		fmt.Println("Error:", err)
 	}
 
 	s.log.Sugar().Infof("clean ebpf map nodeProxyIp when startup ")
-	if err := s.ebpfhandler.CleanMapNodeProxyIp(); err != nil {
+	if _, err := s.ebpfhandler.CleanMapNodeProxyIp(); err != nil {
 		// 处理错误
 		fmt.Println("Error:", err)
 	}
