@@ -1,0 +1,23 @@
+apiVersion: v1
+entries:
+  balancing:
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2024-10-28T13:36:12.596062516Z"
+    description: balancing
+    digest: c9815850d1dc0c71245fb304a0303b4d7488c087738f6aad45187747ec043574
+    home: https://github.com/elf-io/balancing
+    keywords:
+    - balancing
+    kubeVersion: '>= 1.16.0-0'
+    maintainers:
+    - name: elf-io
+      url: https://github.com/elf-io
+    name: balancing
+    sources:
+    - https://github.com/elf-io/balancing
+    type: application
+    urls:
+    - https://elf-io.github.io/balancing/charts/balancing-0.0.1.tgz
+    version: 0.0.1
+generated: "2024-10-28T13:36:12.594605532Z"
