@@ -36,10 +36,9 @@ func (s *ebpfWriter) getRedirectNatMode(policy *balancingv1beta1.LocalRedirectPo
 	}
 	if policy.Spec.RedirectFrontend.ServiceMatcher != nil {
 		return &ebpf.NatModeRedirectService
-	} else {
-		return &ebpf.NatModeRedirectAddress
 	}
-	return nil
+	return &ebpf.NatModeRedirectAddress
+
 }
 
 // UpdateRedirectByPolicy updates the redirect policy based on the given LocalRedirectPolicy.

@@ -86,3 +86,9 @@ tests/vagrant/config
 tests/vagrant/scripts/join.sh
 
 docs/site.tar.gz
+
+tests/vagrant/Vagrantfile
+tests/vagrant/config_old
+tests/vagrant/scripts/pull-calico-image.sh
+tests/vagrant/scripts/setIptablesSnat.sh
+

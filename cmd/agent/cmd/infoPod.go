@@ -1,6 +1,9 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package cmd
 
 import (
+	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	"github.com/elf-io/balancing/pkg/podId"
 	"github.com/elf-io/balancing/pkg/podLabel"
@@ -39,16 +42,20 @@ func (s *PodReconciler) HandlerAdd(obj interface{}) {
 
 	if changed := podLabel.PodLabelHandle.UpdatePodInfo(nil, pod); changed {
 		// inform the balancing policy
-		s.writer.UpdateBalancingByPod(logger, pod)
+		if err := s.writer.UpdateBalancingByPod(logger, pod); err != nil {
+			logger.Sugar().Errorf("%v", err)
+		}
 
 		// inform the localRedirect poliy
 		if pod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 			// data changed, try to update the ebpf data
-			s.writer.UpdateRedirectByPod(logger, pod)
+			if err := s.writer.UpdateRedirectByPod(logger, pod); err != nil {
+				// 处理错误
+				fmt.Println("Error:", err)
+			}
 		}
 	}
 
-	return
 }
 
 func (s *PodReconciler) HandlerUpdate(oldObj, newObj interface{}) {
@@ -79,16 +86,20 @@ func (s *PodReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 
 	if changed := podLabel.PodLabelHandle.UpdatePodInfo(oldPod, newPod); changed {
 		// inform the balancing policy
-		s.writer.UpdateBalancingByPod(logger, newPod)
+		if err := s.writer.UpdateBalancingByPod(logger, newPod); err != nil {
+			// 处理错误
+			logger.Sugar().Errorf("%v", err)
+		}
 
 		// inform the localRedirect poliy
 		if newPod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 			// data changed, try to update the ebpf data
-			s.writer.UpdateRedirectByPod(logger, newPod)
+			if err := s.writer.UpdateRedirectByPod(logger, newPod); err != nil {
+				// 处理错误
+				logger.Sugar().Errorf("%v", err)
+			}
 		}
 	}
-
-	return
 }
 
 func (s *PodReconciler) HandlerDelete(obj interface{}) {
@@ -110,16 +121,20 @@ func (s *PodReconciler) HandlerDelete(obj interface{}) {
 
 	if changed := podLabel.PodLabelHandle.UpdatePodInfo(pod, nil); changed {
 		// inform the balancing policy
-		s.writer.DeleteBalancingByPod(logger, pod)
+		if err := s.writer.DeleteBalancingByPod(logger, pod); err != nil {
+			// 处理错误
+			logger.Sugar().Errorf("%v", err)
+		}
 
 		// inform the localRedirect poliy
 		if pod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 			// data changed, try to update the ebpf data
-			s.writer.DeleteRedirectByPod(logger, pod)
+			if err := s.writer.DeleteRedirectByPod(logger, pod); err != nil {
+				// 处理错误
+				logger.Sugar().Errorf("%v", err)
+			}
 		}
 	}
-
-	return
 }
 
 func NewPodInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, writer ebpfWriter.EbpfWriter) {
@@ -136,11 +151,14 @@ func NewPodInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, wri
 		log:    rootLogger.Named("PodReconciler"),
 		writer: writer,
 	}
-	info.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	t := cache.ResourceEventHandlerFuncs{
 		AddFunc:    r.HandlerAdd,
 		UpdateFunc: r.HandlerUpdate,
 		DeleteFunc: r.HandlerDelete,
-	})
+	}
+	if _, e := info.Informer().AddEventHandler(t); e != nil {
+		rootLogger.Sugar().Fatalf("failed to AddEventHandler %v", e)
+	}
 
 	// notice that there is no need to run Start methods in a separate goroutine.
 	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.

@@ -222,8 +222,9 @@ validate_crd_sdk:
 
 #=============== lint
 
+
 .PHONY: lint_golang_everything
-lint_golang_everything: lint_golang_lock lint_test_label lint_golang_format
+lint_golang_everything: lint_golang_lock lint_test_label lint_golang_format lint_ebpf
 
 
 define lint_go_format
@@ -252,7 +253,7 @@ lint_golang_format:
 lint_golang_lock:
 	@ BAD="" ; \
  	 for l in sync.Mutex sync.RWMutex; do \
-  		DATA=` grep -r --exclude-dir={.git,_build,vendor,externalversions,lock,contrib} -i --include \*.go "$${l}" . ` || true ; \
+  		DATA=` grep -r --exclude-dir={.git,_build,vendor,externalversions,lock,contrib,tests} -i --include \*.go "$${l}" . ` || true ; \
 	    if [ -n "$${DATA}" ] ; then \
 	   		 echo "Found $${l} usage. Please use pkg/lock instead to improve deadlock detection"; \
 	   		 echo "$${DATA}" ; \
@@ -267,7 +268,7 @@ lint_golang_lock:
 # should label for each test file
 .PHONY: lint_test_label
 lint_test_label:
-	@ALL_TEST_FILE=` find  ./test  -name "*_test.go" ` ; FAIL="false" ; \
+	@ALL_TEST_FILE=` find  ./tests  -name "*_test.go" ` ; FAIL="false" ; \
 		for ITEM in $$ALL_TEST_FILE ; do \
 			[[ "$$ITEM" == *_suite_test.go ]] && continue  ; \
 			! grep 'Label(' $${ITEM} &>/dev/null && FAIL="true" && echo "error, miss Label in $${ITEM}" ; \
@@ -304,6 +305,20 @@ lint_image_trivy:
       (($$?==0)) || { echo "error, failed to check dockerfile trivy", $(IMAGE_NAME)  && exit 1 ; } ; \
       echo "trivy check: $(IMAGE_NAME) pass"
 
+
+.PHONY: generate_ebpf
+generate_ebpf:
+	sudo apt-get update && sudo apt-get install -y clang llvm gcc-multilib libbpf-dev
+	$(GO_GENERATE) ./...
+
+
+.PHONY: lint_ebpf
+lint_ebpf:
+	make generate_ebpf
+	if ! test -z "$$(git status --porcelain pkg/ebpf/bpf_cgroup_bpf.go )"; then \
+  			echo "please run 'make generate_ebpf' to update 'pkg/ebpf/bpf_cgroup_bpf.go' " ; \
+  			exit 1 ; \
+  		fi ; echo "succeed to check ebpf"
 
 
 #=========== unit test
@@ -375,10 +390,10 @@ build_doc: OUTPUT_TAR := site.tar.gz
 build_doc:
 	-@rm -rf $(DOC_OUTPUT)
 	-@mkdir -p $(DOC_OUTPUT)
-	-docker stop doc_builder &>/dev/null
-	-docker rm doc_builder &>/dev/null
+	-docker stop doc_builder &>/dev/null || true
+	-docker rm doc_builder &>/dev/null || true
 	[ -f "docs/mkdocs.yml" ] || { echo "error, miss docs/mkdocs.yml "; exit 1 ; }
-	-@ rm -f ./docs/$(OUTPUT_TAR)
+	-@ rm -f ./docs/$(OUTPUT_TAR) || true
 	@echo "build doc html " ; \
 		docker run --rm --name doc_builder  \
 		-v ${PROJECT_DOC_DIR}:/host/docs \
@@ -403,7 +418,7 @@ check_doc:
         --entrypoint sh \
         squidfunk/mkdocs-material:8.5.11 -c "cd /host && cp ./docs/mkdocs.yml ./ && mkdocs build 2>&1 && cd site && tar -czvf site.tar.gz * && mv ${OUTPUT_TAR} ../docs/" 2>&1` ; \
         if (( $$? !=0 )) ; then \
-        	echo "!!! error, failed to build doc" ; \
+        	echo "!!! error, failed to build doc: $${MESSAGE}" ; \
         	exit 1 ; \
         fi ; \
         if grep -E "WARNING .* which is not found" <<< "$${MESSAGE}" ; then  \
@@ -415,6 +430,10 @@ check_doc:
 	@ echo "all doc is ok "
 
 
+.PHONY: injectLicense
+injectLicense:
+	./tools/scripts/injectLicense.sh
+
 #=================================
 
 .PHONY: installBuildTool
@@ -423,7 +442,7 @@ installBuildTool:
 
 .PHONY: installDevTool
 installDevTool:
-	apt-get update && apt-get install -y clang llvm gcc-multilib libbpf-dev linux-headers-$(uname -r) golang
+	apt-get update && apt-get install -y clang llvm gcc-multilib libbpf-dev linux-headers-$$(uname -r)
 
 
 

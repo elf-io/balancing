@@ -102,6 +102,8 @@ service 中targetPort 是名字，就歇菜了
 
 	metrics
 
+	ebpf 中 upd 的 getpeer 等处理和测试
+
 目前只支持 ipv4， 不支持 ipv6
 
 如果 node ip 变换了，目前 backend 中的 pod 所在 的 node ip 不会变化，需要增强

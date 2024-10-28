@@ -1,3 +1,7 @@
+#!/bin/bash
+# Copyright 2024 Authors of elf-io
+# SPDX-License-Identifier: Apache-2.0
+
 # balancingpolicy: redirect the request to the endpoint in the cluster
 
 kubectl get balancingpolicies  | awk '{print $1}' | sed '1 d' | xargs -n 1 -i kubectl delete balancingpolicies {}

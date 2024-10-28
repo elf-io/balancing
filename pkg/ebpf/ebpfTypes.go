@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package ebpf
 
 import (
@@ -107,7 +109,7 @@ func GetNatModeStr(p uint8) string {
 	if v, ok := NatModeMap[p]; ok {
 		return v
 	} else {
-		return "unkown"
+		return "unknown"
 	}
 }
 
@@ -252,7 +254,7 @@ func MapConfigureStr(key, value uint32) string {
 		} else if value == MapConfigureValueDebugLevelError {
 			return "debugLevel: error"
 		} else {
-			return "debugLevel: uknown"
+			return "debugLevel: unknown"
 		}
 	case MapConfigureKeyIndexIpv4Enabled:
 		if value == 0 {

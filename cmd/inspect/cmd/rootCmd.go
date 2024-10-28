@@ -5,13 +5,13 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 	"os"
 	"path/filepath"
 )
 
 var BinName = filepath.Base(os.Args[0])
-var rootLogger *zap.Logger
+
+// var rootLogger *zap.Logger
 
 var RootCmd = &cobra.Command{
 	Use:   BinName,

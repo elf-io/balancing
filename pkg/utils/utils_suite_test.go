@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestLock(t *testing.T) {
+func TestUtils(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Utils Suite")
 }

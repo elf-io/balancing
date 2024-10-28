@@ -54,7 +54,7 @@ type ebpfWriter struct {
 
 	// ---- for service
 	ebpfServiceLock *lock.Mutex
-	// index: namesapce/serviceName
+	// index: namespace/serviceName
 	serviceData map[string]*SvcEndpointData
 
 	// ---- for node
@@ -99,14 +99,25 @@ func NewEbpfWriter(c *kubernetes.Clientset, ebpfhandler ebpf.EbpfProgram, validi
 
 func (s *ebpfWriter) CleanEbpfMapData() error {
 	// before informer, clean all map data to keep all data up to date
-	s.log.Sugar().Infof("clean ebpf map backend when stratup ")
-	s.ebpfhandler.CleanMapBackend()
-	s.log.Sugar().Infof("clean ebpf map service when stratup ")
-	s.ebpfhandler.CleanMapService()
-	s.log.Sugar().Infof("clean ebpf map nodeIp when stratup ")
-	s.ebpfhandler.CleanMapNodeIp()
-	s.log.Sugar().Infof("clean ebpf map nodeProxyIp when stratup ")
-	s.ebpfhandler.CleanMapNodeProxyIp()
+	s.log.Sugar().Infof("clean ebpf map backend when startup ")
+	if _, err := s.ebpfhandler.CleanMapBackend(); err != nil {
+		s.log.Sugar().Errorf("%v", err)
+	}
+
+	s.log.Sugar().Infof("clean ebpf map service when startup ")
+	if _, err := s.ebpfhandler.CleanMapService(); err != nil {
+		s.log.Sugar().Errorf("%v", err)
+	}
+
+	s.log.Sugar().Infof("clean ebpf map nodeIp when startup ")
+	if _, err := s.ebpfhandler.CleanMapNodeIp(); err != nil {
+		s.log.Sugar().Errorf("%v", err)
+	}
+
+	s.log.Sugar().Infof("clean ebpf map nodeProxyIp when startup ")
+	if _, err := s.ebpfhandler.CleanMapNodeProxyIp(); err != nil {
+		s.log.Sugar().Errorf("%v", err)
+	}
 	return nil
 }
 
@@ -167,7 +178,7 @@ func (s *ebpfWriter) GetPolicyBySvcId(natType uint8, svcId uint32) (namespace st
 			err = fmt.Errorf("did not find any data")
 		}
 	default:
-		err = fmt.Errorf("unknow natType %d", natType)
+		err = fmt.Errorf("unknown natType %d", natType)
 	}
 	return
 }

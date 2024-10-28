@@ -26,7 +26,7 @@ DESTDIR_BASH_COMPLETION ?= $(ROOT_DIR)/output/$(TARGETARCH)/bash-completion
 CHART_DIR := $(ROOT_DIR)/charts
 DESTDIR_CHART ?= $(ROOT_DIR)/output/chart
 
-UNITEST_OUTPUT ?= $(ROOT_DIR)/output/test
+UNITEST_OUTPUT ?= $(ROOT_DIR)/output/tests
 DOC_OUTPUT ?= $(ROOT_DIR)/output/docs
 
 GO_MAJOR_AND_MINOR_VERSION := $(shell  grep  -o -E '^[0-9]+\.[0-9]+'  <<< "${GO_VERSION}" )
@@ -140,8 +140,8 @@ OPENAPI_SDK_DIR :=  ${ROOT_DIR}/api/v1/http
 #==================== test image
 
 TEST_APP_IMAGE_TAG := $(shell git ls-tree --full-tree HEAD -- $(ROOT_DIR)/tests/appServer | awk '{ print $$3 }' )
-TEST_APP_PROXY_SERVER_IMAGE := ${REGISTER}/${GIT_REPO}-proxy_server:$(TEST_APP_IMAGE_TAG)
-TEST_APP_BACKEND_SERVER_IMAGE := ${REGISTER}/${GIT_REPO}-backend_server:$(TEST_APP_IMAGE_TAG)
+TEST_APP_PROXY_SERVER_IMAGE := ${REGISTER}/${GIT_REPO}-proxy-server:$(TEST_APP_IMAGE_TAG)
+TEST_APP_BACKEND_SERVER_IMAGE := ${REGISTER}/${GIT_REPO}-backend-server:$(TEST_APP_IMAGE_TAG)
 
 
 #===================== E2E

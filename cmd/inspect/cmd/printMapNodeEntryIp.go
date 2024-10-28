@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package cmd
 
 import (
@@ -21,7 +23,9 @@ var CmdPrintMapNodeProxyIp = &cobra.Command{
 
 		fmt.Printf("\n")
 		fmt.Printf("print the ebpf map of nodeProxyIp:\n")
-		bpf.PrintMapNodeProxyIp()
+		if err := bpf.PrintMapNodeProxyIp(); err != nil {
+			fmt.Println("Error:", err)
+		}
 		fmt.Printf("\n")
 	},
 }

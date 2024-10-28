@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package cmd
 
 import (
@@ -33,7 +35,7 @@ func SkipServiceProcess(svc *corev1.Service) bool {
 func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 	svc, ok := obj.(*corev1.Service)
 	if !ok {
-		s.log.Sugar().Warnf("HandlerAdd failed to get sevice obj: %v")
+		s.log.Sugar().Warnf("HandlerAdd failed to get service obj: %v")
 		return
 	}
 	name := svc.Namespace + "/" + svc.Name
@@ -43,11 +45,11 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 	)
 
 	if SkipServiceProcess(svc) {
-		logger.Sugar().Debugf("HandlerAdd skip unsupported sevice %+v", name)
+		logger.Sugar().Debugf("HandlerAdd skip unsupported service %+v", name)
 		return
 	}
 
-	logger.Sugar().Infof("HandlerAdd process sevice %+v", name)
+	logger.Sugar().Infof("HandlerAdd process service %+v", name)
 	// update service
 	if true {
 		newSvc := corev1.Service{}
@@ -55,8 +57,10 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
-		// use a copied service incase modification
-		s.writer.UpdateServiceByService(logger, &newSvc, false)
+		// use a copied service in case of  modification
+		if err := s.writer.UpdateServiceByService(logger, &newSvc, false); err != nil {
+			logger.Sugar().Errorf("%v", err)
+		}
 	}
 	// update localRedirect
 	if true {
@@ -65,8 +69,10 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
-		// use a copied service incase modification
-		s.writer.UpdateRedirectByService(logger, &newSvc)
+		// use a copied service in case of  modification
+		if err := s.writer.UpdateRedirectByService(logger, &newSvc); err != nil {
+			logger.Sugar().Errorf("%v", err)
+		}
 	}
 	// update balancing
 	if true {
@@ -75,22 +81,22 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
-		// use a copied service incase modification
-		s.writer.UpdateBalancingByService(logger, &newSvc)
+		// use a copied service in case of  modification
+		if err := s.writer.UpdateBalancingByService(logger, &newSvc); err != nil {
+			logger.Sugar().Errorf("%v", err)
+		}
 	}
-
-	return
 }
 
 func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	oldSvc, ok1 := oldObj.(*corev1.Service)
 	if !ok1 {
-		s.log.Sugar().Warnf("HandlerUpdate failed to get old sevice obj %v")
+		s.log.Sugar().Warnf("HandlerUpdate failed to get old service obj %v")
 		return
 	}
 	newSvc, ok2 := newObj.(*corev1.Service)
 	if !ok2 {
-		s.log.Sugar().Warnf("HandlerUpdate failed to get new sevice obj %v")
+		s.log.Sugar().Warnf("HandlerUpdate failed to get new service obj %v")
 		return
 	}
 
@@ -114,9 +120,9 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		NoChange = true
 	}
 	if !NoChange {
-		logger.Sugar().Infof("HandlerUpdate process changed sevice %+v", name)
+		logger.Sugar().Infof("HandlerUpdate process changed service %+v", name)
 	} else {
-		logger.Sugar().Debugf("HandlerUpdate process sevice %+v", name)
+		logger.Sugar().Debugf("HandlerUpdate process service %+v", name)
 	}
 	if true {
 		svc := corev1.Service{}
@@ -124,8 +130,10 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
-		// use a copied service incase modification
-		s.writer.UpdateServiceByService(logger, &svc, NoChange)
+		// use a copied service in case of  modification
+		if err := s.writer.UpdateServiceByService(logger, &svc, NoChange); err != nil {
+			logger.Sugar().Errorf("%v", err)
+		}
 	}
 
 	// update localRedirect
@@ -135,8 +143,10 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
-		// use a copied service incase modification
-		s.writer.UpdateRedirectByService(logger, &svc)
+		// use a copied service in case of  modification
+		if err := s.writer.UpdateRedirectByService(logger, &svc); err != nil {
+			logger.Sugar().Errorf("%v", err)
+		}
 	}
 	// update balancing
 	if !NoChange {
@@ -145,17 +155,17 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
-		// use a copied service incase modification
-		s.writer.UpdateBalancingByService(logger, &svc)
+		// use a copied service in case of  modification
+		if err := s.writer.UpdateBalancingByService(logger, &svc); err != nil {
+			logger.Sugar().Errorf("%v", err)
+		}
 	}
-
-	return
 }
 
 func (s *ServiceReconciler) HandlerDelete(obj interface{}) {
 	svc, ok := obj.(*corev1.Service)
 	if !ok {
-		s.log.Sugar().Warnf("HandlerDelete failed to get sevice obj: %v")
+		s.log.Sugar().Warnf("HandlerDelete failed to get service obj: %v")
 		return
 	}
 	name := svc.Namespace + "/" + svc.Name
@@ -168,16 +178,20 @@ func (s *ServiceReconciler) HandlerDelete(obj interface{}) {
 		logger.Sugar().Debugf("HandlerAdd skip service %+v", name)
 		return
 	}
-	logger.Sugar().Infof("HandlerDelete process sevice %+v", svc)
+	logger.Sugar().Infof("HandlerDelete process service %+v", svc)
 	// update service
-	s.writer.DeleteServiceByService(logger, svc)
+	if err := s.writer.DeleteServiceByService(logger, svc); err != nil {
+		logger.Sugar().Errorf("%v", err)
+	}
 
 	// update localRedirect
-	s.writer.DeleteRedirectByService(logger, svc)
+	if err := s.writer.DeleteRedirectByService(logger, svc); err != nil {
+		logger.Sugar().Errorf("%v", err)
+	}
 	// update balancing
-	s.writer.DeleteBalancingByService(logger, svc)
-
-	return
+	if err := s.writer.DeleteBalancingByService(logger, svc); err != nil {
+		logger.Sugar().Errorf("%v", err)
+	}
 }
 
 func NewServiceInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, writer ebpfWriter.EbpfWriter) {
@@ -195,11 +209,14 @@ func NewServiceInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{},
 		log:    rootLogger.Named("serviceReconciler"),
 		writer: writer,
 	}
-	srcInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	t := cache.ResourceEventHandlerFuncs{
 		AddFunc:    r.HandlerAdd,
 		UpdateFunc: r.HandlerUpdate,
 		DeleteFunc: r.HandlerDelete,
-	})
+	}
+	if _, e := srcInformer.Informer().AddEventHandler(t); e != nil {
+		rootLogger.Sugar().Fatalf("failed to AddEventHandler %v", e)
+	}
 
 	// notice that there is no need to run Start methods in a separate goroutine.
 	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.

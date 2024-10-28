@@ -13,6 +13,8 @@ ignore: |
   .github/
   tests/yaml/
   charts/
+  tests/vagrant/
+  tests/crd/
 
 rules:
   line-length: disable

@@ -102,13 +102,13 @@ func AutoK8sConfig(KubeConfigPath, apiServerHostAddress string) (*rest.Config, e
 		return config, nil
 	}
 
-	if ExistFile(DefaultKubeConfigPath) == true {
+	if ExistFile(DefaultKubeConfigPath) {
 		config, err = clientcmd.BuildConfigFromFlags("", DefaultKubeConfigPath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get config from kube config=%v , info=%v", DefaultKubeConfigPath, err)
 		}
 
-	} else if ExistDir(ScInPodPath) == true {
+	} else if ExistDir(ScInPodPath) {
 		config, err = rest.InClusterConfig()
 		if err != nil {
 			return nil, fmt.Errorf("failed to get config from serviceaccount=%v , info=%v", ScInPodPath, err)
@@ -137,13 +137,13 @@ func AutoCrdConfig(KubeConfigPath, apiServerHostAddress string) (*rest.Config, e
 		return config, nil
 	}
 
-	if ExistFile(DefaultKubeConfigPath) == true {
+	if ExistFile(DefaultKubeConfigPath) {
 		config, err = clientcmd.BuildConfigFromFlags("", DefaultKubeConfigPath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get config from kube config=%v , info=%v", DefaultKubeConfigPath, err)
 		}
 
-	} else if ExistDir(ScInPodPath) == true {
+	} else if ExistDir(ScInPodPath) {
 		config, err = rest.InClusterConfig()
 		if err != nil {
 			return nil, fmt.Errorf("failed to get config from serviceaccount=%v , info=%v", ScInPodPath, err)

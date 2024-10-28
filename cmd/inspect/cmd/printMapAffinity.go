@@ -1,9 +1,11 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"github.com/elf-io/balancing/pkg/ebpf"
+	"github.com/spf13/cobra"
 	"os"
 )
 
@@ -21,7 +23,10 @@ var CmdPrintMapAffinity = &cobra.Command{
 
 		fmt.Printf("\n")
 		fmt.Printf("print the ebpf map of affinity:\n")
-		bpf.PrintMapAffinity()
+		if err := bpf.PrintMapAffinity(); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 		fmt.Printf("\n")
 	},
 }

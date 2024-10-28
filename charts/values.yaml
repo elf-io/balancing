@@ -138,8 +138,8 @@ balancingAgent:
       cpu: 100m
       memory: 128Mi
 
-  ## @param balancingAgent.securityContext the security Context of balancingAgent pod
   securityContext:
+    ## @param balancingAgent.securityContext.privileged the securityContext privileged of balancingAgent daemonset pod
     privileged: true
 
   httpServer:
@@ -225,7 +225,7 @@ balancingController:
   ## @param balancingController.replicas the replicas number of balancingController pod
   replicas: 1
 
-  ## @param balancingController.binName the binName name of balancingController
+  ## @param balancingController.cmdBinName the binName name of balancingController
   cmdBinName: "/usr/bin/controller"
 
   ## @param balancingController.hostnetwork enable hostnetwork mode of balancingController pod. Notice, if no CNI available before template installation, must enable this
@@ -324,7 +324,7 @@ balancingController:
     minAvailable: 1
 
   httpServer:
-    ## @param balancingController.port the http Port for balancingController, for health checking and http service
+    ## @param balancingController.httpServer.port the http Port for balancingController, for health checking and http service
     port: 5820
 
     startupProbe:

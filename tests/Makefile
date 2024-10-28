@@ -61,7 +61,7 @@ show_info:
 	@echo "========================================================"
 	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
 	@echo "   kubectl get pod -o wide -A                           "
-	@echo "   visit the proxy server on controler vm : "
+	@echo "   visit the proxy server on controller vm : "
 	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_CONTROLVM_PROXY_SERVER) | jq .                          "
 	@echo "   visit the proxy server on worker vm : "
 	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_WORKERVM_PROXY_SERVER) | jq .                          "
@@ -196,7 +196,7 @@ uninstall_kube_proxy:
 
 .PHONY: install_example_app
 install_example_app:
-	@echo "---------- install applicatio on kubernetes"
+	@echo "---------- install application on kubernetes"
 	echo "get images ... " ; \
 		CHART_LIST=" $(ROOT_DIR)/tests/charts/backendserver $(ROOT_DIR)/tests/charts/proxyserver $(ROOT_DIR)/tests/charts/redirectserver " ;\
 		for CHART_DIR in $${CHART_LIST} ; do \
@@ -245,7 +245,7 @@ install_example_app:
 	@echo "========================================================"
 	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
 	@echo "   kubectl get pod -o wide -A                           "
-	@echo "   visit the proxy server on controler vm : "
+	@echo "   visit the proxy server on controller vm : "
 	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_CONTROLVM_PROXY_SERVER) | jq .                          "
 	@echo "   visit the proxy server on worker vm : "
 	@echo "                curl http://127.0.0.1:$(E2E_HOSTPORT_WORKERVM_PROXY_SERVER) | jq .                          "

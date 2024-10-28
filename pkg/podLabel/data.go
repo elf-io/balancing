@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package podLabel
 
 /*
@@ -8,7 +10,6 @@ package podLabel
 1. 数据结构：
    - 使用 PodInfo 结构体封装 Pod 的标签、IP 地址（包括 IPv4 和 IPv6）以及节点名称（NodeName）。
    - 使用 PodStore 结构体以 name 和 namespace 作为键存储 Pod 信息。
-   - 提供线程安全的操作，使用 sync.RWMutex 确保并发安全。
 
 2. 主要方法：
    - NewPodStore：创建新的 PodStore 实例。
@@ -141,14 +142,4 @@ func (ps *PodStore) FindLocalIPsByLabelSelector(selector *metav1.LabelSelector) 
 		return r
 	}
 	return nil
-}
-
-// matchesSelector 检查给定的标签是否匹配选择器
-func matchesSelector(labels, selector map[string]string) bool {
-	for key, value := range selector {
-		if labels[key] != value {
-			return false
-		}
-	}
-	return true
 }

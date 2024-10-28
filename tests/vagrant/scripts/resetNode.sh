@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright 2024 Authors of elf-io
+# SPDX-License-Identifier: Apache-2.0
 
 CURRENT_FILENAME=`basename $0`
 CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)

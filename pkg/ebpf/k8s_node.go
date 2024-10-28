@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package ebpf
 
 import (
@@ -106,14 +108,8 @@ OUTER_NEW:
 	return nil
 }
 
-// map the key and value of the nodeProxyIp map
-type nodeProxyIpMapData struct {
-	key *uint32
-	val *bpf_cgroupMapvalueNodeProxyIp
-}
-
 func getNodeProxyIpV4(l *zap.Logger, node *corev1.Node) (entryIp string, err error) {
-	entryIp, _ = node.ObjectMeta.Annotations[types.NodeAnnotaitonNodeProxyIPv4]
+	entryIp = node.ObjectMeta.Annotations[types.NodeAnnotaitonNodeProxyIPv4]
 	if len(entryIp) != 0 && net.ParseIP(entryIp).To4() == nil {
 		l.Sugar().Errorf("the v4 entryIp %s defined by the use is invalid, use the internal ip of the node %s ", entryIp, node.Name)
 		entryIp = ""
@@ -215,7 +211,7 @@ func (s *EbpfProgramStruct) UpdateEbpfMapForNode(l *zap.Logger, oldNode *corev1.
 
 	// for ipv6
 	if false {
-		l.Sugar().Infof("does not suppport ipv6, abandon applying ")
+		l.Sugar().Infof("does not support ipv6, abandon applying ")
 	}
 
 	return nil
@@ -238,7 +234,7 @@ func (s *EbpfProgramStruct) DeleteEbpfMapForNode(l *zap.Logger, node *corev1.Nod
 
 	// for ipv6
 	if false {
-		l.Sugar().Infof("does not suppport ipv6, abandon applying ")
+		l.Sugar().Infof("does not support ipv6, abandon applying ")
 	}
 	return nil
 }

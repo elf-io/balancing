@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package ebpfWriter
 
 import (
@@ -42,13 +44,12 @@ func (s *ebpfWriter) getBalancingNatMode(policy *balancingv1beta1.BalancingPolic
 		case balancingv1beta1.RedirectModeNodeProxy:
 			return &ebpf.NatModeBalancingNodeProxy
 		default:
-			s.log.Sugar().Errorf("unknow RedirectMode in policy %s", policy.Name)
+			s.log.Sugar().Errorf("unknown RedirectMode in policy %s", policy.Name)
 			return nil
 		}
-	} else {
-		return &ebpf.NatModeBalancingAddress
 	}
-	return nil
+	return &ebpf.NatModeBalancingAddress
+
 }
 
 func (s *ebpfWriter) UpdateBalancingByPolicy(l *zap.Logger, policy *balancingv1beta1.BalancingPolicy) error {

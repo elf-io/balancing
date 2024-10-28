@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package ebpf
 
 import (
@@ -171,10 +173,6 @@ func GenerateSvcV4Id(svc *corev1.Service) (id uint32, ipv6Flag bool) {
 	return 0, false
 }
 
-func buildEbpfMapDataForSvcPort() {
-
-}
-
 func GetPortProtocol(svcPort *corev1.ServicePort) uint8 {
 	if svcPort.Protocol == corev1.ProtocolTCP {
 		return IPPROTO_TCP
@@ -255,10 +253,6 @@ func GetServiceV4LoadbalancerIP(svc *corev1.Service) []net.IP {
 func ClassifyV4Endpoint(edsList map[string]*discovery.EndpointSlice) (localEp []*discovery.Endpoint, remoteEp []*discovery.Endpoint) {
 	localEp = []*discovery.Endpoint{}
 	remoteEp = []*discovery.Endpoint{}
-
-	if edsList == nil || len(edsList) == 0 {
-		return localEp, remoteEp
-	}
 
 	checkV4Addr := func(j *discovery.Endpoint) bool {
 		for _, k := range j.Addresses {

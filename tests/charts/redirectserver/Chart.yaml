@@ -10,7 +10,7 @@ version: 0.1.0
 # no need to modify this version , CI will auto update it with /VERSION
 appVersion: "0.1.0"
 kubeVersion: ">= 1.16.0-0"
-description: applicaiton backend server
+description: application backend server
 sources:
   - "https://github.com/elf-io/balancing"
 keywords:

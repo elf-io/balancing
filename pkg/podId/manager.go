@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package podId
 
 import (
@@ -65,7 +67,7 @@ func (s *podIdManager) updatePodInfo(pod *corev1.Pod) error {
 	if len(pod.Status.ContainerStatuses) > 0 {
 		l := len(pod.Status.ContainerStatuses)
 		containerId := getContaineridFunc(pod.Status.ContainerStatuses[l-1].ContainerID)
-		if len(containerId) < 0 {
+		if len(containerId) == 0 {
 			return fmt.Errorf("failed to get container id")
 		}
 		key := PodName{
@@ -118,7 +120,6 @@ func (s *podIdManager) initPodId() {
 	}
 
 	s.log.Sugar().Infof("succeeded to get all pod uid information, total %d: %+v", s.podInfo.Count(), s.podInfo.GetAll())
-	return
 }
 
 func (s *podIdManager) Update(oldPod, newPod *corev1.Pod) {
@@ -132,13 +133,14 @@ func (s *podIdManager) Update(oldPod, newPod *corev1.Pod) {
 		s.log.Sugar().Debugf("pod uid information, total %d: %+v", s.podInfo.Count(), s.podInfo.GetAll())
 	} else {
 		// add
-		if newPod.Status.ContainerStatuses != nil && len(newPod.Status.ContainerStatuses) > 0 {
+		if len(newPod.Status.ContainerStatuses) > 0 {
 			s.log.Sugar().Debugf("add pod id for pod %s/%s", newPod.Namespace, newPod.Name)
-			s.updatePodInfo(newPod)
+			if err := s.updatePodInfo(newPod); err != nil {
+				s.log.Sugar().Errorf("error: %s", err)
+			}
 			s.log.Sugar().Debugf("pod uid information, total %d: %+v", s.podInfo.Count(), s.podInfo.GetAll())
 		}
 	}
-	return
 }
 
 // pid 用于查询 关联 pod name
@@ -151,7 +153,7 @@ func (s *podIdManager) LookupPodByPid(pid uint32) (podName, namespace, container
 		return "", "", "", "", false, fmt.Errorf("empty input")
 	}
 
-	// get pod infromation from cgroup
+	// get pod information from cgroup
 	podId, containerId, host, e := getPodAndContainerID(pid)
 	if e != nil {
 		err = fmt.Errorf("failed to getPodAndContainerID for pid %d: %v ", pid, e)

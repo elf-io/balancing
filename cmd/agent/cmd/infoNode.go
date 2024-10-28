@@ -1,3 +1,5 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package cmd
 
 import (
@@ -32,26 +34,27 @@ func (s *NodeReconciler) HandlerAdd(obj interface{}) {
 	logger.Sugar().Debugf("HandlerAdd process node %+v", node.Name)
 
 	// before UpdateNode, BuildNodeId firstly
-	nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(node)
-	s.writer.UpdateNode(logger, node, false)
+	if _, _, _, err := nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(node); err != nil {
+		// 处理错误
+		logger.Sugar().Errorf("Error: %v", err)
+	}
+	if err := s.writer.UpdateNode(logger, node, false); err != nil {
+		logger.Sugar().Errorf("Error: %v", err)
+	}
 
 	// before UpdateBalancingByNode, UpdateNode firstly
 	// update the nodeip and nodeProxyIp for balancing
-	s.writer.UpdateBalancingByNode(logger, node)
+	if err := s.writer.UpdateBalancingByNode(logger, node); err != nil {
+		// 处理错误
+		logger.Sugar().Errorw("Error:", err)
+	}
 
-	return
 }
 
 func checkNodeProxyIPChanged(oldNode, newNode *corev1.Node, entryKey string) bool {
-	oldEntryIP, _ := oldNode.ObjectMeta.Annotations[entryKey]
-	newEntryIP, _ := newNode.ObjectMeta.Annotations[entryKey]
+	oldEntryIP := oldNode.ObjectMeta.Annotations[entryKey]
+	newEntryIP := newNode.ObjectMeta.Annotations[entryKey]
 	return oldEntryIP != newEntryIP
-}
-
-func checkNodeIdChanged(oldNode, newNode *corev1.Node) bool {
-	oldId, _ := oldNode.Annotations[types.NodeAnnotationNodeIdKey]
-	newId, _ := newNode.Annotations[types.NodeAnnotationNodeIdKey]
-	return oldId != newId
 }
 
 func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
@@ -71,7 +74,10 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	)
 
 	// update database
-	nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(newNode)
+	if _, _, _, err := nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(newNode); err != nil {
+		// 处理错误
+		s.log.Sugar().Errorf("Error: %v", err)
+	}
 
 	NoChange := true
 	if t := cmp.Diff(oldNode.Status.Addresses, newNode.Status.Addresses); len(t) > 0 {
@@ -86,14 +92,17 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		logger.Sugar().Infof("node NodeProxyIP changed, new: %+v, old: %+v", newNode.Annotations, oldNode.Annotations)
 	}
 	// before UpdateBalancingByNode, s.writer.UpdateNode firstly
-	s.writer.UpdateNode(logger, newNode, NoChange)
+	if err := s.writer.UpdateNode(logger, newNode, NoChange); err != nil {
+		logger.Sugar().Errorf("Error: %v", err)
+	}
 	if !NoChange {
 		// node ip or nodePoryIP changes, update the nodeip and nodeProxyIp for balancing
 		// before UpdateBalancingByNode, s.writer.UpdateNode firstly
-		s.writer.UpdateBalancingByNode(logger, newNode)
+		if err := s.writer.UpdateBalancingByNode(logger, newNode); err != nil {
+			logger.Sugar().Errorf("Error: %v", err)
+		}
 	}
 
-	return
 }
 
 func (s *NodeReconciler) HandlerDelete(obj interface{}) {
@@ -112,11 +121,15 @@ func (s *NodeReconciler) HandlerDelete(obj interface{}) {
 	nodeId.NodeIdManagerHander.DeleteNodeIdAndEntryIP(node.Name)
 
 	// before UpdateBalancingByNode, UpdateNode firstly
-	s.writer.DeleteNode(logger, node)
+	if err := s.writer.DeleteNode(logger, node); err != nil {
+		// 处理错误
+		logger.Sugar().Errorf("Error: %v", err)
+	}
 	// before UpdateBalancingByNode, UpdateNode firstly
-	s.writer.UpdateBalancingByNode(logger, node)
-
-	return
+	if err := s.writer.UpdateBalancingByNode(logger, node); err != nil {
+		// 处理错误
+		logger.Sugar().Errorf("Error: %v", err)
+	}
 }
 
 func NewNodeInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, writer ebpfWriter.EbpfWriter) {
@@ -133,11 +146,14 @@ func NewNodeInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, wr
 		log:    rootLogger.Named("nodeReconciler"),
 		writer: writer,
 	}
-	info.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	t := cache.ResourceEventHandlerFuncs{
 		AddFunc:    r.HandlerAdd,
 		UpdateFunc: r.HandlerUpdate,
 		DeleteFunc: r.HandlerDelete,
-	})
+	}
+	if _, e := info.Informer().AddEventHandler(t); e != nil {
+		rootLogger.Sugar().Fatalf("failed to AddEventHandler %v", e)
+	}
 
 	// notice that there is no need to run Start methods in a separate goroutine.
 	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.

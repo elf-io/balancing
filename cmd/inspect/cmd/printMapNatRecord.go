@@ -1,9 +1,11 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
 package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"github.com/elf-io/balancing/pkg/ebpf"
+	"github.com/spf13/cobra"
 	"os"
 )
 
@@ -21,7 +23,10 @@ var CmdPrintMapNat = &cobra.Command{
 
 		fmt.Printf("\n")
 		fmt.Printf("print the ebpf map of nat record:\n")
-		bpf.PrintMapNatRecord()
+		if e := bpf.PrintMapNatRecord(); e != nil {
+			fmt.Printf("error: %v\n", e)
+			os.Exit(3)
+		}
 		fmt.Printf("\n")
 	},
 }

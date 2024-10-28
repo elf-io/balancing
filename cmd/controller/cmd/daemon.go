@@ -43,7 +43,7 @@ func DaemonMain() {
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
 	go func() {
 		for sig := range sigCh {
-			rootLogger.Sugar().Warnf("Received singal %+v ", sig)
+			rootLogger.Sugar().Warnf("Received signal %+v ", sig)
 			os.Exit(1)
 		}
 	}()
