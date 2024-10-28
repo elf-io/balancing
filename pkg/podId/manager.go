@@ -179,5 +179,5 @@ func (s *podIdManager) LookupPodByPid(pid uint32) (podName, namespace, container
 	}
 
 	err = fmt.Errorf("no data of PodName for pid %d", pid)
-
+	return
 }
