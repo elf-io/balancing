@@ -315,7 +315,7 @@ generate_ebpf:
 .PHONY: lint_ebpf
 lint_ebpf:
 	make generate_ebpf
-	if ! test -z "$$(git status --porcelain)"; then \
+	if ! test -z "$$(git status --porcelain pkg/ebpf/bpf_cgroup_bpf.go )"; then \
   			echo "please run 'make generate_ebpf' to update 'pkg/ebpf/bpf_cgroup_bpf.go' " ; \
   			exit 1 ; \
   		fi ; echo "succeed to check ebpf"
@@ -442,7 +442,7 @@ installBuildTool:
 
 .PHONY: installDevTool
 installDevTool:
-	sudo apt-get update && sudo apt-get install -y clang llvm gcc-multilib libbpf-dev linux-headers-$(uname -r)
+	sudo apt-get update && sudo apt-get install -y clang llvm gcc-multilib libbpf-dev linux-headers-$$(uname -r)
 
 
 
