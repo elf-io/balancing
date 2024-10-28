@@ -3,6 +3,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	"github.com/elf-io/balancing/pkg/nodeId"
 	"github.com/elf-io/balancing/pkg/types"
@@ -34,7 +35,7 @@ func (s *NodeReconciler) HandlerAdd(obj interface{}) {
 	logger.Sugar().Debugf("HandlerAdd process node %+v", node.Name)
 
 	// before UpdateNode, BuildNodeId firstly
-	if err := nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(node); err != nil {
+	if _, _, _, err := nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(node); err != nil {
 		// 处理错误
 		fmt.Println("Error:", err)
 	}
@@ -73,7 +74,7 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	)
 
 	// update database
-	if err := nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(newNode); err != nil {
+	if _, _, _, err := nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(newNode); err != nil {
 		// 处理错误
 		fmt.Println("Error:", err)
 	}

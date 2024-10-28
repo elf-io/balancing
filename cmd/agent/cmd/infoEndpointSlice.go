@@ -3,6 +3,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	"github.com/elf-io/balancing/pkg/k8s"
 	"github.com/google/go-cmp/cmp"
@@ -118,9 +119,14 @@ func NewEndpointSliceInformer(Client *kubernetes.Clientset, stopWatchCh chan str
 		log:    rootLogger.Named("EndpointsliceReconciler"),
 		writer: writer,
 	}
-	if err := srcInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{}); err != nil {
-		// 处理错误
-		fmt.Println("Error:", err)
+	t := cache.ResourceEventHandlerFuncs{
+		AddFunc:    r.HandlerAdd,
+		UpdateFunc: r.HandlerUpdate,
+		DeleteFunc: r.HandlerDelete,
+	}
+	if _, e := srcInformer.Informer().AddEventHandler(t); e != nil {
+		rootLogger.Sugar().Fatalf("failed to AddEventHandler: %v", e)
+
 	}
 
 	// notice that there is no need to run Start methods in a separate goroutine.
