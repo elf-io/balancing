@@ -438,11 +438,11 @@ injectLicense:
 
 .PHONY: installBuildTool
 installBuildTool:
-	apt-get update && apt-get install -y clang llvm gcc-multilib libbpf-dev
+	sudo apt-get update && sudo apt-get install -y clang llvm gcc-multilib libbpf-dev
 
 .PHONY: installDevTool
 installDevTool:
-	apt-get update && apt-get install -y clang llvm gcc-multilib libbpf-dev linux-headers-$(uname -r)
+	sudo apt-get update && sudo apt-get install -y clang llvm gcc-multilib libbpf-dev linux-headers-$(uname -r)
 
 
 
