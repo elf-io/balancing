@@ -252,7 +252,7 @@ lint_golang_format:
 lint_golang_lock:
 	@ BAD="" ; \
  	 for l in sync.Mutex sync.RWMutex; do \
-  		DATA=` grep -r --exclude-dir={.git,_build,vendor,externalversions,lock,contrib} -i --include \*.go "$${l}" . ` || true ; \
+  		DATA=` grep -r --exclude-dir={.git,_build,vendor,externalversions,lock,contrib,tests/appServer} -i --include \*.go "$${l}" . ` || true ; \
 	    if [ -n "$${DATA}" ] ; then \
 	   		 echo "Found $${l} usage. Please use pkg/lock instead to improve deadlock detection"; \
 	   		 echo "$${DATA}" ; \
@@ -414,6 +414,10 @@ check_doc:
 	-@ rm -f ./docs/$(OUTPUT_TAR)
 	@ echo "all doc is ok "
 
+
+.PHONY: injectLicense
+injectLicense:
+	./tools/scripts/injectLicense.sh
 
 #=================================
 

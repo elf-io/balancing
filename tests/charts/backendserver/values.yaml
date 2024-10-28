@@ -3,7 +3,7 @@ hostnetwork: false
 
 image:
   registry: ghcr.io
-  repository: elf-io/balancing-backend_server
+  repository: elf-io/balancing-backend-server
   pullPolicy: IfNotPresent
   tag: "aa2f96c70ff4159d722fb863dfda1b705b9cc448"
   imagePullSecrets: []

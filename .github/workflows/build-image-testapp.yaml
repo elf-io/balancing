@@ -46,10 +46,10 @@ jobs:
       matrix:
         include:
           # ====modify====
-          - name: proxy_server
+          - name: proxy-server
             context: ./tests/appServer
             dockerfile: ./tests/appServer/Dockerfile.proxy
-          - name: backend_server
+          - name: backend-server
             context: ./tests/appServer
             dockerfile: ./tests/appServer/Dockerfile.backend
 

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # balancingpolicy: redirect the request to the endpoint in the cluster
 
 kubectl get balancingpolicies  | awk '{print $1}' | sed '1 d' | xargs -n 1 -i kubectl delete balancingpolicies {}
