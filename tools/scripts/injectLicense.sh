@@ -15,9 +15,8 @@ GO_FILE_LIST=$(find . -type f -name "*.go" ! -path "./vendor/*" ! -path "./chart
 for FILE in $GO_FILE_LIST ; do
    if ! grep "SPDX-License-Identifier" $FILE &>/dev/null ; then
        echo "inject license header to $FILE"
-       echo -e "// $HEADER_TITLE\n// $SPDX_IDENTIFIER\n$(cat $FILE)" > $FILE
-       sed -i '1 i \\\\\ '${SPDX_IDENTIFIER}'' $FILE
-       sed -i '1 i \\\\\ '${HEADER_TITLE}'' $FILE
+       sed -i '1 i \// '"${SPDX_IDENTIFIER}"'' $FILE
+       sed -i '1 i \// '"${HEADER_TITLE}"'' $FILE
    fi
 done
 
