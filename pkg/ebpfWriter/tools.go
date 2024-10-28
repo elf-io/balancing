@@ -138,7 +138,7 @@ func (s *ebpfWriter) fakeEndpointSliceForBalancingPolicy(policy *balancingv1beta
 				CHECK_IP_LOOP1:
 					for _, c := range eds.Endpoints {
 						for _, x := range c.Addresses {
-							if strings.ToLower(x) == strings.ToLower(ipv4) {
+							if strings.EqualFold(x, ipv4) {
 								uniqueFlag = false
 								break CHECK_IP_LOOP1
 							}
@@ -153,7 +153,7 @@ func (s *ebpfWriter) fakeEndpointSliceForBalancingPolicy(policy *balancingv1beta
 				CHECK_IP_LOOP2:
 					for _, c := range eds.Endpoints {
 						for _, x := range c.Addresses {
-							if strings.ToLower(x) == strings.ToLower(ipv6) {
+							if strings.EqualFold(x, ipv6) {
 								uniqueFlag = false
 								break CHECK_IP_LOOP2
 							}

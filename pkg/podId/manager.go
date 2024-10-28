@@ -67,7 +67,7 @@ func (s *podIdManager) updatePodInfo(pod *corev1.Pod) error {
 	if len(pod.Status.ContainerStatuses) > 0 {
 		l := len(pod.Status.ContainerStatuses)
 		containerId := getContaineridFunc(pod.Status.ContainerStatuses[l-1].ContainerID)
-		if len(containerId) < 0 {
+		if len(containerId) == 0 {
 			return fmt.Errorf("failed to get container id")
 		}
 		key := PodName{

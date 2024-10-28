@@ -108,12 +108,6 @@ OUTER_NEW:
 	return nil
 }
 
-// map the key and value of the nodeProxyIp map
-type nodeProxyIpMapData struct {
-	key *uint32
-	val *bpf_cgroupMapvalueNodeProxyIp
-}
-
 func getNodeProxyIpV4(l *zap.Logger, node *corev1.Node) (entryIp string, err error) {
 	entryIp, _ = node.ObjectMeta.Annotations[types.NodeAnnotaitonNodeProxyIPv4]
 	if len(entryIp) != 0 && net.ParseIP(entryIp).To4() == nil {

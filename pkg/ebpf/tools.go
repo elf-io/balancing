@@ -173,10 +173,6 @@ func GenerateSvcV4Id(svc *corev1.Service) (id uint32, ipv6Flag bool) {
 	return 0, false
 }
 
-func buildEbpfMapDataForSvcPort() {
-
-}
-
 func GetPortProtocol(svcPort *corev1.ServicePort) uint8 {
 	if svcPort.Protocol == corev1.ProtocolTCP {
 		return IPPROTO_TCP

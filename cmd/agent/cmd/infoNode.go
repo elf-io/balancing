@@ -50,12 +50,6 @@ func checkNodeProxyIPChanged(oldNode, newNode *corev1.Node, entryKey string) boo
 	return oldEntryIP != newEntryIP
 }
 
-func checkNodeIdChanged(oldNode, newNode *corev1.Node) bool {
-	oldId, _ := oldNode.Annotations[types.NodeAnnotationNodeIdKey]
-	newId, _ := newNode.Annotations[types.NodeAnnotationNodeIdKey]
-	return oldId != newId
-}
-
 func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	oldNode, ok1 := oldObj.(*corev1.Node)
 	if !ok1 {

@@ -238,7 +238,7 @@ func (s *nodeIdManager) initNodeId() {
 	}
 
 	s.log.Sugar().Infof("succeeded to get all nodeId: %+v", s.nodeIdData)
-	return
+
 }
 
 func (s *nodeIdManager) UpdateNodeIdAndEntryIp(node *corev1.Node) (idChanged, ip4Chnaged, ip6Chnaged bool, err error) {
@@ -258,7 +258,7 @@ func (s *nodeIdManager) UpdateNodeIdAndEntryIp(node *corev1.Node) (idChanged, ip
 		if t, err1 := stringToUint32(nodeIdStr); err1 != nil {
 			s.log.Sugar().Errorf("found an invalid nodeId %s for node %s: %v", nodeIdStr, node.Name, err1)
 		} else {
-			if old, _ := s.nodeIdData[node.Name]; old != t {
+			if old, ok := s.nodeIdData[node.Name]; (ok && old != t) || !ok {
 				s.nodeIdData[node.Name] = t
 				s.log.Sugar().Infof("update nodeId from %s to %s on node %s", old, t, node.Name)
 				idChanged = true
@@ -268,7 +268,7 @@ func (s *nodeIdManager) UpdateNodeIdAndEntryIp(node *corev1.Node) (idChanged, ip
 	if types.AgentConfig.EnableIpv4 {
 		if ipstr, ok := node.ObjectMeta.Annotations[types.NodeAnnotaitonNodeProxyIPv4]; ok && len(ipstr) > 0 {
 			if net.ParseIP(ipstr) != nil && net.ParseIP(ipstr).To4() != nil {
-				if old, _ := s.nodeIp4Data[node.Name]; old != ipstr {
+				if old, ok := s.nodeIp4Data[node.Name]; (old != ipstr && ok) || !ok {
 					s.nodeIp4Data[node.Name] = net.ParseIP(ipstr).To4().String()
 					s.log.Sugar().Infof("update nodeId from %s to %s on node %s", old, ipstr, node.Name)
 					ip4Chnaged = true
@@ -281,7 +281,7 @@ func (s *nodeIdManager) UpdateNodeIdAndEntryIp(node *corev1.Node) (idChanged, ip
 	if types.AgentConfig.EnableIpv6 {
 		if ipstr, ok := node.ObjectMeta.Annotations[types.NodeAnnotaitonNodeProxyIPv6]; ok && len(ipstr) > 0 {
 			if net.ParseIP(ipstr) != nil && net.ParseIP(ipstr).To4() == nil {
-				if old, _ := s.nodeIp6Data[node.Name]; old != ipstr {
+				if old, ok := s.nodeIp6Data[node.Name]; (old != ipstr && ok) || !ok {
 					s.nodeIp6Data[node.Name] = net.ParseIP(ipstr).To16().String()
 					s.log.Sugar().Infof("update nodeId from %s to %s on node %s", old, ipstr, node.Name)
 					ip6Chnaged = true
@@ -359,6 +359,4 @@ func (s *nodeIdManager) DeleteNodeIdAndEntryIP(nodeName string) {
 	delete(s.nodeIp6Data, nodeName)
 
 	s.log.Sugar().Infof("succeeded to delete nodeId for node %s", nodeName)
-
-	return
 }

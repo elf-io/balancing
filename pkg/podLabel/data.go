@@ -143,13 +143,3 @@ func (ps *PodStore) FindLocalIPsByLabelSelector(selector *metav1.LabelSelector) 
 	}
 	return nil
 }
-
-// matchesSelector 检查给定的标签是否匹配选择器
-func matchesSelector(labels, selector map[string]string) bool {
-	for key, value := range selector {
-		if labels[key] != value {
-			return false
-		}
-	}
-	return true
-}
