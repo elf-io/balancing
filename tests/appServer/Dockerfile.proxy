@@ -4,13 +4,14 @@
 FROM golang:1.23.1 AS builder
 
 WORKDIR /app
-COPY ./src .
-RUN go build -o proxy_server proxy_server.go
+COPY / .
+
+RUN go build -o proxy_server /app/tests/appServer/src/proxy_server.go
 
 #======================
 FROM ubuntu:24.10
 
-COPY --from=builder /app/proxy_server /usr/sbin
+COPY --from=builder /app/tests/appServer/src/proxy_server /usr/sbin
 RUN chmod +x /usr/sbin/proxy_server
 
 EXPOSE 80

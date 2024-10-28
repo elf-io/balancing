@@ -5,15 +5,15 @@
 FROM golang:1.23.1 AS builder
 
 WORKDIR /app
+COPY / .
 
-COPY ./src .
-RUN go build -o http_server http_server.go
-RUN go build -o udp_server udp_server.go
+RUN go build -o http_server /app/tests/appServer/src/http_server.go
+RUN go build -o udp_server /app/tests/appServer/src/udp_server.go
 
 #================================
 FROM ubuntu:24.10
 
-COPY --from=builder /app/http_server /app/udp_server /usr/sbin
+COPY --from=builder /app/tests/appServer/src/http_server /app/tests/appServer/src/udp_server /usr/sbin
 RUN chmod +x /usr/sbin/udp_server && chmod +x /usr/sbin/http_server
 
 EXPOSE 80
