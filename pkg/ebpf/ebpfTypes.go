@@ -109,7 +109,7 @@ func GetNatModeStr(p uint8) string {
 	if v, ok := NatModeMap[p]; ok {
 		return v
 	} else {
-		return "unkown"
+		return "unknown"
 	}
 }
 

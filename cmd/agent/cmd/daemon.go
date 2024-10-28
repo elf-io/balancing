@@ -110,7 +110,7 @@ func DaemonMain() {
 		sigCh := make(chan os.Signal, 1)
 		signal.Notify(sigCh, syscall.SIGINT, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
 		for sig := range sigCh {
-			rootLogger.Sugar().Warnf("Received singal %+v ", sig)
+			rootLogger.Sugar().Warnf("Received signal %+v ", sig)
 			rootLogger.Info("unload ebpf program ")
 			bpfManager.UnloadProgramp()
 			os.Exit(1)

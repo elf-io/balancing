@@ -463,7 +463,7 @@ func (s *EbpfProgramStruct) UnloadAllEbpfMap() {
 // 				return fmt.Errorf("failed to BatchDelete , reason: %v ", batchErr)
 // 			}
 // 		}
-// 		fmt.Printf("delted item account: %v \n", count)
+// 		fmt.Printf("deleted item account: %v \n", count)
 // 	} else {
 // 		if _, batchErr := s.BpfObjCgroup.MapFloatipV4.BatchDelete(keyList, &ebpf.BatchOptions{}); batchErr != nil {
 // 			return fmt.Errorf("failed to BatchDelete , reason: %v ", batchErr)

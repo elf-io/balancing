@@ -153,7 +153,7 @@ func (s *podIdManager) LookupPodByPid(pid uint32) (podName, namespace, container
 		return "", "", "", "", false, fmt.Errorf("empty input")
 	}
 
-	// get pod infromation from cgroup
+	// get pod information from cgroup
 	podId, containerId, host, e := getPodAndContainerID(pid)
 	if e != nil {
 		err = fmt.Errorf("failed to getPodAndContainerID for pid %d: %v ", pid, e)

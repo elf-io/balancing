@@ -99,13 +99,13 @@ func NewEbpfWriter(c *kubernetes.Clientset, ebpfhandler ebpf.EbpfProgram, validi
 
 func (s *ebpfWriter) CleanEbpfMapData() error {
 	// before informer, clean all map data to keep all data up to date
-	s.log.Sugar().Infof("clean ebpf map backend when stratup ")
+	s.log.Sugar().Infof("clean ebpf map backend when startup ")
 	s.ebpfhandler.CleanMapBackend()
-	s.log.Sugar().Infof("clean ebpf map service when stratup ")
+	s.log.Sugar().Infof("clean ebpf map service when startup ")
 	s.ebpfhandler.CleanMapService()
-	s.log.Sugar().Infof("clean ebpf map nodeIp when stratup ")
+	s.log.Sugar().Infof("clean ebpf map nodeIp when startup ")
 	s.ebpfhandler.CleanMapNodeIp()
-	s.log.Sugar().Infof("clean ebpf map nodeProxyIp when stratup ")
+	s.log.Sugar().Infof("clean ebpf map nodeProxyIp when startup ")
 	s.ebpfhandler.CleanMapNodeProxyIp()
 	return nil
 }

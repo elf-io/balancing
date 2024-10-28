@@ -35,7 +35,7 @@ func SkipServiceProcess(svc *corev1.Service) bool {
 func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 	svc, ok := obj.(*corev1.Service)
 	if !ok {
-		s.log.Sugar().Warnf("HandlerAdd failed to get sevice obj: %v")
+		s.log.Sugar().Warnf("HandlerAdd failed to get service obj: %v")
 		return
 	}
 	name := svc.Namespace + "/" + svc.Name
@@ -45,11 +45,11 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 	)
 
 	if SkipServiceProcess(svc) {
-		logger.Sugar().Debugf("HandlerAdd skip unsupported sevice %+v", name)
+		logger.Sugar().Debugf("HandlerAdd skip unsupported service %+v", name)
 		return
 	}
 
-	logger.Sugar().Infof("HandlerAdd process sevice %+v", name)
+	logger.Sugar().Infof("HandlerAdd process service %+v", name)
 	// update service
 	if true {
 		newSvc := corev1.Service{}
@@ -57,7 +57,7 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
-		// use a copied service incase modification
+		// use a copied service in case of  modification
 		s.writer.UpdateServiceByService(logger, &newSvc, false)
 	}
 	// update localRedirect
@@ -67,7 +67,7 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
-		// use a copied service incase modification
+		// use a copied service in case of  modification
 		s.writer.UpdateRedirectByService(logger, &newSvc)
 	}
 	// update balancing
@@ -77,7 +77,7 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
-		// use a copied service incase modification
+		// use a copied service in case of  modification
 		s.writer.UpdateBalancingByService(logger, &newSvc)
 	}
 
@@ -87,12 +87,12 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	oldSvc, ok1 := oldObj.(*corev1.Service)
 	if !ok1 {
-		s.log.Sugar().Warnf("HandlerUpdate failed to get old sevice obj %v")
+		s.log.Sugar().Warnf("HandlerUpdate failed to get old service obj %v")
 		return
 	}
 	newSvc, ok2 := newObj.(*corev1.Service)
 	if !ok2 {
-		s.log.Sugar().Warnf("HandlerUpdate failed to get new sevice obj %v")
+		s.log.Sugar().Warnf("HandlerUpdate failed to get new service obj %v")
 		return
 	}
 
@@ -116,9 +116,9 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		NoChange = true
 	}
 	if !NoChange {
-		logger.Sugar().Infof("HandlerUpdate process changed sevice %+v", name)
+		logger.Sugar().Infof("HandlerUpdate process changed service %+v", name)
 	} else {
-		logger.Sugar().Debugf("HandlerUpdate process sevice %+v", name)
+		logger.Sugar().Debugf("HandlerUpdate process service %+v", name)
 	}
 	if true {
 		svc := corev1.Service{}
@@ -126,7 +126,7 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
-		// use a copied service incase modification
+		// use a copied service in case of  modification
 		s.writer.UpdateServiceByService(logger, &svc, NoChange)
 	}
 
@@ -137,7 +137,7 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
-		// use a copied service incase modification
+		// use a copied service in case of  modification
 		s.writer.UpdateRedirectByService(logger, &svc)
 	}
 	// update balancing
@@ -147,7 +147,7 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			logger.Sugar().Errorf("failed to DeepCopy service: %+v", e)
 			return
 		}
-		// use a copied service incase modification
+		// use a copied service in case of  modification
 		s.writer.UpdateBalancingByService(logger, &svc)
 	}
 
@@ -157,7 +157,7 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 func (s *ServiceReconciler) HandlerDelete(obj interface{}) {
 	svc, ok := obj.(*corev1.Service)
 	if !ok {
-		s.log.Sugar().Warnf("HandlerDelete failed to get sevice obj: %v")
+		s.log.Sugar().Warnf("HandlerDelete failed to get service obj: %v")
 		return
 	}
 	name := svc.Namespace + "/" + svc.Name
@@ -170,7 +170,7 @@ func (s *ServiceReconciler) HandlerDelete(obj interface{}) {
 		logger.Sugar().Debugf("HandlerAdd skip service %+v", name)
 		return
 	}
-	logger.Sugar().Infof("HandlerDelete process sevice %+v", svc)
+	logger.Sugar().Infof("HandlerDelete process service %+v", svc)
 	// update service
 	s.writer.DeleteServiceByService(logger, svc)
 

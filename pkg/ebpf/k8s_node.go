@@ -217,7 +217,7 @@ func (s *EbpfProgramStruct) UpdateEbpfMapForNode(l *zap.Logger, oldNode *corev1.
 
 	// for ipv6
 	if false {
-		l.Sugar().Infof("does not suppport ipv6, abandon applying ")
+		l.Sugar().Infof("does not support ipv6, abandon applying ")
 	}
 
 	return nil
@@ -240,7 +240,7 @@ func (s *EbpfProgramStruct) DeleteEbpfMapForNode(l *zap.Logger, node *corev1.Nod
 
 	// for ipv6
 	if false {
-		l.Sugar().Infof("does not suppport ipv6, abandon applying ")
+		l.Sugar().Infof("does not support ipv6, abandon applying ")
 	}
 	return nil
 }

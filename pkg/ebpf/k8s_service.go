@@ -341,7 +341,7 @@ func (s *EbpfProgramStruct) UpdateEbpfMapForService(l *zap.Logger, natType uint8
 	}
 
 	if processIpv6 {
-		l.Sugar().Infof("does not suppport ipv6, abandon applying ")
+		l.Sugar().Infof("does not support ipv6, abandon applying ")
 	}
 
 	return nil
@@ -379,7 +379,7 @@ func (s *EbpfProgramStruct) DeleteEbpfMapForService(l *zap.Logger, natType uint8
 	}
 
 	if processIpv6 {
-		l.Sugar().Infof("does not suppport ipv6, abandon applying ")
+		l.Sugar().Infof("does not support ipv6, abandon applying ")
 	}
 
 	return nil
