@@ -90,8 +90,6 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			fmt.Println("Error:", err)
 		}
 	}
-
-	return
 }
 
 func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
@@ -169,8 +167,6 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			fmt.Println("Error:", err)
 		}
 	}
-
-	return
 }
 
 func (s *ServiceReconciler) HandlerDelete(obj interface{}) {
@@ -206,8 +202,6 @@ func (s *ServiceReconciler) HandlerDelete(obj interface{}) {
 		// 处理错误
 		fmt.Println("Error:", err)
 	}
-
-	return
 }
 
 func NewServiceInformer(Client *kubernetes.Clientset, stopWatchCh chan struct{}, writer ebpfWriter.EbpfWriter) {
