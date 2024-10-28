@@ -254,9 +254,6 @@ func ClassifyV4Endpoint(edsList map[string]*discovery.EndpointSlice) (localEp []
 	localEp = []*discovery.Endpoint{}
 	remoteEp = []*discovery.Endpoint{}
 
-	if len(edsList) == 0 {
-		// 处理空映射的逻辑
-	}
 	checkV4Addr := func(j *discovery.Endpoint) bool {
 		for _, k := range j.Addresses {
 			if net.ParseIP(k).To4() != nil {

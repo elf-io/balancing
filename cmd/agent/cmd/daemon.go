@@ -82,7 +82,10 @@ func DaemonMain() {
 	// setup ebpf writer
 	writer := ebpfWriter.NewEbpfWriter(Client, bpfManager, InformerListInvterval, rootLogger.Named("ebpfWriter"))
 	// before informer, clean all map data to keep all data up to date
-	writer.CleanEbpfMapData()
+	if err := writer.CleanEbpfMapData(); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 
 	// setup informer
 	stopWatchCh := make(chan struct{})
@@ -112,7 +115,10 @@ func DaemonMain() {
 		for sig := range sigCh {
 			rootLogger.Sugar().Warnf("Received signal %+v ", sig)
 			rootLogger.Info("unload ebpf program ")
-			bpfManager.UnloadProgramp()
+			if err := bpfManager.UnloadProgramp(); err != nil {
+				// 处理错误
+				fmt.Println("Error:", err)
+			}
 			os.Exit(1)
 		}
 	}()

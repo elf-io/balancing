@@ -160,7 +160,7 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 	// 把 ebpf 程序再挂载到 cgroup
 	// https://github.com/cilium/ebpf/blob/main/link/cgroup.go#L43
 	s.l.Sugar().Debugf("attach AttachCGroupUDP4Sendmsg")
-	// 返回的 CgroupLink 必须进行存储，否则会被 GC 而触发 attach 被释放的问题
+	// 返回的 CgroupLink 必须进行存储，否则被 GC 而触发 attach 被释放的问题
 	s.CgroupLinkSend, err = link.AttachCgroup(link.CgroupOptions{
 		Path:    types.CgroupV2Path,
 		Attach:  ebpf.AttachCGroupUDP4Sendmsg,
@@ -205,13 +205,22 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 	// set configuration
 	if strings.ToLower(types.AgentConfig.EbpfLogLevel) == types.LogLevelEbpfDebug {
 		s.l.Sugar().Infof("ebpf debug level: verbose")
-		s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelVerbose)
+		if err := s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelVerbose); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	} else if strings.ToLower(types.AgentConfig.EbpfLogLevel) == types.LogLevelEbpfInfo {
 		s.l.Sugar().Infof("ebpf debug level: info")
-		s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelInfo)
+		if err := s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelInfo); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	} else {
 		s.l.Sugar().Infof("ebpf debug level: error")
-		s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelError)
+		if err := s.UpdateMapConfigure(MapConfigureKeyIndexDebugLevel, MapConfigureValueDebugLevelError); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
 	if types.AgentConfig.Configmap.EnableIPv4 {
 		s.l.Sugar().Infof("ebpf ipv4 enabled: true")
@@ -251,33 +260,33 @@ func (s *EbpfProgramStruct) UnloadProgramp() error {
 	}
 
 	// unping and close ebpf map
-	if s.BpfObjCgroup.bpf_cgroupMaps.MapBackend != nil {
-		s.BpfObjCgroup.bpf_cgroupMaps.MapBackend.Unpin()
-		s.BpfObjCgroup.bpf_cgroupMaps.MapBackend.Close()
+	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapBackend.Unpin(); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
 	}
-	if s.BpfObjCgroup.bpf_cgroupMaps.MapService != nil {
-		s.BpfObjCgroup.bpf_cgroupMaps.MapService.Unpin()
-		s.BpfObjCgroup.bpf_cgroupMaps.MapService.Close()
+	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapService.Unpin(); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
 	}
-	if s.BpfObjCgroup.bpf_cgroupMaps.MapAffinity != nil {
-		s.BpfObjCgroup.bpf_cgroupMaps.MapAffinity.Unpin()
-		s.BpfObjCgroup.bpf_cgroupMaps.MapAffinity.Close()
+	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapAffinity.Unpin(); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
 	}
-	if s.BpfObjCgroup.bpf_cgroupMaps.MapNodeIp != nil {
-		s.BpfObjCgroup.bpf_cgroupMaps.MapNodeIp.Unpin()
-		s.BpfObjCgroup.bpf_cgroupMaps.MapNodeIp.Close()
+	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapNodeIp.Unpin(); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
 	}
-	if s.BpfObjCgroup.bpf_cgroupMaps.MapNodeProxyIp != nil {
-		s.BpfObjCgroup.bpf_cgroupMaps.MapNodeProxyIp.Unpin()
-		s.BpfObjCgroup.bpf_cgroupMaps.MapNodeProxyIp.Close()
+	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapNodeProxyIp.Unpin(); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
 	}
-	if s.BpfObjCgroup.bpf_cgroupMaps.MapNatRecord != nil {
-		s.BpfObjCgroup.bpf_cgroupMaps.MapNatRecord.Unpin()
-		s.BpfObjCgroup.bpf_cgroupMaps.MapNatRecord.Close()
+	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapNatRecord.Unpin(); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
 	}
-	if s.BpfObjCgroup.bpf_cgroupMaps.MapEvent != nil {
-		s.BpfObjCgroup.bpf_cgroupMaps.MapEvent.Unpin()
-		s.BpfObjCgroup.bpf_cgroupMaps.MapEvent.Close()
+	if err := s.BpfObjCgroup.bpf_cgroupMaps.MapEvent.Unpin(); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
 	}
 
 	fmt.Printf("Closing progs ...\n")
@@ -471,3 +480,5 @@ func (s *EbpfProgramStruct) UnloadAllEbpfMap() {
 // 	}
 // 	return nil
 // }
+
+

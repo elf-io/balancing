@@ -34,12 +34,18 @@ func (s *NodeReconciler) HandlerAdd(obj interface{}) {
 	logger.Sugar().Debugf("HandlerAdd process node %+v", node.Name)
 
 	// before UpdateNode, BuildNodeId firstly
-	nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(node)
+	if err := nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(node); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 	s.writer.UpdateNode(logger, node, false)
 
 	// before UpdateBalancingByNode, UpdateNode firstly
 	// update the nodeip and nodeProxyIp for balancing
-	s.writer.UpdateBalancingByNode(logger, node)
+	if err := s.writer.UpdateBalancingByNode(logger, node); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 
 	return
 }
@@ -67,7 +73,10 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	)
 
 	// update database
-	nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(newNode)
+	if err := nodeId.NodeIdManagerHander.UpdateNodeIdAndEntryIp(newNode); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 
 	NoChange := true
 	if t := cmp.Diff(oldNode.Status.Addresses, newNode.Status.Addresses); len(t) > 0 {
@@ -82,11 +91,17 @@ func (s *NodeReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 		logger.Sugar().Infof("node NodeProxyIP changed, new: %+v, old: %+v", newNode.Annotations, oldNode.Annotations)
 	}
 	// before UpdateBalancingByNode, s.writer.UpdateNode firstly
-	s.writer.UpdateNode(logger, newNode, NoChange)
+	if err := s.writer.UpdateNode(logger, newNode, NoChange); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 	if !NoChange {
 		// node ip or nodePoryIP changes, update the nodeip and nodeProxyIp for balancing
 		// before UpdateBalancingByNode, s.writer.UpdateNode firstly
-		s.writer.UpdateBalancingByNode(logger, newNode)
+		if err := s.writer.UpdateBalancingByNode(logger, newNode); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
 
 	return
@@ -108,9 +123,15 @@ func (s *NodeReconciler) HandlerDelete(obj interface{}) {
 	nodeId.NodeIdManagerHander.DeleteNodeIdAndEntryIP(node.Name)
 
 	// before UpdateBalancingByNode, UpdateNode firstly
-	s.writer.DeleteNode(logger, node)
+	if err := s.writer.DeleteNode(logger, node); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 	// before UpdateBalancingByNode, UpdateNode firstly
-	s.writer.UpdateBalancingByNode(logger, node)
+	if err := s.writer.UpdateBalancingByNode(logger, node); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 
 	return
 }

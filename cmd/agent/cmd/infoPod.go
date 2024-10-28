@@ -41,12 +41,18 @@ func (s *PodReconciler) HandlerAdd(obj interface{}) {
 
 	if changed := podLabel.PodLabelHandle.UpdatePodInfo(nil, pod); changed {
 		// inform the balancing policy
-		s.writer.UpdateBalancingByPod(logger, pod)
+		if err := s.writer.UpdateBalancingByPod(logger, pod); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 
 		// inform the localRedirect poliy
 		if pod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 			// data changed, try to update the ebpf data
-			s.writer.UpdateRedirectByPod(logger, pod)
+			if err := s.writer.UpdateRedirectByPod(logger, pod); err != nil {
+				// 处理错误
+				fmt.Println("Error:", err)
+			}
 		}
 	}
 
@@ -81,12 +87,18 @@ func (s *PodReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 
 	if changed := podLabel.PodLabelHandle.UpdatePodInfo(oldPod, newPod); changed {
 		// inform the balancing policy
-		s.writer.UpdateBalancingByPod(logger, newPod)
+		if err := s.writer.UpdateBalancingByPod(logger, newPod); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 
 		// inform the localRedirect poliy
 		if newPod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 			// data changed, try to update the ebpf data
-			s.writer.UpdateRedirectByPod(logger, newPod)
+			if err := s.writer.UpdateRedirectByPod(logger, newPod); err != nil {
+				// 处理错误
+				fmt.Println("Error:", err)
+			}
 		}
 	}
 
@@ -112,12 +124,18 @@ func (s *PodReconciler) HandlerDelete(obj interface{}) {
 
 	if changed := podLabel.PodLabelHandle.UpdatePodInfo(pod, nil); changed {
 		// inform the balancing policy
-		s.writer.DeleteBalancingByPod(logger, pod)
+		if err := s.writer.DeleteBalancingByPod(logger, pod); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 
 		// inform the localRedirect poliy
 		if pod.Spec.NodeName == types.AgentConfig.LocalNodeName {
 			// data changed, try to update the ebpf data
-			s.writer.DeleteRedirectByPod(logger, pod)
+			if err := s.writer.DeleteRedirectByPod(logger, pod); err != nil {
+				// 处理错误
+				fmt.Println("Error:", err)
+			}
 		}
 	}
 

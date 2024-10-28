@@ -136,7 +136,9 @@ func (s *podIdManager) Update(oldPod, newPod *corev1.Pod) {
 		// add
 		if newPod.Status.ContainerStatuses != nil && len(newPod.Status.ContainerStatuses) > 0 {
 			s.log.Sugar().Debugf("add pod id for pod %s/%s", newPod.Namespace, newPod.Name)
-			s.updatePodInfo(newPod)
+			if err := s.updatePodInfo(newPod); err != nil {
+				s.log.Sugar().Errorf("error: %s", err)
+			}
 			s.log.Sugar().Debugf("pod uid information, total %d: %+v", s.podInfo.Count(), s.podInfo.GetAll())
 		}
 	}

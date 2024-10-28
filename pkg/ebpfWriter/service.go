@@ -49,7 +49,7 @@ func (s *ebpfWriter) UpdateServiceByService(l *zap.Logger, svc *corev1.Service, 
 	s.ebpfServiceLock.Lock()
 	defer s.ebpfServiceLock.Unlock()
 	if d, ok := s.serviceData[index]; ok {
-		if d.EpsliceList != nil && len(d.EpsliceList) > 0 {
+		if len(d.EpsliceList) > 0 {
 			if !onlyUpdateTime {
 				l.Sugar().Infof("cache the data, and apply new data to ebpf map for service %v", index)
 				// only before update ebpf map, update serviceId

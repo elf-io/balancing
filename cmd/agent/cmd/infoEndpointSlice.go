@@ -34,7 +34,10 @@ func (s *EndpoingSliceReconciler) HandlerAdd(obj interface{}) {
 	)
 
 	logger.Sugar().Infof("HandlerAdd process EndpointSlice: %+v", name)
-	s.writer.UpdateServiceByEndpointSlice(logger, eds, false)
+	if err := s.writer.UpdateServiceByEndpointSlice(logger, eds, false); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 
 	return
 }
@@ -71,7 +74,10 @@ func (s *EndpoingSliceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 	}
 
 	logger.Sugar().Infof("HandlerUpdate process EndpointSlice: %+s", name)
-	s.writer.UpdateServiceByEndpointSlice(logger, newEds, NoChange)
+	if err := s.writer.UpdateServiceByEndpointSlice(logger, newEds, NoChange); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 
 	return
 }
@@ -89,7 +95,10 @@ func (s *EndpoingSliceReconciler) HandlerDelete(obj interface{}) {
 	)
 
 	logger.Sugar().Infof("HandlerDelete process EndpointSlice: %s", name)
-	s.writer.DeleteServiceByEndpointSlice(logger, eds)
+	if err := s.writer.DeleteServiceByEndpointSlice(logger, eds); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 
 	return
 }
@@ -109,11 +118,10 @@ func NewEndpointSliceInformer(Client *kubernetes.Clientset, stopWatchCh chan str
 		log:    rootLogger.Named("EndpointsliceReconciler"),
 		writer: writer,
 	}
-	srcInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc:    r.HandlerAdd,
-		UpdateFunc: r.HandlerUpdate,
-		DeleteFunc: r.HandlerDelete,
-	})
+	if err := srcInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{}); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 
 	// notice that there is no need to run Start methods in a separate goroutine.
 	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.

@@ -49,7 +49,6 @@ func (s *ebpfWriter) UpdateNode(l *zap.Logger, node *corev1.Node, onlyUpdateTime
 			s.nodeData[index] = node
 		} else {
 			l.Sugar().Debugf("just update lastUpdateTime")
-			d = node
 		}
 	} else {
 		l.Sugar().Infof("cache the data, and apply new data to ebpf map for the node %v , nodeIP: %+v, nodeProxyV4IP: %+v, nodeProxyV6IP: %+v", index, node.Status.Addresses, node.Annotations[types.NodeAnnotaitonNodeProxyIPv4], node.Annotations[types.NodeAnnotaitonNodeProxyIPv6])

@@ -459,6 +459,7 @@ func (s *EbpfProgramStruct) CleanMapNatRecord() (int, error) {
 	for {
 		c, batchErr := mapPtr.BatchLookup(&cursor, keys, vals, nil)
 		count += c
+
 		finished := false
 		if batchErr != nil {
 			if errors.Is(batchErr, ebpf.ErrKeyNotExist) {
@@ -484,3 +485,4 @@ func (s *EbpfProgramStruct) CleanMapNatRecord() (int, error) {
 	}
 	return count, nil
 }
+

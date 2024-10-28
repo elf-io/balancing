@@ -58,7 +58,10 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			return
 		}
 		// use a copied service in case of  modification
-		s.writer.UpdateServiceByService(logger, &newSvc, false)
+		if err := s.writer.UpdateServiceByService(logger, &newSvc, false); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
 	// update localRedirect
 	if true {
@@ -68,7 +71,10 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			return
 		}
 		// use a copied service in case of  modification
-		s.writer.UpdateRedirectByService(logger, &newSvc)
+		if err := s.writer.UpdateRedirectByService(logger, &newSvc); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
 	// update balancing
 	if true {
@@ -78,7 +84,10 @@ func (s *ServiceReconciler) HandlerAdd(obj interface{}) {
 			return
 		}
 		// use a copied service in case of  modification
-		s.writer.UpdateBalancingByService(logger, &newSvc)
+		if err := s.writer.UpdateBalancingByService(logger, &newSvc); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
 
 	return
@@ -127,7 +136,10 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			return
 		}
 		// use a copied service in case of  modification
-		s.writer.UpdateServiceByService(logger, &svc, NoChange)
+		if err := s.writer.UpdateServiceByService(logger, &svc, NoChange); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
 
 	// update localRedirect
@@ -138,7 +150,10 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			return
 		}
 		// use a copied service in case of  modification
-		s.writer.UpdateRedirectByService(logger, &svc)
+		if err := s.writer.UpdateRedirectByService(logger, &svc); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
 	// update balancing
 	if !NoChange {
@@ -148,7 +163,10 @@ func (s *ServiceReconciler) HandlerUpdate(oldObj, newObj interface{}) {
 			return
 		}
 		// use a copied service in case of  modification
-		s.writer.UpdateBalancingByService(logger, &svc)
+		if err := s.writer.UpdateBalancingByService(logger, &svc); err != nil {
+			// 处理错误
+			fmt.Println("Error:", err)
+		}
 	}
 
 	return
@@ -172,12 +190,21 @@ func (s *ServiceReconciler) HandlerDelete(obj interface{}) {
 	}
 	logger.Sugar().Infof("HandlerDelete process service %+v", svc)
 	// update service
-	s.writer.DeleteServiceByService(logger, svc)
+	if err := s.writer.DeleteServiceByService(logger, svc); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 
 	// update localRedirect
-	s.writer.DeleteRedirectByService(logger, svc)
+	if err := s.writer.DeleteRedirectByService(logger, svc); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 	// update balancing
-	s.writer.DeleteBalancingByService(logger, svc)
+	if err := s.writer.DeleteBalancingByService(logger, svc); err != nil {
+		// 处理错误
+		fmt.Println("Error:", err)
+	}
 
 	return
 }

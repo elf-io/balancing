@@ -32,10 +32,18 @@ var CmdPrintMapAll = &cobra.Command{
 		if err := bpf.PrintMapService(nil, nil); err != nil {
 			fmt.Println("Error:", err)
 		}
-		bpf.PrintMapBackend(nil, nil)
-		bpf.PrintMapNodeIp()
-		bpf.PrintMapNodeProxyIp()
-		bpf.PrintMapConfigure()
+		if err := bpf.PrintMapBackend(nil, nil); err != nil {
+			fmt.Println("Error:", err)
+		}
+		if err := bpf.PrintMapNodeIp(); err != nil {
+			fmt.Println("Error:", err)
+		}
+		if err := bpf.PrintMapNodeProxyIp(); err != nil {
+			fmt.Println("Error:", err)
+		}
+		if err := bpf.PrintMapConfigure(); err != nil {
+			fmt.Println("Error:", err)
+		}
 		fmt.Printf("\n")
 	},
 }

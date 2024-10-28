@@ -343,14 +343,8 @@ func FakeServiceForBalancingPolicyByServiceMatcher(policy *balancingv1beta1.Bala
 	svc.Status.LoadBalancer.Ingress = nil
 	svc.Spec.IPFamilyPolicy = oldSvc.Spec.IPFamilyPolicy
 	svc.Spec.ClusterIP = oldSvc.Spec.ClusterIP
-	svc.Spec.ClusterIPs = []string{}
-	for _, v := range oldSvc.Spec.ClusterIPs {
-		svc.Spec.ClusterIPs = append(svc.Spec.ClusterIPs, v)
-	}
-	svc.Spec.IPFamilies = []corev1.IPFamily{}
-	for _, v := range oldSvc.Spec.IPFamilies {
-		svc.Spec.IPFamilies = append(svc.Spec.IPFamilies, v)
-	}
+	svc.Spec.ClusterIPs = append(svc.Spec.ClusterIPs, oldSvc.Spec.ClusterIPs...)
+	svc.Spec.IPFamilies = append(svc.Spec.IPFamilies, oldSvc.Spec.IPFamilies...)
 	svc.Spec.Ports = []corev1.ServicePort{}
 	svc.Annotations = map[string]string{
 		types.AnnotationServiceID: policy.Annotations[types.AnnotationServiceID],
@@ -363,7 +357,7 @@ LOOP_policyPort:
 			return nil, fmt.Errorf("unsupported port %v for BalancingPolicy %v: %v", policyPort.Port, policy.Name, e)
 		}
 		for _, svcPort := range oldSvc.Spec.Ports {
-			if strings.ToLower(string(svcPort.Protocol)) == strings.ToLower(policyPort.Protocol) && svcPort.Port == port {
+			if strings.EqualFold(string(svcPort.Protocol), string(policyPort.Protocol)) && svcPort.Port == port {
 				// succeeded to find the port
 				newport := corev1.ServicePort{
 					Name:       svcPort.Name,
@@ -375,7 +369,7 @@ LOOP_policyPort:
 				// find the TargetPort from the backend
 				if policy.Spec.BalancingBackend.AddressEndpoint != nil {
 					for _, toPort := range policy.Spec.BalancingBackend.AddressEndpoint.ToPorts {
-						if toPort.Name == policyPort.Name && strings.ToLower(toPort.Protocol) == strings.ToLower(policyPort.Protocol) {
+						if toPort.Name == policyPort.Name && strings.EqualFold(toPort.Protocol, policyPort.Protocol) {
 							port, e := utils.StringToInt32(toPort.Port)
 							if e != nil {
 								return nil, fmt.Errorf("unsupported backend port %v for BalancingPolicy %v: %v", toPort, policy.Name, e)
@@ -387,7 +381,7 @@ LOOP_policyPort:
 					}
 				} else {
 					for _, toPort := range policy.Spec.BalancingBackend.ServiceEndpoint.ToPorts {
-						if toPort.Name == policyPort.Name && strings.ToLower(toPort.Protocol) == strings.ToLower(policyPort.Protocol) {
+						if toPort.Name == policyPort.Name && strings.EqualFold(toPort.Protocol, policyPort.Protocol) {
 							p, e := utils.StringToInt32(toPort.Port)
 							if e != nil {
 								return nil, fmt.Errorf("unsupported port %v for BalancingPolicy %v: %v", port, policy.Name, e)
@@ -410,3 +404,4 @@ LOOP_policyPort:
 
 	return svc, nil
 }
+
