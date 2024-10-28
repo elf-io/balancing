@@ -97,12 +97,8 @@ build_local_controller_image:
 .PHONY: build_local_test_app_image
 build_local_test_app_image: APT_HTTP_PROXY :=
 build_local_test_app_image:
-	docker build --build-arg APT_HTTP_PROXY=$(APT_HTTP_PROXY) \
-		--file ./tests/appServer/Dockerfile.proxy \
-		--tag $(TEST_APP_PROXY_SERVER_IMAGE) .
-	docker build --build-arg APT_HTTP_PROXY=$(APT_HTTP_PROXY) \
-		--file ./tests/appServer/Dockerfile.backend \
-		--tag $(TEST_APP_BACKEND_SERVER_IMAGE) .
+	cd ./tests/appServer && docker build --build-arg APT_HTTP_PROXY=$(APT_HTTP_PROXY) --file Dockerfile.proxy --tag $(TEST_APP_PROXY_SERVER_IMAGE) .
+	cd ./tests/appServer && docker build --build-arg APT_HTTP_PROXY=$(APT_HTTP_PROXY) --file Dockerfile.backend --tag $(TEST_APP_BACKEND_SERVER_IMAGE) .
 
 
 #================= update golang
@@ -256,7 +252,7 @@ lint_golang_format:
 lint_golang_lock:
 	@ BAD="" ; \
  	 for l in sync.Mutex sync.RWMutex; do \
-  		DATA=` grep -r --exclude-dir={.git,_build,vendor,externalversions,lock,contrib} -i --include \*.go "$${l}" . ` || true ; \
+  		DATA=` grep -r --exclude-dir={.git,_build,vendor,externalversions,lock,contrib,tests/appServer} -i --include \*.go "$${l}" . ` || true ; \
 	    if [ -n "$${DATA}" ] ; then \
 	   		 echo "Found $${l} usage. Please use pkg/lock instead to improve deadlock detection"; \
 	   		 echo "$${DATA}" ; \
