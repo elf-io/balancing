@@ -224,7 +224,7 @@ validate_crd_sdk:
 
 
 .PHONY: lint_golang_everything
-lint_golang_everything: lint_golang_lock lint_test_label lint_golang_format lint_ebpf
+lint_golang_everything: lint_golang_lock lint_test_label lint_golang_format
 
 
 define lint_go_format
@@ -306,19 +306,7 @@ lint_image_trivy:
       echo "trivy check: $(IMAGE_NAME) pass"
 
 
-.PHONY: generate_ebpf
-generate_ebpf:
-	sudo apt-get update && sudo apt-get install -y clang llvm gcc-multilib libbpf-dev
-	$(GO_GENERATE) ./...
 
-
-.PHONY: lint_ebpf
-lint_ebpf:
-	make generate_ebpf
-	if ! test -z "$$(git status --porcelain pkg/ebpf/bpf_cgroup_bpf.go )"; then \
-  			echo "please run 'make generate_ebpf' to update 'pkg/ebpf/bpf_cgroup_bpf.go' " ; \
-  			exit 1 ; \
-  		fi ; echo "succeed to check ebpf"
 
 
 #=========== unit test
