@@ -2,8 +2,27 @@ apiVersion: v1
 entries:
   balancing:
   - apiVersion: v2
+    appVersion: 0.0.2
+    created: "2024-10-31T06:20:41.128854304Z"
+    description: balancing
+    digest: 42f5fb878fc53f3f358d8b605f27cd6e4908122de0a92d8001b117b94758ffcc
+    home: https://github.com/elf-io/balancing
+    keywords:
+    - balancing
+    kubeVersion: '>= 1.16.0-0'
+    maintainers:
+    - name: elf-io
+      url: https://github.com/elf-io
+    name: balancing
+    sources:
+    - https://github.com/elf-io/balancing
+    type: application
+    urls:
+    - https://elf-io.github.io/balancing/charts/balancing-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v2
     appVersion: 0.0.1
-    created: "2024-10-28T13:45:58.41086317Z"
+    created: "2024-10-31T06:20:41.127582667Z"
     description: balancing
     digest: 6f2b4ba52ea860cd759f19f0a02f022b1d150b4a7bb1e0aeb8bd9aa232788cb9
     home: https://github.com/elf-io/balancing
@@ -20,4 +39,4 @@ entries:
     urls:
     - https://elf-io.github.io/balancing/charts/balancing-0.0.1.tgz
     version: 0.0.1
-generated: "2024-10-28T13:45:58.409490395Z"
+generated: "2024-10-31T06:20:41.126227844Z"
