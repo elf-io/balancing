@@ -42,7 +42,7 @@ func (s *webhookRedirect) Default(ctx context.Context, obj runtime.Object) error
 			return errors.New(msg)
 		} else {
 			bp.Annotations[types.AnnotationServiceID] = idStr
-			logger.Sugar().Infof("add service Id=%s to policy", idStr)
+			logger.Sugar().Infof("patch annotation Id=%s to policy", idStr)
 		}
 	} else if e == policyId.PolicyErrorInvalidId {
 		idStr := bp.Annotations[types.AnnotationServiceID]

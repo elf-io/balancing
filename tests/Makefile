@@ -192,6 +192,7 @@ deploy_project:
 
 .PHONY: uninstall_kube_proxy
 uninstall_kube_proxy:
+	KUBECONFIG=$(E2E_KUBECONFIG_PATH) ./scripts/uninstallKubeProxy.sh
 
 
 .PHONY: install_example_app
