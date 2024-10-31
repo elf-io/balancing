@@ -1,3 +1,6 @@
+// Copyright 2024 Authors of elf-io
+// SPDX-License-Identifier: Apache-2.0
+
 package utils
 
 import (
@@ -39,6 +42,6 @@ func StringToUint32(str string) (uint32, error) {
 
 // RandomUint32 returns a randomly generated uint32 number.
 func RandomUint32() uint32 {
-	rand.Seed(time.Now().UnixNano())
-	return rand.Uint32()
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return r.Uint32()
 }

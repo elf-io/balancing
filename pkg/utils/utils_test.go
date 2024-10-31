@@ -13,7 +13,7 @@ import (
 var _ = Describe("Utils", func() {
 	Context("FileExists", func() {
 		It("should return true if the file exists", func() {
-			Expect(utils.FileExists("utils.go")).To(BeTrue())
+			Expect(utils.FileExists("utils_test.go")).To(BeTrue())
 		})
 
 		It("should return false if the file does not exist", func() {
