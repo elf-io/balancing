@@ -7,9 +7,12 @@
 
 2. ` make build_local_test_app_image   `
 
-3. ` make e2e_init  `
+3. 
+```
+make e2e_init  -e E2E_SKIP_KUBE_PROXY=true
+```
 
-4. 
+4.
 
 ```
 make e2e_deploy

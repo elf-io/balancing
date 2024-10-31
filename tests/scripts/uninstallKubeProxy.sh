@@ -32,7 +32,7 @@ echo "wait for taking effect"
 sleep 10
 
 echo "delete daemonset "
-kubeclt delete daemonset -n kube-system kube-proxy
+kubectl delete daemonset -n kube-system kube-proxy
 
 
 

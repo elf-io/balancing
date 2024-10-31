@@ -18,7 +18,6 @@ init_vagrant: installE2eTools clean
 		  KUBECONFIG_PATH=$(E2E_KUBECONFIG_PATH) \
 		  VAGRANT_IMAGE_K8S=$(E2E_VAGRANT_IMAGE_K8S) \
 		  VAGRANT_IMAGE_UBUNTU=$(E2E_VAGRANT_IMAGE_UBUNTU) \
-		  SKIP_KUBE_PROXY=$(E2E_SKIP_KUBE_PROXY) \
 		  ./setupCluster.sh on
 	@echo "===================== deploy prometheus CRD ========== "
 	# https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml ; } \
@@ -31,6 +30,9 @@ init_vagrant: installE2eTools clean
 	kubectl apply --kubeconfig $(E2E_KUBECONFIG_PATH) -f ./crd/monitoring.coreos.com_probes.yaml
 	# https://raw.githubusercontent.com/grafana-operator/grafana-operator/master/deploy/manifests/latest/crds.yaml  ; } \
 	kubectl apply --kubeconfig $(E2E_KUBECONFIG_PATH) -f ./crd/grafanadashboards.yaml
+	if [ "$(E2E_SKIP_KUBE_PROXY)" == "true" ] ; then \
+  			make uninstall_kube_proxy ; \
+  		fi
 	@echo "========================================================"
 	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
 	@echo "   kubectl get pod -o wide -A                           "
