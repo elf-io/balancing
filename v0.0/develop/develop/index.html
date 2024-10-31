@@ -343,11 +343,11 @@ You're not viewing the latest version.
 <li>
 <p><code>make build_local_test_app_image</code></p>
 </li>
-<li>
-<p><code>make e2e_init</code></p>
-</li>
 <li></li>
 </ol>
+<pre><code>make e2e_init  -e E2E_SKIP_KUBE_PROXY=true
+</code></pre>
+<p>4.</p>
 <pre><code>make e2e_deploy
 #or
 make e2e_deploy -e PROJECT_IMAGE_TAG=8877a79da7c0a9f159363660b5b23e5458480aea \
