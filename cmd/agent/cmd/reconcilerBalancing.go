@@ -7,8 +7,7 @@ import (
 	"fmt"
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	balancing "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
-	"github.com/elf-io/balancing/pkg/types"
-	"github.com/elf-io/balancing/pkg/utils"
+	"github.com/elf-io/balancing/pkg/policyId"
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -23,17 +22,6 @@ type ReconcilerBalancing struct {
 }
 
 func (s *ReconcilerBalancing) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-
-	CheckPolicyValidity := func(policy *balancing.BalancingPolicy) error {
-		if idStr, ok := policy.Annotations[types.AnnotationServiceID]; ok {
-			if _, e := utils.StringToUint32(idStr); e != nil {
-				return fmt.Errorf("policy %s has an invalid serviceID annotation %s, skip", policy.Name, idStr)
-			}
-		} else {
-			return fmt.Errorf("policy %s miss serviceID annotation, skip", policy.Name)
-		}
-		return nil
-	}
 
 	logger := s.l.With(
 		zap.String("policy", req.NamespacedName.Name),
@@ -54,7 +42,7 @@ func (s *ReconcilerBalancing) Reconcile(ctx context.Context, req ctrl.Request) (
 		return res, fmt.Errorf("could not fetch: %+v", err)
 	}
 
-	if e := CheckPolicyValidity(rs); e != nil {
+	if _, e := policyId.GetBalancingPolicyValidity(rs); e != nil {
 		logger.Sugar().Errorf("localRedirect policy %v is invalid: %v", req.NamespacedName.Name, e)
 		return res, nil
 	}

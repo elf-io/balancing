@@ -175,7 +175,7 @@ echo "generate changelog md"
 FILE_CHANGELOG="${OUTPUT_DIR}/changelog_from_${START_TAG}_to_${DEST_TAG}.md"
 echo > ${FILE_CHANGELOG}
 echo "# ${DEST_TAG}" >> ${FILE_CHANGELOG}
-echo "Welcome to the ${DEST_TAG} release of Spiderpool!" >> ${FILE_CHANGELOG}
+echo "Welcome to the ${DEST_TAG} release " >> ${FILE_CHANGELOG}
 echo "Compared with version:${START_TAG}, version:${DEST_TAG} has the following updates." >> ${FILE_CHANGELOG}
 echo "" >> ${FILE_CHANGELOG}
 echo "***" >> ${FILE_CHANGELOG}

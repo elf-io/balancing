@@ -259,10 +259,12 @@ test_connectivity:
 	export K8S_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_WORKERVM_PROXY_SERVER) ; \
  		export HOST_PROXY_SERVER_MAPPING_PORT=$(E2E_HOSTPORT_HOSTVM_PROXY_SERVER) ;\
  		export KUBECONFIG=$(E2E_KUBECONFIG_PATH) ; \
- 		./scripts/testAppConnectivity.sh basic || { echo "failed to test the connectivity" ; exit 1 ; } ;  \
-	    ./scripts/testAppConnectivity.sh service || { echo "failed to test the connectivity" ; exit 1 ; } ; \
-	    ./scripts/testAppConnectivity.sh balancing || { echo "failed to test the connectivity" ; exit 1 ; } ; \
-	    ./scripts/testAppConnectivity.sh redirect || { echo "failed to test the connectivity" ; exit 1 ; }
+		FAILURE=0 ; \
+ 		./scripts/testAppConnectivity.sh basic || { echo "failed to test the connectivity" ; ((FAILURE+=1)) ;  } ;  \
+	    ./scripts/testAppConnectivity.sh service || { echo "failed to test the connectivity" ; ((FAILURE+=1)) ; } ; \
+	    ./scripts/testAppConnectivity.sh balancing || { echo "failed to test the connectivity" ; ((FAILURE+=1)) ; } ; \
+	    ./scripts/testAppConnectivity.sh redirect || { echo "failed to test the connectivity" ; ((FAILURE+=1)) ; }  ;\
+	    ((FAILURE==0)) || { echo "error: some tests failed" ; exit 1 ; }
 
 
 .PHONY: clean
