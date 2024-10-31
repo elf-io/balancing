@@ -100,7 +100,7 @@ func (s *webhookRedirect) ValidateUpdate(ctx context.Context, oldObj, newObj run
 	)
 
 	if !reflect.DeepEqual(newBp.Spec, oldBp.Spec) {
-		msg := fmt.Sprintf("policy is not allowed to update the spec")
+		msg := "policy is not allowed to update the spec"
 		logger.Sugar().Errorf(msg)
 		return nil, errors.New(msg)
 	}

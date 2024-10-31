@@ -68,11 +68,11 @@ func (s *webhookBalacning) ValidateCreate(ctx context.Context, obj runtime.Objec
 
 	id, e := policyId.GetBalancingPolicyValidity(bp)
 	if e == policyId.PolicyErrorMissId {
-		msg := fmt.Sprintf("policy miss service Id, the mutating webhook went wrong ")
+		msg := "policy miss service Id, the mutating webhook went wrong "
 		logger.Sugar().Errorf(msg)
 		return nil, errors.New(msg)
 	} else if e == policyId.PolicyErrorInvalidId {
-		msg := fmt.Sprintf("policy has an invalid Id in annotation ")
+		msg := "policy has an invalid Id in annotation "
 		logger.Sugar().Errorf(msg)
 		return nil, errors.New(msg)
 	} else {
