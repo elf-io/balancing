@@ -72,6 +72,9 @@ pod 所在节点的 nodePort
 		（2）
 		localRedirect 和 balancing policy 中不支持 指向相同的 service 或者 virtual ip
 
+		(3) 限制
+         使用了统一的 id 生成， 各种 policy 总计只能创建 65535 个
+
 
 
 

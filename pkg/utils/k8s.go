@@ -11,7 +11,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
 	"path/filepath"
-	"strconv"
 )
 
 func FileExists(filename string) bool {
@@ -20,22 +19,6 @@ func FileExists(filename string) bool {
 		return false
 	}
 	return !info.IsDir()
-}
-
-const (
-	int32Min = -1 << 31
-	int32Max = 1<<31 - 1
-)
-
-func StringToInt32(s string) (int32, error) {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		return 0, err
-	}
-	if i < int32Min || i > int32Max {
-		return 0, fmt.Errorf("value out of int32 range: %d", i)
-	}
-	return int32(i), nil
 }
 
 func DeepCopy(src, dst interface{}) error {
@@ -51,42 +34,10 @@ func DeepCopy(src, dst interface{}) error {
 	return nil
 }
 
-func StringToUint32(str string) (uint32, error) {
-	if str == "" {
-		return 0, fmt.Errorf("empty string")
-	}
-	num, err := strconv.ParseUint(str, 10, 32)
-	if err != nil {
-		return 0, err
-	}
-	if num > uint64(uint32(^uint32(0))) {
-		return 0, fmt.Errorf("exceed the uint32")
-	}
-	return uint32(num), nil
-}
-
 var (
 	DefaultKubeConfigPath = filepath.Join(os.Getenv("HOME"), ".kube", "config")
 	ScInPodPath           = "/var/run/secrets/kubernetes.io/serviceaccount"
 )
-
-func ExistFile(filePath string) bool {
-	if info, err := os.Stat(filePath); err == nil {
-		if !info.IsDir() {
-			return true
-		}
-	}
-	return false
-}
-
-func ExistDir(dirPath string) bool {
-	if info, err := os.Stat(dirPath); err == nil {
-		if info.IsDir() {
-			return true
-		}
-	}
-	return false
-}
 
 // KubeConfigPath is for agent on hosts out of the cluster
 // apiServerHostAddress is for agent and controller pod in the cluster when kube-proxy is not running
