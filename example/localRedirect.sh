@@ -11,8 +11,6 @@ apiVersion: balancing.elf.io/v1beta1
 kind: LocalRedirectPolicy
 metadata:
   name: test-service
-  annotations:
-     balancing.elf.io/serviceId: "10090"
 spec:
   enabled: true
   frontend:
