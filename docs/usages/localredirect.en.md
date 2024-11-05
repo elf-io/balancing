@@ -22,3 +22,72 @@ In future versions, the following enhancements are planned:
 * This feature is particularly beneficial for applications with high traffic volumes and latency-sensitive operations.
 
   > Note: Projects like [Cilium](https://github.com/cilium/cilium) and [Calico](https://github.com/projectcalico/calico) already include similar functionalities, making them suitable for clusters that require advanced network optimizations.
+
+## Policy Examples
+
+Below is a YAML example where the frontend points to a service name:
+
+```yaml
+apiVersion: balancing.elf.io/v1beta1
+kind: LocalRedirectPolicy
+metadata:
+  name: test-service
+spec:
+  enabled: true
+  frontend:
+    serviceMatcher:
+      serviceName: http-server-v4
+      namespace: default
+      toPorts:
+        - port: "8080"
+          protocol: TCP
+          name: p1
+        - port: "80"
+          protocol: TCP
+          name: p2
+  backend:
+    endpointSelector:
+      matchLabels:
+        app: http-redirect
+    toPorts:
+      - port: "80"
+        protocol: TCP
+        name: p1
+      - port: "80"
+        protocol: TCP
+        name: p2
+```
+
+Below is a YAML example where the frontend uses a custom virtual IP and port:
+
+```yaml
+apiVersion: balancing.elf.io/v1beta1
+kind: LocalRedirectPolicy
+metadata:
+  name: test-addr
+  annotations:
+     balancing.elf.io/serviceId: "10091"
+spec:
+  enabled: true
+  frontend:
+    addressMatcher:
+      ip: "169.254.0.90"
+      toPorts:
+        - port: "8080"
+          protocol: TCP
+          name: p1
+        - port: "80"
+          protocol: TCP
+          name: p2
+  backend:
+    endpointSelector:
+      matchLabels:
+        app: http-redirect
+    toPorts:
+      - port: "80"
+        protocol: TCP
+        name: p1
+      - port: "80"
+        protocol: TCP
+        name: p2
+```
