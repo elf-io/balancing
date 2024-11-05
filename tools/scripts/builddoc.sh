@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright 2024 Authors of kdoctor-io
+# SPDX-License-Identifier: Apache-2.0
+
 pip install mkdocs mkdocs-material mkdocs-i18n
 
 CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
