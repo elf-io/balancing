@@ -1,37 +1,37 @@
-site_name: balancing
+site_name: Balancing
 docs_dir: docs
 site_dir: site
 repo_name: elf-io/balancing
+site_url: https://elf-io.github.io/balancing/
 repo_url: https://github.com/elf-io/balancing
-# remote branch for mkdocs gh-deploy
 remote_branch: github_pages
 theme:
   name: material
-  custom_dir: docs/overrides
-  # The maximum depth of the navigation tree in the sidebar
   navigation_depth: 2
+  features:
+    - content.code.annotate
+    - content.tabs.link
   palette:
     scheme: default
-    primary: blue
-    language: zh
-  features:
-    - navigation.instant
-    - navigation.tracking
-    - navigation.indexes
-    - navigation.tabs
-    - navigation.tabs.sticky
-    - navigation.top
-    - search.highlight
-    - search.suggest
-    - search.share
-
-plugins:
-  - tags
-  - search
+    primary: "#4478D1"
 
 extra:
   version:
     provider: mike
+
+plugins:
+  - i18n:
+      default_language: en
+      languages:
+        en:
+          name: English
+          build: true
+          default: true
+        zh:
+          name: 中文
+          build: true
+  - tags
+  - search
 
 markdown_extensions:
   - meta
@@ -40,6 +40,48 @@ markdown_extensions:
   - fenced_code
   - tables
   - attr_list
+  # Python Markdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.snippets
 
 nav:
-  - readme.md
+  - Overview: readme.en.md
+  - Getting started:
+      - Install: usages/install.en.md
+      - Service: usages/service.en.md
+      - LocalRedirect: usages/localredirect.en.md
+      - Balancing: usages/balancing.en.md
+  - Development:
+      - Development: develop/develop.en.md
+      - Debug: develop/ebpfDebug.en.md
+  - 概述: readme.zh.md
+  - 入门:
+      - 安装: usages/install.zh.md
+      - 服务: usages/service.zh.md
+      - 本地重定向: usages/localredirect.zh.md
+      - 负载均衡: usages/balancing.zh.md
+  - 开发:
+      - 开发: develop/develop.zh.md
+      - 调试: develop/ebpfDebug.zh.md

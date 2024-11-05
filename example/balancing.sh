@@ -12,8 +12,6 @@ apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
   name: test-service-podendpoint
-  annotations:
-     balancing.elf.io/serviceId: "20001"
 spec:
   enabled: true
   frontend:
