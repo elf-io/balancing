@@ -11,6 +11,8 @@ Balancing Policy 提供了一种新的负载均衡模式，补充了 Kubernetes 
 
 ## 功能
 
+![use case](../images/balancing.png)
+
 当前功能包括：
 * [x] 自定义负载均衡的 front 地址，可以是 Kubernetes 的 service name 或自定义的 VIP 和端口。
 * [x] 自定义负载均衡的 backend 地址，通过 pod label selector 指定后端对象，支持以下三种方式：
@@ -26,6 +28,7 @@ Balancing Policy 提供了一种新的负载均衡模式，补充了 Kubernetes 
 
 未来版本将解决以下问题：
 * [ ] Balancing Agent 支持自动在节点间建立转发隧道，并更新 IP 地址到 node 的 annotation `"balancing.elf.io/nodeProxyIpv4"`，以实现 overlay CNI 场景下的集群外部主机应用和多集群通信。
+* [ ] Balancing Agent 实施对后端自定义的 IP 地址进行健康检查
 
 ## 使用场景
 
@@ -39,7 +42,9 @@ Balancing Policy 提供了一种新的负载均衡模式，补充了 Kubernetes 
 
    > 当前版本中，Balancing 尚未完成节点间的隧道建立和端口分配，因此只能在 underlay CNI 场景下保障集群内外的联通。未来版本中，Balancing 完成隧道建立后，才能保障 overlay CNI 场景下的集群内外连通性。
 
-3. 自定义 front 负载均衡地址或 backend 转发地址，以支持更灵活的负载均衡需求。
+3. 集群内定义外部服务的负载均衡地址，提供对集群外部的高可用和负载均衡访问。
+
+4. 自定义 front 负载均衡地址或 backend 转发地址，以支持更灵活的负载均衡需求。
 
 ## 策略例子
 

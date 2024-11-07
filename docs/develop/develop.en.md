@@ -15,8 +15,7 @@
     make build_local_image
     ```
 
-    > For users in China, you can use a proxy source to speed up the build:
-    > `make build_local_image -e USE_PROXY_SOURCE=true`
+    > For users in China, you can use a proxy source to speed up the build: `make build_local_image -e USE_PROXY_SOURCE=true`
 
 2. Build the test application image
 

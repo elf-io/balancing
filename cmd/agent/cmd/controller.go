@@ -6,18 +6,20 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	balancingv1beta1 "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
 	"github.com/elf-io/balancing/pkg/lock"
 	"github.com/elf-io/balancing/pkg/types"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/rest"
-	"net/http"
 	ctrl "sigs.k8s.io/controller-runtime"
 	controllerzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
-	"time"
 )
 
 var (
@@ -28,6 +30,7 @@ var scheme = runtime.NewScheme()
 
 func init() {
 	utilruntime.Must(balancingv1beta1.AddToScheme(scheme))
+	utilruntime.Must(corev1.AddToScheme(scheme))
 }
 
 var finishSetUp = false

@@ -11,6 +11,8 @@ It supports request redirection for the following objects:
 
 ## Features
 
+![use case](../images/balancing.png)
+
 Current features include:
 * [x] Customizable front address for load balancing, which can be a Kubernetes service name or a custom VIP and port.
 * [x] Customizable backend address for load balancing, specified by pod label selector, supporting the following three methods:
@@ -26,6 +28,7 @@ Current features include:
 
 Future versions will address the following issues:
 * [ ] Balancing Agent will support automatically establishing forwarding tunnels between nodes and updating IP addresses to the node's annotation `"balancing.elf.io/nodeProxyIpv4"`, to achieve communication with external hosts and multi-cluster in overlay CNI scenarios.
+* [ ] Balancing Agent will implement health checks for custom backend IP addresses.
 
 ## Use Cases
 
@@ -39,7 +42,9 @@ Future versions will address the following issues:
 
    > In the current version, Balancing has not yet completed tunnel establishment and port allocation between nodes, so it can only ensure connectivity within and outside the cluster in underlay CNI scenarios. In future versions, once Balancing completes tunnel establishment, it will ensure connectivity within and outside the cluster in overlay CNI scenarios.
 
-3. Customizing front load balancing addresses or backend forwarding addresses to support more flexible load balancing needs.
+3. Defining external service load balancing addresses within the cluster to provide high availability and load balancing access to external services.
+
+4. Customizing front load balancing addresses or backend forwarding addresses to support more flexible load balancing needs.
 
 ## Policy Examples
 

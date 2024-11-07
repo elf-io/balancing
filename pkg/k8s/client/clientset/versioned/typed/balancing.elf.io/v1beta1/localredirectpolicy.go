@@ -26,8 +26,6 @@ type LocalRedirectPoliciesGetter interface {
 type LocalRedirectPolicyInterface interface {
 	Create(ctx context.Context, localRedirectPolicy *v1beta1.LocalRedirectPolicy, opts v1.CreateOptions) (*v1beta1.LocalRedirectPolicy, error)
 	Update(ctx context.Context, localRedirectPolicy *v1beta1.LocalRedirectPolicy, opts v1.UpdateOptions) (*v1beta1.LocalRedirectPolicy, error)
-	// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-	UpdateStatus(ctx context.Context, localRedirectPolicy *v1beta1.LocalRedirectPolicy, opts v1.UpdateOptions) (*v1beta1.LocalRedirectPolicy, error)
 	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
 	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1beta1.LocalRedirectPolicy, error)

@@ -206,6 +206,12 @@ TestRedirectPolicy(){
     VisitK8s "${ADDRESS}:80"  "udp"  \
               "udp: visit the virtual address of backend-server localRedirect service"  "redirectserver.*workervm"
 
+    SERVICE_CLUSTER_IP=$( kubectl  get service test-selected-node | sed '1 d' | awk '{print $3}' )
+    VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
+              "http: visit the clusterIp of backend-server selected-localRedirect service"  "redirectserver.*workervm"
+    VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
+              "udp: visit the clusterIp of backend-server selected-localRedirect service"  "redirectserver.*workervm"
+
 }
 
 TestBalancingPolicy(){

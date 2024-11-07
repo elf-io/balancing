@@ -103,12 +103,23 @@ type LocalRedirectBackend struct {
 	ToPorts []PortInfo `json:"toPorts"`
 }
 
-type LocalRedirectSpec struct {
-	// enable this policy
+type PolicyConfig struct {
+	// select the nodes of local cluster, who will take effect this policy
 	//
 	// +kubebuilder:validation:Optional
+	NodeLabelSelector *metav1.LabelSelector `json:"nodeLabelSelector,omitempty"`
+
+	// enable the nodes out of local cluster, to take effect this policy
+	//
 	// +kubebuilder:default=true
-	Enabled *bool `json:"enabled,omitempty"`
+	EnableOutCluster bool `json:"enableOutCluster"`
+}
+
+type LocalRedirectSpec struct {
+	// configuration how this policy works.
+	//
+	// +kubebuilder:validation:Optional
+	Config *PolicyConfig `json:"config,omitempty"`
 
 	// RedirectFrontend specifies frontend configuration to redirect traffic from.
 	//
@@ -121,10 +132,6 @@ type LocalRedirectSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf", message="backend is immutable"
 	LocalRedirectBackend LocalRedirectBackend `json:"backend"`
-}
-
-type LocalRedirectStatus struct {
-	Enabled bool `json:"enabled,omitempty"`
 }
 
 // adds a column to "kubectl get" output for this CRD
@@ -143,8 +150,7 @@ type LocalRedirectPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
 
-	Spec   LocalRedirectSpec   `json:"spec,omitempty"`
-	Status LocalRedirectStatus `json:"status,omitempty"`
+	Spec LocalRedirectSpec `json:"spec,omitempty"`
 }
 
 // +kubebuilder:object:root=true

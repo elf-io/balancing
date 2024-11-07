@@ -4,42 +4,49 @@
 
 ## Balancing 简介
 
-Balancing 是一个在 Kubernetes 平台上基于 eBPF 实现的四层负载均衡组件。它参考了 [cilium](https://github.com/cilium/cilium) 、[calico](https://github.com/projectcalico/calico) 、[KPNG](https://github.com/kubernetes-retired/kpng)  等项目的功能，实现了与 CNI 无关的负载均衡解析扩展能力。
+Balancing 是一个在 Kubernetes 平台上基于 eBPF 实现的四层负载均衡组件。它参考了 [cilium](https://github.com/cilium/cilium) 、[calico](https://github.com/projectcalico/calico) 、[KPNG](https://github.com/kubernetes-retired/kpng)  等项目的功能，
+Balancing 支持以容器化方式运行在 Kubernetes 集群内部，也支持二进制方式运行在裸金属上，为 Kubernetes 集群内部应用、外部应用实现了与 CNI 无关的负载均衡访问能力。
 
 ### 当前功能
 
-1. **集群内外的 service 解析**：替代 kube-proxy。
-    - 支持在集群节点上基于 cGroup eBPF 为 Pod 和 Node 发起的 service 解析。
-    - 支持在集群外部主机上为本地应用提供 cGroup eBPF 解析。
+1. **实施 CNI 无关的集群 service 解析**
+    - 基于 cGroup eBPF ，在集群节点上为 Pod 和 Node 发起的 service 访问实施解析，实现 kube-proxy replacement。
+    - 在集群外的裸金属、虚拟机上实施客户端负载均衡解析，以支持访问 kubernetes 集群中的 service。
     - 未来版本将支持在节点网卡上基于 TC eBPF 实现南北向的 nodePort 解析。
     - 更多信息，请参考 [service解析](./usages/service.zh.md)
 
-2. **localRedirect policy 四层负载均衡解析**：
-    - 基于 cGroup eBPF 为 Pod 和 Node 发起的 service 重定向解析。
-    - 典型场景如将应用访问 coreDns 的请求重定向到本地的 local coreDns。
+2. **实施本地重定向的四层负载均衡解析**：
+    - 基于 cGroup eBPF，为 Pod 和 Node 发起的 service 访问重定向解析到同节点上的服务，典型场景如 local coreDns。
     - 更多信息，请参考 [LocalRedirect Policy](./usages/localredirect.zh.md)
 
-3. **balancing policy 四层负载均衡解析（进行中）**：
-    - 基于 cGroup eBPF 为 Pod、Node、application 实施自定义的全局四层负载均衡解析。
+3. **实施集群全局、集群外部服务的四层负载均衡解析**：
+    - 支持更加灵活的策略定义，为集群内部和外部的应用提供了全局的负载均衡策略。
     - 应用场景包括集群外部主机的客户端侧负载均衡解析、Kubernetes 集群内的负载均衡等。
     - 更多信息，请参考 [Balancing Policy](./usages/balancing.zh.md)
-    - 注意：balancing policy 目前仅实现了负载均衡解析，尚未实现节点间的隧道通信。
 
-4. **事件日志**：
-    - 记录负载均衡解析事件，并关联相关容器信息。
+4. **解析事件的指标日志**：
+    - 记录负载均衡解析事件，并关联容器信息，形成完整的负载均衡解析指标。
 
 ## 典型使用场景
 
-1. **替代 kube-proxy 的 service 解析**：
-    - 适用于 overlay CNI，如 [Macvlan](https://github.com/containernetworking/plugins/tree/main/plugins/main/macvlan) 、[SR-IOV CNI](https://github.com/k8snetworkplumbingwg/sriov-cni)  等。
+1. **在 CNI 无关的集群中，替代 kube-proxy 的 service 解析**：
+    - 适用于无法实施 service 的 underlay CNI，如 [Macvlan](https://github.com/containernetworking/plugins/tree/main/plugins/main/macvlan) 、[SR-IOV CNI](https://github.com/k8snetworkplumbingwg/sriov-cni)  等。
+    - 适用于没有实现 eBPF 功能的CNI，如 [Antrea](https://github.com/antrea-io/antrea) 、 [Kube-ovn](https://github.com/kubeovn/kube-ovn) 、 [Flannel](https://github.com/flannel-io/flannel) ，以及公有云集群。
 
-2. **coreDns 重定向到 Node-local DNS**：
-    - 提供高可用的重定向转发。
+2. **服务访问重定向到本地代理**：
+    - 实施高可用的重定向， coreDns 服务定向到 Node-local DNS
+    - 为 [clusterpedia](https://github.com/clusterpedia-io/clusterpedia) 实施节点 api-server 代理
 
-3. **集群外部应用访问 Kubernetes 服务**：
-    - 通过四层负载均衡地址访问 Kubernetes 集群中的服务。
+3. **集群外部的客户端应用侧实施 eBPF 四层负载均衡，访问 Kubernetes 集群中的服务**：
+    - 裸金属、虚拟机中的应用
+    - [kubevirt](https://github.com/kubevirt/kubevirt) 虚拟机中的应用
+    - [kubeedge](https://github.com/kubeedge/kubeedge) 边端节点访问云端服务（进行中）
 
 4. **多集群之间的四层负载均衡访问**。
+    - 跨集群的服务访问 （进行中）
+
+5. **通过自定义的前端和后端地址，在 kubernetes 集群中提供外部主机服务的负载均衡访问**
+    - 通过自定义的负载均衡策略，为集群外部的应用提供集群内部的负载均衡访问地址，并实施健康检查（进行中）
 
 ## 架构
 

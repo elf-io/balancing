@@ -4,7 +4,6 @@ kind: BalancingPolicy
 metadata:
   name: balancing-matchservice-podendpoint
 spec:
-  enabled: true
   frontend:
     serviceMatcher:
       # controller 进行限制，只能有一个 BalancingPolicy 绑定 同名 service  , 否则 agent 侧会 因为 clusterIP 相同 相互覆盖数据
@@ -47,7 +46,6 @@ kind: BalancingPolicy
 metadata:
   name: balancing-matchservice-hostport
 spec:
-  enabled: true
   frontend:
     serviceMatcher:
       # controller 进行限制，只能有一个 BalancingPolicy 绑定 同名 service   , 否则 agent 侧会 相互覆盖数据
@@ -83,7 +81,6 @@ kind: BalancingPolicy
 metadata:
   name: balancing-mastchservice-nodeproxy
 spec:
-  enabled: true
   frontend:
     serviceMatcher:
       # controller 进行限制，只能有一个 BalancingPolicy 绑定 同名 service   , 否则 agent 侧会 相互覆盖数据
@@ -119,7 +116,6 @@ kind: BalancingPolicy
 metadata:
   name: balancing-matchaddress
 spec:
-  enabled: true
   frontend:
     addressMatcher:
       # controller 进行限制，只能有一个 BalancingPolicy 绑定 相同 ip   , 否则 agent 侧会 相互覆盖数据
