@@ -49,8 +49,6 @@ apiVersion: balancing.elf.io/v1beta1
 kind: LocalRedirectPolicy
 metadata:
   name: test-addr
-  annotations:
-     balancing.elf.io/serviceId: "10091"
 spec:
   enabled: true
   frontend:
@@ -76,6 +74,37 @@ spec:
       - port: "80"
         protocol: TCP
         name: p2
+EOF
+
+
+
+cat <<EOF | kubectl apply -f -
+apiVersion: balancing.elf.io/v1beta1
+kind: LocalRedirectPolicy
+metadata:
+  name: test-node
+spec:
+  config:
+    enableOutCluster: false
+    nodeLabelSelector:
+      matchLabels:
+        kubernetes.io/hostname: http-workervm
+  frontend:
+    serviceMatcher:
+      serviceName: http-server-v4
+      namespace: default
+      toPorts:
+        - port: "8080"
+          protocol: TCP
+          name: p1
+  backend:
+    endpointSelector:
+      matchLabels:
+        app: http-redirect
+    toPorts:
+      - port: "80"
+        protocol: TCP
+        name: p1
 EOF
 
 

@@ -13,7 +13,6 @@ kind: BalancingPolicy
 metadata:
   name: test-service-podendpoint
 spec:
-  enabled: true
   frontend:
     serviceMatcher:
       # controller 进行限制，只能有一个 BalancingPolicy 绑定 同名 service  , 否则 agent 侧会 因为 clusterIP 相同 相互覆盖数据
@@ -52,10 +51,7 @@ apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
   name: test-service-hostport
-  annotations:
-     balancing.elf.io/serviceId: "20002"
 spec:
-  enabled: true
   frontend:
     serviceMatcher:
       # controller 进行限制，只能有一个 BalancingPolicy 绑定 同名 service   , 否则 agent 侧会 相互覆盖数据
@@ -88,10 +84,7 @@ apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
   name: test-service-nodeproxy
-  annotations:
-     balancing.elf.io/serviceId: "20003"
 spec:
-  enabled: true
   frontend:
     serviceMatcher:
       # controller 进行限制，只能有一个 BalancingPolicy 绑定 同名 service   , 否则 agent 侧会 相互覆盖数据
@@ -123,10 +116,7 @@ apiVersion: balancing.elf.io/v1beta1
 kind: BalancingPolicy
 metadata:
   name: test-addr
-  annotations:
-     balancing.elf.io/serviceId: "20004"
 spec:
-  enabled: true
   frontend:
     addressMatcher:
       # controller 进行限制，只能有一个 BalancingPolicy 绑定 相同 ip   , 否则 agent 侧会 相互覆盖数据

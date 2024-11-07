@@ -86,18 +86,6 @@ func (c *FakeBalancingPolicies) Update(ctx context.Context, balancingPolicy *v1b
 	return obj.(*v1beta1.BalancingPolicy), err
 }
 
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeBalancingPolicies) UpdateStatus(ctx context.Context, balancingPolicy *v1beta1.BalancingPolicy, opts v1.UpdateOptions) (result *v1beta1.BalancingPolicy, err error) {
-	emptyResult := &v1beta1.BalancingPolicy{}
-	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateSubresourceActionWithOptions(balancingpoliciesResource, "status", balancingPolicy, opts), emptyResult)
-	if obj == nil {
-		return emptyResult, err
-	}
-	return obj.(*v1beta1.BalancingPolicy), err
-}
-
 // Delete takes name of the balancingPolicy and deletes it. Returns an error if one occurs.
 func (c *FakeBalancingPolicies) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.

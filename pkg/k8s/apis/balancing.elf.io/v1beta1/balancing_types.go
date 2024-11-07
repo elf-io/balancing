@@ -72,11 +72,11 @@ type BalancingBackend struct {
 // ----------------------------
 
 type BalancingSpec struct {
-	// enable this policy
+
+	// configuration how this policy works.
 	//
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=true
-	Enabled *bool `json:"enabled,omitempty"`
+	Config *PolicyConfig `json:"config,omitempty"`
 
 	// BalancingFrontend specifies frontend configuration to redirect traffic from.
 	//
@@ -89,10 +89,6 @@ type BalancingSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf", message="backend is immutable"
 	BalancingBackend BalancingBackend `json:"backend"`
-}
-
-type BalancingStatus struct {
-	Enabled bool `json:"enabled,omitempty"`
 }
 
 // adds a column to "kubectl get" output for this CRD
@@ -112,8 +108,7 @@ type BalancingPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
 
-	Spec   BalancingSpec   `json:"spec,omitempty"`
-	Status BalancingStatus `json:"status,omitempty"`
+	Spec BalancingSpec `json:"spec,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -4,7 +4,6 @@ kind: LocalRedirectPolicy
 metadata:
   name: redirect-matchservice
 spec:
-  enabled: true
   frontend:
     serviceMatcher:
       # controller 进行限制，只能有一个 LocalRedirectPolicy 绑定 同名 service   , 否则 agent 侧会 相互覆盖数据
@@ -44,7 +43,6 @@ kind: LocalRedirectPolicy
 metadata:
   name: redirect-matchaddress
 spec:
-  enabled: true
   frontend:
     addressMatcher:
       ip: "169.254.0.90"
@@ -68,6 +66,49 @@ spec:
       - port: "80"
         protocol: TCP
         name: p1
+      - port: "80"
+        protocol: TCP
+        name: p2
+      - port: "80"
+        protocol: UDP
+        name: p3
+---
+apiVersion: balancing.elf.io/v1beta1
+kind: LocalRedirectPolicy
+metadata:
+  name: test-selected-node
+spec:
+  config:
+    enableOutCluster: false
+    nodeLabelSelector:
+      matchLabels:
+        kubernetes.io/hostname: workervm
+  frontend:
+    serviceMatcher:
+      serviceName: backendserver-redirect-selected-service
+      namespace: default
+      toPorts:
+        # 只能有一个 name: p1
+        - port: "8080"
+          protocol: TCP
+          name: p1
+        # 只能有一个 name: p2
+        - port: "80"
+          protocol: TCP
+          name: p2
+        - port: "80"
+          protocol: UDP
+          name: p3
+  backend:
+    endpointSelector:
+      matchLabels:
+        {{- include "project.selectorLabels" . | nindent 8 }}
+    toPorts:
+      # 只能有一个 name: p1
+      - port: "80"
+        protocol: TCP
+        name: p1
+        # 只能有一个 name: p2
       - port: "80"
         protocol: TCP
         name: p2

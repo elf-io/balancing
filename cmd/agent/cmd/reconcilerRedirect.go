@@ -8,6 +8,7 @@ import (
 	"github.com/elf-io/balancing/pkg/ebpfWriter"
 	balancing "github.com/elf-io/balancing/pkg/k8s/apis/balancing.elf.io/v1beta1"
 	"github.com/elf-io/balancing/pkg/policyId"
+	"github.com/elf-io/balancing/pkg/types"
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -42,6 +43,17 @@ func (s *ReconcilerRedirect) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return res, fmt.Errorf("could not fetch: %+v", err)
 	}
 	logger.Sugar().Debugf("reconcile: LocalRedirectPolicy policy %s", req.NamespacedName.Name)
+
+	if ok, err := CheckLocalNodeSelected(ctx, s.client, rs.Spec.Config, types.AgentConfig.LocalNodeName); err != nil {
+		logger.Sugar().Errorf("%v", err)
+		return res, err
+	} else {
+		if !ok {
+			logger.Sugar().Infof("policy does not select local node, ignore it")
+			return res, nil
+		}
+		logger.Sugar().Debugf("policy selects local node")
+	}
 
 	if _, e := policyId.GetLocalRedirectPolicyValidity(rs); e != nil {
 		logger.Sugar().Errorf("localRedirect policy %v is invalid: %v", req.NamespacedName.Name, e)
