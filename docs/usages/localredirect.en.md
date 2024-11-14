@@ -33,7 +33,6 @@ kind: LocalRedirectPolicy
 metadata:
   name: test-service
 spec:
-  enabled: true
   frontend:
     serviceMatcher:
       serviceName: http-server-v4
@@ -68,7 +67,6 @@ metadata:
   annotations:
      balancing.elf.io/serviceId: "10091"
 spec:
-  enabled: true
   frontend:
     addressMatcher:
       ip: "169.254.0.90"
