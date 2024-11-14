@@ -56,7 +56,6 @@ kind: BalancingPolicy
 metadata:
   name: test-service-podendpoint
 spec:
-  enabled: true
   frontend:
     serviceMatcher:
       serviceName: http-server-balancing-pod-v4
@@ -91,7 +90,6 @@ kind: BalancingPolicy
 metadata:
   name: test-service-hostport
 spec:
-  enabled: true
   frontend:
     serviceMatcher:
       serviceName: http-server-balancing-hostport-v4
@@ -121,7 +119,6 @@ kind: BalancingPolicy
 metadata:
   name: test-service-nodeproxy
 spec:
-  enabled: true
   frontend:
     serviceMatcher:
       serviceName: http-server-balancing-nodeproxy-v4
@@ -151,7 +148,6 @@ kind: BalancingPolicy
 metadata:
   name: test-addr
 spec:
-  enabled: true
   frontend:
     addressMatcher:
       ip: "169.254.169.254"
