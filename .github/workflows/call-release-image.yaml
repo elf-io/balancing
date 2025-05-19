@@ -97,7 +97,7 @@ jobs:
 
       - name: Install Cosign
         if: ${{ env.RUN_PUSH == 'true' }}
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@v3.8.2
 
       - name: Getting Build Arg
         id: arg
