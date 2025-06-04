@@ -3,7 +3,7 @@
 
 # ====modify====
 ARG BASE_IMAGE=docker.io/library/ubuntu:24.10
-ARG GOLANG_IMAGE=docker.io/library/golang:1.23.1
+ARG GOLANG_IMAGE=docker.io/library/golang:1.24.3
 
 #========= build gops ===============
 FROM --platform=${TARGETPLATFORM} ${GOLANG_IMAGE} as gops-cni-builder
