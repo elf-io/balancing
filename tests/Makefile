@@ -232,13 +232,19 @@ install_example_app:
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  sudo docker stop server || true ; ) ; \
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" sudo docker rm server || true ; ) ; \
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" \
-				sudo docker run -d -p $(E2E_VMPORT_HOSTVM_PROXY_SERVER):80 --name server "$${IMAGE}" ; \
+				sudo docker run -d -p $(E2E_VMPORT_HOSTVM_PROXY_SERVER):80 -p $(E2E_VMPORT_HOSTVM_PROXY_SERVER):80/udp --name server --hostname hostvm_proxy "$${IMAGE}" ; \
 			)
 	echo "deploy backend server " ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  backendserver --wait || true ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) install  backendserver ./charts/backendserver \
 			--wait --debug --set image.tag=$(TEST_APP_IMAGE_TAG) \
 			|| {   ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
+			IMAGE=` helm template test ./charts/backendserver --set image.tag=$(TEST_APP_IMAGE_TAG)  | grep " image: " | tr -d '"'| awk '{print $$2}' ` ; \
+			( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  sudo docker stop backend || true ; ) ; \
+			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" sudo docker rm backend || true ; ) ; \
+			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" \
+				sudo docker run -d -p $(E2E_VMPORT_HOSTVM_BACKEND_SERVER):80 -p $(E2E_VMPORT_HOSTVM_BACKEND_SERVER):80/udp --name backend --hostname hostvm_backend "$${IMAGE}" ; \
+			)
 	echo "deploy redirect server " ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  redirectserver --wait || true ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) install  redirectserver ./charts/redirectserver \
@@ -246,6 +252,10 @@ install_example_app:
 			|| { ./scripts/debugCluster.sh $(E2E_KUBECONFIG_PATH) "detail"  $(E2E_INSTALL_NAMESPACE) ; exit 1 ; }
 	@ KUBECONFIG=$(E2E_KUBECONFIG_PATH)  kubectl get pod -o wide -A
 	@echo "========================================================"
+	echo  "   backendserver is a common http/udp server" 
+	echo  "   redirectserver is same with backendserver, whichi redirects the backendserver's query to itself" 
+	echo  "   proxyserver is a http server, it will forward the request to other server with the specified address in the http body"
+	echo  "" 
 	@echo "   export KUBECONFIG=$(E2E_KUBECONFIG_PATH)             "
 	@echo "   kubectl get pod -o wide -A                           "
 	@echo "   visit the proxy server on controller vm : "

@@ -60,6 +60,10 @@ The Balancing component consists of an agent and a controller:
 - Refer to [LocalRedirect Policy](./docs/usages/localredirect.en.md) for usage experience.
 - Refer to [Balancing Policy](./docs/usages/balancing.en.md) for usage experience.
 
+## Limit
+
+- the project still does not support resovle NodePort query sent from the outside of the cluster. So it still need kube-proxy
+
 ## Roadmap
 
 - **IP Family and Protocol**

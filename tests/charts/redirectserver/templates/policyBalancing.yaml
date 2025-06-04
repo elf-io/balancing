@@ -87,7 +87,7 @@ spec:
       serviceName: backendserver-balancing-nodeproxy
       namespace: default
       toPorts:
-        # the port and protocol must be in line with the service , but the name should not be
+        # the port and protocol must be in line with the service , but the name is not required
         - port: "80"
           protocol: TCP
           name: p1
@@ -133,17 +133,17 @@ spec:
   backend:
     addressEndpoint:
       addresses:
-        - "1.1.1.1"
-        - "1.1.1.2"
+        # to the backend in the VM hostvm 
+        - "192.168.0.2"
       toPorts:
         # 只能有一个 name: p1
-        - port: "80"
+        - port: "8080"
           protocol: TCP
           name: p1
           # 只能有一个 name: p2
-        - port: "80"
+        - port: "8080"
           protocol: TCP
           name: p2
-        - port: "80"
+        - port: "8080"
           protocol: UDP
           name: p3

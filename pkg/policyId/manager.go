@@ -36,7 +36,9 @@ func (s *policyIdManager) GeneratePolicyId(policyName string) (string, error) {
 	s.dataLock.Lock()
 	defer s.dataLock.Unlock()
 	if id, ok := s.idData[policyName]; ok {
-		return fmt.Sprintf("%d", id), fmt.Errorf("policy already has a id=%d", id)
+		// currently, there is no deleteID interface, so, when recreate a policy with same name, the webhook will generate error 
+		//return fmt.Sprintf("%d", id), fmt.Errorf("policy already has a id=%d", id)
+		return fmt.Sprintf("%d", id), nil
 	}
 
 	id := uint32(0)
