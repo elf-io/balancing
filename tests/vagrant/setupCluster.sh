@@ -11,7 +11,7 @@ CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
 
 # 定义镜像变量
 VAGRANT_IMAGE_K8S=${VAGRANT_IMAGE_K8S:-"alvistack/kubernetes-1.30"}
-VAGRANT_IMAGE_UBUNTU=${VAGRANT_IMAGE_UBUNTU:-"alvistack/ubuntu-24.04"}
+VAGRANT_IMAGE_UBUNTU=${VAGRANT_IMAGE_UBUNTU:-"alvistack/ubuntu-24.10"}
 # 定义资源变量
 VM_MEMORY=${VM_MEMORY:-$((${VM_MEMORY:-1024}*8))}
 VM_CPUS=${VM_CPUS:-"4"}

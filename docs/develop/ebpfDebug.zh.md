@@ -2,6 +2,32 @@
 
 在部署 Balancing 后，可检测如下内容，确认 Balancing 工作符合预期。
 
+
+## eBPF map 作用
+
+```
+map_service
+	记录了为每一个 service 生成的访问入口规则，为 port、nodeport、Loadbalancer、externalIP 分别都会生成一条记录 
+
+map_backend
+	记录了每一个后端 endpoint 的转发地址，每一个 endpoint 都会有一个记录，如果是nodePort 场景，记录数量再翻倍
+
+map_affinity
+	存储客户端亲和记录，实现会话亲和性
+
+map_nat_record
+	记录了 nat 链路追踪
+
+map_node_proxy_ip
+	记录了 节点的 id 和 ip 的映射 , 用于其它表格在查询时进行 id 和 ip 之间的索引
+
+map_node_ip
+	记录了每一个 node 的 ip ，用于匹配 nodePort 场景下的 目的 ip
+
+map_configure
+	ebpf 程序的实时工作配置
+```
+
 ## 节点 eBPF 检查
 
 ```bash
@@ -18,7 +44,7 @@ ls /sys/fs/cgroup
 # 输出示例
 cgroup.controllers  cgroup.stat  cpuset.cpus.isolated  dev-mqueue.mount  io.prio.class  memory.reclaim  proc-sys-fs-binfmt_misc.mount  system.slice
 
-# 使用如下命令能够查询到 balancing 加载的 eBPF Program
+# 使用如下命令能够查询到 balancing 加载的 cgroup_sock_addr 类型的 eBPF Program
 bpftool prog
 
 # 使用如下命令能够查询到 balancing 把 eBPF Program 关联到了 cgroup v2
@@ -38,6 +64,8 @@ kubectl logs -n elf balancing-agent-q727g | grep "formatted ebpf event" | jq .
 ```
 
 ## 对象
+
+如下这些对象的 id， 都是用在 ebpf 的 map 中代表相关对象
 
 ```bash
 # 确认每一个节点，都被标记了如下 ID 唯一的 annotation

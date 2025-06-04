@@ -43,6 +43,7 @@ image="docker.io/library/golang:${go_version}"
 
 # shellcheck disable=SC2207
 cd $PROJECT_ROOT_PATH
+# Find Dockerfiles in images/ directory that use GOLANG_IMAGE
 used_by=($(git grep -l GOLANG_IMAGE= ${PROJECT_ROOT_PATH}/images/*/Dockerfile))
 
 for i in "${used_by[@]}" ; do
@@ -50,5 +51,15 @@ for i in "${used_by[@]}" ; do
     [ ! -f "${i}" ] && echo "error, failed to find ${i} " && exit 1
     #sed "s|GOLANG_IMAGE=docker\.io/library/golang:[0-9][0-9]*\.[0-9][0-9]*\(\.[0-9][0-9]*\)\?@.*|GOLANG_IMAGE=${image}@${image_digest}|" "${i}" > "${i}.sedtmp" && mv ${i}.sedtmp ${i}
     sed "s|GOLANG_IMAGE=docker\.io/library/golang:[0-9][0-9]*\.[0-9][0-9]*\(\.[0-9][0-9]*\)\?|GOLANG_IMAGE=${image}|" "${i}" > "${i}.sedtmp" && mv ${i}.sedtmp ${i}
+done
+
+# Update Go version in Dockerfiles under tests/appServer directory
+appserver_dockerfiles=($(find ${PROJECT_ROOT_PATH}/tests/appServer -name "Dockerfile.*"))
+
+for i in "${appserver_dockerfiles[@]}" ; do
+    [ ! -f "${i}" ] && echo "error, failed to find ${i} " && exit 1
+    # Update FROM golang:X.Y.Z to the new version
+    sed -i "s|FROM golang:[0-9][0-9]*\.[0-9][0-9]*\(\.[0-9][0-9]*\)\?|FROM golang:${go_version}|g" "${i}"
+    echo "Updated Go version in ${i}"
 done
 

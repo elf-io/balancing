@@ -217,24 +217,25 @@ TestRedirectPolicy(){
 TestBalancingPolicy(){
     echo "===================== test balancing: balancing policy  ========================="
 
+    # 适用于集群内或者集群外的 client，当访问 BalancingPolicy 中的指定 ip 地址时，按照 其中的 backend 进行转发
     ADDRESS=$( kubectl  get BalancingPolicy balancing-matchaddress | sed '1d' | awk '{print $2}' )
     VisitK8s "http://${ADDRESS}:80"  "http"  \
-              "http: visit the virtual address of backend-server balancing service"  "redirectserver"
+              "http: visit the virtual address of backend-server balancing service"  "hostvm_backend"
     VisitK8s "${ADDRESS}:80"  "udp"  \
-              "udp: visit the virtual address of backend-server balancing service"  "redirectserver"
+              "udp: visit the virtual address of backend-server balancing service"  "hostvm_backend"
     VisitHost "http://${ADDRESS}:80"  "http"  \
-              "http: visit the virtual address of backend-server balancing service"  "redirectserver"
+              "http: visit the virtual address of backend-server balancing service"  "hostvm_backend"
     VisitHost "${ADDRESS}:80"  "udp"  \
-              "udp: visit the virtual address of backend-server balancing service"  "redirectserver"
+              "udp: visit the virtual address of backend-server balancing service"  "hostvm_backend"
 
-
+    # 适用于集群外的client，它访问集群内服务的 clusterIP 时，负载均衡解析到 podIP + podPort （该功能还依赖集群内外之间的 agent 建立好隧道）
     SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-balancing-pod | sed '1 d' | awk '{print $3}' )
     VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
               "http: visit the pod ip of backend-server balancing service"  "redirectserver"
     VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
               "udp: visit the pod ip of backend-server balancing service"  "redirectserver"
 
-
+    # 适用于集群外的client，它访问集群内（nodePort）服务的 clusterIP 时，负载均衡解析到 backend 所在的 nodeIP + nodePort
     SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-balancing-hostport | sed '1 d' | awk '{print $3}' )
     VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
               "http: visit the hostPort of backend-server balancing service"  "redirectserver"
