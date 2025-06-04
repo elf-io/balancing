@@ -232,7 +232,7 @@ install_example_app:
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  sudo docker stop server || true ; ) ; \
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" sudo docker rm server || true ; ) ; \
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" \
-				sudo docker run -d -p $(E2E_VMPORT_HOSTVM_PROXY_SERVER):80 --name server --hostname hostvm_proxy "$${IMAGE}" ; \
+				sudo docker run -d -p $(E2E_VMPORT_HOSTVM_PROXY_SERVER):80 -p $(E2E_VMPORT_HOSTVM_PROXY_SERVER):80/udp --name server --hostname hostvm_proxy "$${IMAGE}" ; \
 			)
 	echo "deploy backend server " ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  backendserver --wait || true ; \
@@ -243,7 +243,7 @@ install_example_app:
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)"  sudo docker stop backend || true ; ) ; \
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" sudo docker rm backend || true ; ) ; \
 			( cd vagrant ; ./ssh "$(E2E_VM_HOST)" \
-				sudo docker run -d -p $(E2E_VMPORT_HOSTVM_BACKEND_SERVER):80 --name backend --hostname hostvm_backend "$${IMAGE}" ; \
+				sudo docker run -d -p $(E2E_VMPORT_HOSTVM_BACKEND_SERVER):80 -p $(E2E_VMPORT_HOSTVM_BACKEND_SERVER):80/udp --name backend --hostname hostvm_backend "$${IMAGE}" ; \
 			)
 	echo "deploy redirect server " ; \
 			helm  --kubeconfig=$(E2E_KUBECONFIG_PATH) uninstall  redirectserver --wait || true ; \

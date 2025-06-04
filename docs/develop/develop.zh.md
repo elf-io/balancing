@@ -33,6 +33,7 @@
 
     ```shell
     make e2e_deploy
+    
     # 或者使用指定的镜像标签
     make e2e_deploy -e PROJECT_IMAGE_TAG=8877a79da7c0a9f159363660b5b23e5458480aea \
                     -e TEST_APP_IMAGE_TAG=aa7693a44e205c13e9bd3bee63260c9c1048ce24
