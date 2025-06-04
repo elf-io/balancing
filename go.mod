@@ -1,6 +1,6 @@
 module github.com/elf-io/balancing
 
-go 1.23
+go 1.24
 
 require (
 	github.com/cilium/ebpf v0.16.0
