@@ -108,7 +108,7 @@ jobs:
           docker images
 
       # test against commit version
-      - name: Setup Kind Cluster
+      - name: Setup Cluster
         uses: nick-invision/retry@v2
         with:
           timeout_minutes: 10

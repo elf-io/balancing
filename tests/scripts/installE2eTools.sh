@@ -45,8 +45,8 @@ if ! VBoxManage -v &>/dev/null ; then
     echo "install virtual box"
     #https://www.virtualbox.org/wiki/Linux_Downloads
     wget https://download.virtualbox.org/virtualbox/7.0.20/virtualbox-7.0_7.0.20-163906~Ubuntu~jammy_amd64.deb
-    apt-get update  -y
-    apt install ./virtualbox-7.0_7.0.20-163906~Ubuntu~jammy_amd64.deb
+    sudo apt-get update  -y
+    sudo apt install ./virtualbox-7.0_7.0.20-163906~Ubuntu~jammy_amd64.deb
     VBoxManage -v
 else
     echo "pass virtual box is ready: $(vboxmanage --version) "
@@ -64,10 +64,10 @@ fi
 
 
 if ! which sshpass &>/dev/null ; then
-    apt-get install -y sshpass
+    sudo apt-get install -y sshpass
 fi
 if ! which jq &>/dev/null ; then
-    apt-get install -y jq
+    sudo apt-get install -y jq
 fi
 
 exit 0
