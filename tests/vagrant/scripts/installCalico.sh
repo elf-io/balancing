@@ -9,13 +9,15 @@ set -x
 
 CURRENT_FILENAME=`basename $0`
 CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
-
+IMAGE_PROXY_REPOSITORY=${IMAGE_PROXY_REPOSITORY:-"true"}
 
 echo "install calico"
 
 VERSION=v3.28.2
 #curl https://raw.githubusercontent.com/projectcalico/calico/${VERSION}/manifests/calico.yaml -O
-sed -i 's?docker.io?docker.m.daocloud.io?'  ${CURRENT_DIR_PATH}/calico-${VERSION}.yaml
+if [ "${IMAGE_PROXY_REPOSITORY}" == "true" ] ; then
+    sed -i 's?docker.io?docker.m.daocloud.io?'  ${CURRENT_DIR_PATH}/calico-${VERSION}.yaml
+fi
 kubectl apply -f ${CURRENT_DIR_PATH}/calico-${VERSION}.yaml
 
 TIMEOUT_SEC=180

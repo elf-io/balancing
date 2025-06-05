@@ -15,7 +15,7 @@ ImageName="$1"
 EXCLUDE_VM_LIST=${EXCLUDE_VM_LIST:-""}
 SPECIFIED_VM_LIST=${SPECIFIED_VM_LIST:-""}
 
-RAW_INFO=` vagrant status `
+RAW_INFO=` sudo vagrant status `
 RUNNING_INFO=` grep " running " <<< "$RAW_INFO"  `
 RUNNING_NUM=` echo "$RUNNING_INFO" | wc -l `
 (( $RUNNING_NUM == 0 )) && echo "error, no running VMs" >&2 && exit 1

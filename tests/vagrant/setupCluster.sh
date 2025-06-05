@@ -13,8 +13,9 @@ CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
 VAGRANT_IMAGE_K8S=${VAGRANT_IMAGE_K8S:-"alvistack/kubernetes-1.30"}
 VAGRANT_IMAGE_UBUNTU=${VAGRANT_IMAGE_UBUNTU:-"alvistack/ubuntu-24.10"}
 # 定义资源变量
-VM_MEMORY=${VM_MEMORY:-$((${VM_MEMORY:-1024}*8))}
+VM_MEMORY_GB=${VM_MEMORY_GB:-"8"}
 VM_CPUS=${VM_CPUS:-"4"}
+IMAGE_PROXY_REPOSITORY=${IMAGE_PROXY_REPOSITORY:-"true"}
 
 SKIP_KUBE_PROXY=${SKIP_KUBE_PROXY:-""}
 
@@ -70,7 +71,7 @@ Vagrant.configure("2") do |config|
     k8s.vm.network "forwarded_port", guest: ${VMPORT_K8SVM_TCP_PORT1}, host: ${HOSTPORT_CONTROLVM_TCP_PORT1}
     k8s.vm.network "forwarded_port", guest: 6443, host: ${HOSTPORT_API_SERVER}
     k8s.vm.provider "virtualbox" do |vb|
-      vb.memory = "$VM_MEMORY"
+      vb.memory = "$(( VM_MEMORY_GB * 1024 ))"
       vb.cpus = "$VM_CPUS"
     end
     # 恢复默认的 vagrant 用户 SSH 登录
@@ -96,7 +97,7 @@ Vagrant.configure("2") do |config|
       sudo WORKER_JOIN_SCRIPT_PATH=/home/vagrant/scripts/join.sh  SKIP_KUBE_PROXY=${SKIP_KUBE_PROXY} /home/vagrant/scripts/setUpMaster.sh
       sudo /home/vagrant/scripts/setKubelet.sh  eth1
       chmod +x /home/vagrant/scripts/installCalico.sh
-      /home/vagrant/scripts/installCalico.sh
+      IMAGE_PROXY_REPOSITORY=${IMAGE_PROXY_REPOSITORY} /home/vagrant/scripts/installCalico.sh
 
       if [ "${DEFAULT_ROUTER_TO_HOST}" == "true" ]; then
         # 删除原有默认路由
@@ -116,7 +117,7 @@ Vagrant.configure("2") do |config|
     k8s.vm.network "private_network", ip: "192.168.0.11", netmask: "255.255.255.0", ipv6: "fd00::11", ipv6_prefix_length: 64
     k8s.vm.network "forwarded_port", guest: ${VMPORT_K8SVM_TCP_PORT1}, host: ${HOSTPORT_WORKERVM_TCP_PORT1}
     k8s.vm.provider "virtualbox" do |vb|
-      vb.memory = "$VM_MEMORY"
+      vb.memory = "$(( VM_MEMORY_GB * 1024 ))"
       vb.cpus = "$VM_CPUS"
     end
     # 恢复默认的 vagrant 用户 SSH 登录
@@ -172,7 +173,7 @@ Vagrant.configure("2") do |config|
     ubuntu.vm.network "forwarded_port", guest: ${VMPORT_HOSTVM_TCP_PORT2}, host: ${HOSTPORT_HOSTVM_TCP_PORT2}
 
     ubuntu.vm.provider "virtualbox" do |vb|
-      vb.memory = "$VM_MEMORY"
+      vb.memory = "$(( VM_MEMORY_GB * 1024 ))"
       vb.cpus = "$VM_CPUS"
     end
     # 恢复默认的 vagrant 用户 SSH 登录
@@ -236,7 +237,7 @@ case "$1" in
     echo "============================================================================"
     echo "start setting up vagrant cluster: $(date)"
     create_vagrantfile
-    vagrant up
+    sudo vagrant up
     SetKubeconfig
     echo "finish setting up vagrant cluster: $(date)"
     echo "============================================================================"
@@ -244,7 +245,7 @@ case "$1" in
   off)
     echo "============================================================================"
     echo "destroy vagrant cluster"
-    vagrant destroy -f controlvm workervm hostvm
+    sudo vagrant destroy -f controlvm workervm hostvm
     echo "============================================================================"
     ;;
   *)
