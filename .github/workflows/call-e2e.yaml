@@ -123,7 +123,8 @@ jobs:
                 -e E2E_IP_FAMILY=${{ inputs.ipfamily }} \
                 -e E2E_SKIP_KUBE_PROXY=true \
                 -e E2E_VM_CPUS=2 \
-                -e E2E_VM_MEMORY_GB=4
+                -e E2E_VM_MEMORY_GB=4 \
+                -e E2E_IMAGE_PROXY_REPOSITORY=false
 
       - name: Run e2e Test
         continue-on-error: true
