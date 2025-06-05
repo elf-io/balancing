@@ -84,8 +84,10 @@ if ! sudo vagrant version &>/dev/null ; then
     echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
     sudo apt update && sudo apt install -y vagrant
     sudo vagrant version
+    sudo mkdir /etc/vbox || true
     sudo cat /etc/vbox/networks.conf
     sudo echo '* 0.0.0.0/0 ::/0' > /etc/vbox/networks.conf
+    sudo cat /etc/vbox/networks.conf
 else
     echo "pass vagrant is ready: $(vagrant version) "
 fi
