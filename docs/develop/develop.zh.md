@@ -46,3 +46,15 @@
     ```
 
 6. 使用浏览器访问 `http://NodeIP:28000`，查看 Proscope Server 中的 Golang 采样数据。
+
+## 本机调试 ebpf
+
+```
+apt-get install clang llvm gcc-multilib libbpf-dev linux-headers-$(uname -r)
+
+cd pkg/ebpf/bpf
+
+# 检测语法错误
+clang -fsyntax-only -I.  cgroup.c
+
+```

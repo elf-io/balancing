@@ -192,6 +192,32 @@ struct {
   //__uint(map_flags, 0);
 } map_nat_record SEC(".maps");
 
+//======================================= map ： QoS rate limiting for NAT_TYPE_REDIRECT flows
+
+/* ebpf program use this for storage of flow count in current second */
+/* QoS rate limiting for NAT_TYPE_REDIRECT flows */
+#define MAX_QOS_LIMIT_PER_SECOND 10  /* Maximum requests per second */
+
+struct flow_key {
+    __be32 dst_ip;
+    __u16 dst_port;
+    __u8 proto;
+    __u8 pad[1];
+};
+
+struct flow_value {
+    __u64 last_timestamp;  /* Timestamp of the last request in nanoseconds */
+    __u32 count;          /* Number of requests since the beginning of the current second */
+    __u32 pad;
+};
+
+struct {
+    __uint(type, BPF_MAP_TYPE_LRU_HASH);
+    __uint(max_entries, 10240);
+    __type(key, struct flow_key);
+    __type(value, struct flow_value);
+} map_qos_flows SEC(".maps");
+
 #endif
 
 

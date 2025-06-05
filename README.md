@@ -83,6 +83,7 @@ The Balancing component consists of an agent and a controller:
 - **LocalRedirect Policy**
     - [x] Front supports pointing to service and custom VIP
     - [x] Backend supports pod label selectors
+    - [x] Support Qos
 
 - **Balancing Policy**
     - [x] Front supports pointing to service and custom VIP

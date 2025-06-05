@@ -44,6 +44,59 @@ static __always_inline  bool ctx_in_hostns(void *ctx )
 
 //-------------------------------------
 
+/* Check if QoS rate limit is exceeded for a flow
+ * Updates flow counters and checks if rate limit is exceeded
+ * Returns true if rate limit exceeded, false otherwise
+ * return: 0 if not exceeded, otherwise the flow's count in current second
+ */
+static __always_inline __u32 check_qos_limit_exceeded(__be32 dest_ip, __u16 dst_port, __u8 ip_proto  ,  __u32 debug_level ) {
+    struct flow_key flow;
+    struct flow_value new_value = {0};
+    struct flow_value *flow_val;
+    
+    // Get current timestamp in nanoseconds
+    __u64 current_time = bpf_ktime_get_ns();
+    __u64 current_second = current_time / 1000000000; // Convert to seconds
+    
+    // Create flow key (only protocol and destination)
+    flow.dst_ip = dest_ip;
+    flow.dst_port = dst_port;
+    flow.proto = ip_proto;
+    flow.pad[0] = 0;
+    
+    // Lookup flow rate information
+    flow_val = bpf_map_lookup_elem(&map_qos_flows, &flow);
+    
+    if (flow_val) {
+        __u64 last_second = flow_val->last_timestamp / 1000000000;
+        
+        if (last_second == current_second) {
+            // Still in the same second, increment counter
+            if (flow_val->count >= MAX_QOS_LIMIT_PER_SECOND) {
+                return MAX_QOS_LIMIT_PER_SECOND; // Rate limit exceeded
+            }
+            
+            // Update counter
+            flow_val->count++;
+        } else {
+            // New second, reset counter
+            flow_val->count = 1;
+            flow_val->last_timestamp = current_time;
+        }
+    } else {
+        // New flow, initialize counter
+        new_value.last_timestamp = current_time;
+        new_value.count = 1;    
+    }
+
+    if ( bpf_map_update_elem(&map_qos_flows, &flow, &new_value, BPF_ANY) ) {
+        debugf(DEBUG_ERROR, "failed to update map_qos_flows" );
+    }
+
+    debugf(DEBUG_VERSBOSE, "count %d does not exceed QoS rate limit %d, process NAT_TYPE_REDIRECT\n" , flow_val->count , MAX_QOS_LIMIT_PER_SECOND );
+    return 0; // Rate limit not exceeded
+}
+
 static __always_inline bool get_service( __be32 dest_ip, __u16 dst_port, __u8 ip_proto  , struct mapkey_service *svckey , struct mapvalue_service *svcval ,  __u32 debug_level ) {
     struct mapvalue_service *t ;
 
@@ -58,11 +111,17 @@ static __always_inline bool get_service( __be32 dest_ip, __u16 dst_port, __u8 ip
     // search NAT_TYPE_REDIRECT
     svckey->nat_type = NAT_TYPE_REDIRECT ;
     t = bpf_map_lookup_elem( &map_service , svckey);
-    if (t){
+    if (t) {
         debugf(DEBUG_INFO, "get NAT_TYPE_REDIRECT record \n" );
-        goto succeed;
+        // Check QoS rate limiting for NAT_TYPE_REDIRECT flows
+        __u32 ret = check_qos_limit_exceeded(dest_ip, dst_port, ip_proto , debug_level );
+        if ( ret == 0 ) {
+            //  Rate limit not exceeded, continue to process redirect
+            goto succeed;
+        }
+        debugf(DEBUG_INFO, "Hit the QoS rate limit %d, skip NAT_TYPE_REDIRECT process\n" , ret );
     }
-
+    
     // search NAT_TYPE_BALANCING
     svckey->nat_type = NAT_TYPE_BALANCING ;
     t = bpf_map_lookup_elem( &map_service , svckey);

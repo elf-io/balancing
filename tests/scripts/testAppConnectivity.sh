@@ -235,7 +235,7 @@ TestBalancingPolicy(){
     VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
               "udp: visit the pod ip of backend-server balancing service"  "redirectserver"
 
-    # 适用于集群外的client，它访问集群内（nodePort）服务的 clusterIP 时，负载均衡解析到 backend 所在的 nodeIP + nodePort
+    # 负载均衡地址被 DNAT 解析为 pod 所在的 node IP 和 pod HostPort，适用于集群外部应用访问集群内定义了 hostPort 的 service
     SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-balancing-hostport | sed '1 d' | awk '{print $3}' )
     VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
               "http: visit the hostPort of backend-server balancing service"  "redirectserver"
@@ -246,16 +246,17 @@ TestBalancingPolicy(){
     VisitHost "${SERVICE_CLUSTER_IP}:80"  "udp"  \
               "udp: visit the hostPort of backend-server balancing service"  "redirectserver"
 
-
-    SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-balancing-nodeproxy | sed '1 d' | awk '{print $3}' )
-    VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
-              "http: visit the nodeProxy of backend-server balancing service"  "redirectserver"
-    VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
-              "udp: visit the nodeProxy of backend-server balancing service"  "redirectserver"
-    VisitHost "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
-              "http: visit the nodeProxy of backend-server balancing service"  "redirectserver"
-    VisitHost "${SERVICE_CLUSTER_IP}:80"  "udp"  \
-              "udp: visit the nodeProxy of backend-server balancing service"  "redirectserver"
+    # 这个依赖 kube-proxy 或者 其它负载均衡器 实施 二次 DNAT 
+    # 负载均衡地址被 DNAT 解析为节点的 Proxy IP 和策略中定义的端口，适用集群外部应用访问集群内的 POD
+    # SERVICE_CLUSTER_IP=$( kubectl  get service backendserver-balancing-nodeproxy | sed '1 d' | awk '{print $3}' )
+    # VisitK8s "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
+    #           "http: visit the nodeProxy of backend-server balancing service"  "redirectserver"
+    # VisitK8s "${SERVICE_CLUSTER_IP}:80"  "udp"  \
+    #           "udp: visit the nodeProxy of backend-server balancing service"  "redirectserver"
+    # VisitHost "http://${SERVICE_CLUSTER_IP}:80"  "http"  \
+    #           "http: visit the nodeProxy of backend-server balancing service"  "redirectserver"
+    # VisitHost "${SERVICE_CLUSTER_IP}:80"  "udp"  \
+    #           "udp: visit the nodeProxy of backend-server balancing service"  "redirectserver"
 
     # DOTO: TEST on host client
 
