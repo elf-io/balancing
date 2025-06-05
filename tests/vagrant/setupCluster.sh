@@ -13,7 +13,7 @@ CURRENT_DIR_PATH=$(cd `dirname $0`; pwd)
 VAGRANT_IMAGE_K8S=${VAGRANT_IMAGE_K8S:-"alvistack/kubernetes-1.30"}
 VAGRANT_IMAGE_UBUNTU=${VAGRANT_IMAGE_UBUNTU:-"alvistack/ubuntu-24.10"}
 # 定义资源变量
-VM_MEMORY=${VM_MEMORY:-$((${VM_MEMORY:-1024}*8))}
+VM_MEMORY_GB=${VM_MEMORY_GB:-"8"}
 VM_CPUS=${VM_CPUS:-"4"}
 
 SKIP_KUBE_PROXY=${SKIP_KUBE_PROXY:-""}
@@ -70,7 +70,7 @@ Vagrant.configure("2") do |config|
     k8s.vm.network "forwarded_port", guest: ${VMPORT_K8SVM_TCP_PORT1}, host: ${HOSTPORT_CONTROLVM_TCP_PORT1}
     k8s.vm.network "forwarded_port", guest: 6443, host: ${HOSTPORT_API_SERVER}
     k8s.vm.provider "virtualbox" do |vb|
-      vb.memory = "$VM_MEMORY"
+      vb.memory = "$(( VM_MEMORY_GB * 1024 ))"
       vb.cpus = "$VM_CPUS"
     end
     # 恢复默认的 vagrant 用户 SSH 登录
@@ -116,7 +116,7 @@ Vagrant.configure("2") do |config|
     k8s.vm.network "private_network", ip: "192.168.0.11", netmask: "255.255.255.0", ipv6: "fd00::11", ipv6_prefix_length: 64
     k8s.vm.network "forwarded_port", guest: ${VMPORT_K8SVM_TCP_PORT1}, host: ${HOSTPORT_WORKERVM_TCP_PORT1}
     k8s.vm.provider "virtualbox" do |vb|
-      vb.memory = "$VM_MEMORY"
+      vb.memory = "$(( VM_MEMORY_GB * 1024 ))"
       vb.cpus = "$VM_CPUS"
     end
     # 恢复默认的 vagrant 用户 SSH 登录
@@ -172,7 +172,7 @@ Vagrant.configure("2") do |config|
     ubuntu.vm.network "forwarded_port", guest: ${VMPORT_HOSTVM_TCP_PORT2}, host: ${HOSTPORT_HOSTVM_TCP_PORT2}
 
     ubuntu.vm.provider "virtualbox" do |vb|
-      vb.memory = "$VM_MEMORY"
+      vb.memory = "$(( VM_MEMORY_GB * 1024 ))"
       vb.cpus = "$VM_CPUS"
     end
     # 恢复默认的 vagrant 用户 SSH 登录
