@@ -106,6 +106,7 @@ jobs:
               done
           done
           docker images
+          make build_local_test_app_image
 
       # test against commit version
       - name: Setup Cluster
@@ -117,11 +118,10 @@ jobs:
           command: |
             sudo free -h
             sudo cat /proc/cpuinfo 
-            sudo make e2e_init -e E2E_KIND_CLUSTER_NAME=${{ env.RUN_KIND_CLUSTER_NAME }} \
+            sudo make e2e \
                 -e PROJECT_IMAGE_TAG=${{ inputs.ref }} \
                 -e E2E_IP_FAMILY=${{ inputs.ipfamily }} \
-                -e E2E_PYROSCOPE_VM_PORT='' \
-                -e E2E_KIND_NODE_IMAGE=${{ inputs.kind_node_image }} \
+                -e E2E_SKIP_KUBE_PROXY=true \
                 -e E2E_VM_CPUS=2 \
                 -e E2E_VM_MEMORY_GB=4
 
