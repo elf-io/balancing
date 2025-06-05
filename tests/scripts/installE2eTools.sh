@@ -44,9 +44,35 @@ fi
 if ! sudo VBoxManage -v &>/dev/null ; then
     echo "install virtual box"
     #https://www.virtualbox.org/wiki/Linux_Downloads
-    wget https://download.virtualbox.org/virtualbox/7.0.20/virtualbox-7.0_7.0.20-163906~Ubuntu~jammy_amd64.deb
-    sudo apt-get update  -y
-    sudo apt install -y ./virtualbox-7.0_7.0.20-163906~Ubuntu~jammy_amd64.deb
+    
+    # Detect Ubuntu version and use appropriate package
+    UBUNTU_VERSION=$(lsb_release -cs)
+    echo "Detected Ubuntu version: $UBUNTU_VERSION"
+    cat /etc/os-release
+    
+    if [ "$UBUNTU_VERSION" = "noble" ]; then
+        # For Ubuntu 24.04 (Noble), use the official repository method
+        echo "Using VirtualBox repository for Ubuntu $UBUNTU_VERSION"
+        # Add Oracle VirtualBox public key
+        wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg
+        
+        # Add the VirtualBox repository
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $UBUNTU_VERSION contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
+        
+        # Update and install VirtualBox
+        sudo apt-get update -y
+        sudo apt-get install -y virtualbox-7.0
+    else
+        # For Ubuntu 22.04 (Jammy) and others, use the direct package download
+        echo "Using direct package download for Ubuntu $UBUNTU_VERSION"
+        [ -f ./virtualbox-7.0_7.0.20-163906~Ubuntu~jammy_amd64.deb ] || wget https://download.virtualbox.org/virtualbox/7.0.20/virtualbox-7.0_7.0.20-163906~Ubuntu~jammy_amd64.deb
+        sudo apt-get update -y
+        sudo apt install -y ./virtualbox-7.0_7.0.20-163906~Ubuntu~jammy_amd64.deb
+    fi
+    
+    # Install dependencies if needed
+    sudo apt-get install -f -y
+    
     sudo VBoxManage -v
 else
     echo "pass virtual box is ready: $(vboxmanage --version) "
