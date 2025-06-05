@@ -122,7 +122,7 @@ jobs:
                 -e E2E_IP_FAMILY=${{ inputs.ipfamily }} \
                 -e E2E_PYROSCOPE_VM_PORT='' \
                 -e E2E_KIND_NODE_IMAGE=${{ inputs.kind_node_image }} \
-                -e E2E_VM_CPU=2 \
+                -e E2E_VM_CPUS=2 \
                 -e E2E_VM_MEMORY_GB=4
 
       - name: Run e2e Test
