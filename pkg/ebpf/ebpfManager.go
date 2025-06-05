@@ -251,6 +251,12 @@ func (s *EbpfProgramStruct) LoadProgramp() error {
 		}
 	}
 
+	// Update the redirect QoS limit
+	s.l.Sugar().Infof("ebpf redirect QoS limit: %d", types.AgentConfig.RedirectQosLimit)
+	if err := s.UpdateMapConfigure(MapConfigureKeyIndexRedirectQoSLimit, uint32(types.AgentConfig.RedirectQosLimit)); err != nil {
+		s.l.Sugar().Fatalf("%v", err)
+	}
+
 	return nil
 }
 

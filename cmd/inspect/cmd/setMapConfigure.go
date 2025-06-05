@@ -124,9 +124,47 @@ var CmdSetMapConfigureIpv6 = &cobra.Command{
 	},
 }
 
+var CmdSetMapConfigureRedirectQosLimit = &cobra.Command{
+	Use:   "redirectQosLimit",
+	Short: "set redirect QoS limit (requests per second)",
+	Args:  cobra.RangeArgs(1, 1),
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) != 1 {
+			fmt.Printf("please provide a numeric value for redirectQosLimit")
+			os.Exit(1)
+		}
+
+		var key uint32
+		var value uint32
+		key = ebpf.MapConfigureKeyIndexRedirectQoSLimit
+
+		// Convert string argument to uint32
+		_, err := fmt.Sscanf(args[0], "%d", &value)
+		if err != nil {
+			fmt.Printf("Invalid value: %s. Please provide a valid number\n", args[0])
+			os.Exit(1)
+		}
+
+		bpf := ebpf.NewEbpfProgramMananger(nil)
+		if err := bpf.LoadAllEbpfMap(""); err != nil {
+			fmt.Printf("failed to load ebpf Map: %v\n", err)
+			os.Exit(2)
+		}
+		defer bpf.UnloadAllEbpfMap()
+
+		if e := bpf.UpdateMapConfigure(key, value); e != nil {
+			fmt.Printf("failed to set ebpf Map: %v\n", e)
+			os.Exit(3)
+		}
+
+		fmt.Printf("succeeded to set ebpf Map configure: %s\n", ebpf.MapConfigureStr(key, value))
+	},
+}
+
 func init() {
 	CmdSetMapConfigure.AddCommand(CmdSetMapConfigureIpv4)
 	CmdSetMapConfigure.AddCommand(CmdSetMapConfigureIpv6)
 	CmdSetMapConfigure.AddCommand(CmdSetMapConfigureDebugLevel)
+	CmdSetMapConfigure.AddCommand(CmdSetMapConfigureRedirectQosLimit)
 	CmdSetMap.AddCommand(CmdSetMapConfigure)
 }

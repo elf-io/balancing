@@ -16,6 +16,7 @@ LocalRedirect 策略参考了 [cilium](https://github.com/cilium/cilium) 项目�
 
 * [x] 前端支持指向服务或自定义的 VIP 和端口
 * [x] 后端支持 Pod 标签选择器
+* [x] 支持配置集群全局的 Qos 上限。
 
 > 注意：Balancing Policy 和 LocalRedirect Policy 实例之间，前端不支持绑定相同的服务或定义相同的虚拟地址，否则会导致解析冲突。
 
@@ -29,6 +30,8 @@ LocalRedirect 策略参考了 [cilium](https://github.com/cilium/cilium) 项目�
   传统方式中，通过修改 Pod 的 DNS 配置指向本地 Node-local DNS 的虚拟地址，在节点上绑定该虚拟地址。然而，当 Node-local DNS 故障或升级时，这种方式无法为应用提供高可用的 DNS 服务。
 
   引入 LocalRedirect 策略的重定向能力，无需修改 Pod 的 DNS 配置或引入新的虚拟地址，即可为 Node-local DNS 提供透明、高可用的服务重定向，支持在本地 Node-local DNS 故障或升级期间，将服务访问解析到原本的 CoreDNS 服务。
+
+  可选的，可配置集群全局的 Qos 上限，在每一个 node 上，当为某个 service 的重定向次数达到每秒的 QOS 上限时，在本秒内则不为该服务实施重定向，让服务解析走正常的流程。该功能可用于有效设置节点本地的代理的每秒 QOS 上限。
 
 ## 策略示例
 
@@ -96,3 +99,13 @@ spec:
         protocol: TCP
         name: p2
 ```
+
+## Qos 上限
+
+1. 启用
+
+    方式 1：在安装 balancing 时，设置 helm 的参数 values.feature.redirectQosLimit=100
+
+    方式 2：在安装完成 balancing 后，可设置 `kubectl set env deployment/balancing-agent -n elf REDIRECT_QOS_LIMIT=100`
+
+

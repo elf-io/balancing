@@ -49,7 +49,7 @@ static __always_inline  bool ctx_in_hostns(void *ctx )
  * Returns true if rate limit exceeded, false otherwise
  * return: 0 if not exceeded, otherwise the flow's count in current second
  */
-static __always_inline __u32 check_qos_limit_exceeded(__be32 dest_ip, __u16 dst_port, __u8 ip_proto  ,  __u32 debug_level ) {
+static __always_inline __u32 check_qos_limit_exceeded(__be32 dest_ip, __u16 dst_port, __u8 ip_proto, __u32 debug_level, __u32 qos_limit) {
     struct flow_key flow;
     struct flow_value new_value = {0};
     struct flow_value *flow_val;
@@ -72,16 +72,18 @@ static __always_inline __u32 check_qos_limit_exceeded(__be32 dest_ip, __u16 dst_
         
         if (last_second == current_second) {
             // Still in the same second, increment counter
-            if (flow_val->count >= MAX_QOS_LIMIT_PER_SECOND) {
-                return MAX_QOS_LIMIT_PER_SECOND; // Rate limit exceeded
+            if (flow_val->count > qos_limit) {
+                return qos_limit; // Rate limit exceeded
             }
             
             // Update counter
-            flow_val->count++;
+            new_value = *flow_val; // Copy current value to update structure
+            new_value.count++;
         } else {
             // New second, reset counter
-            flow_val->count = 1;
-            flow_val->last_timestamp = current_time;
+            new_value = *flow_val; // Copy current value to update structure
+            new_value.count = 1;
+            new_value.last_timestamp = current_time;
         }
     } else {
         // New flow, initialize counter
@@ -89,15 +91,16 @@ static __always_inline __u32 check_qos_limit_exceeded(__be32 dest_ip, __u16 dst_
         new_value.count = 1;    
     }
 
-    if ( bpf_map_update_elem(&map_qos_flows, &flow, &new_value, BPF_ANY) ) {
-        debugf(DEBUG_ERROR, "failed to update map_qos_flows" );
+    if (bpf_map_update_elem(&map_qos_flows, &flow, &new_value, BPF_ANY)) {
+        debugf(DEBUG_ERROR, "failed to update map_qos_flows");
     }
 
-    debugf(DEBUG_VERSBOSE, "count %d does not exceed QoS rate limit %d, process NAT_TYPE_REDIRECT\n" , flow_val->count , MAX_QOS_LIMIT_PER_SECOND );
+    debugf(DEBUG_VERSBOSE, "qos count %d for %pI4:%d/%d, and does not exceed QoS rate limit %d \n", 
+           flow_val ? flow_val->count : 1, &dest_ip , dst_port , ip_proto , qos_limit);
     return 0; // Rate limit not exceeded
 }
 
-static __always_inline bool get_service( __be32 dest_ip, __u16 dst_port, __u8 ip_proto  , struct mapkey_service *svckey , struct mapvalue_service *svcval ,  __u32 debug_level ) {
+static __always_inline bool get_service( __be32 dest_ip, __u16 dst_port, __u8 ip_proto, struct mapkey_service *svckey, struct mapvalue_service *svcval, __u32 debug_level, __u32 redirect_qos_limit) {
     struct mapvalue_service *t ;
 
     svckey->address = dest_ip ;
@@ -114,12 +117,15 @@ static __always_inline bool get_service( __be32 dest_ip, __u16 dst_port, __u8 ip
     if (t) {
         debugf(DEBUG_INFO, "get NAT_TYPE_REDIRECT record \n" );
         // Check QoS rate limiting for NAT_TYPE_REDIRECT flows
-        __u32 ret = check_qos_limit_exceeded(dest_ip, dst_port, ip_proto , debug_level );
+        __u32 ret=0;
+        if ( redirect_qos_limit != 0 ) {
+            ret = check_qos_limit_exceeded(dest_ip, dst_port, ip_proto, debug_level, redirect_qos_limit);
+        }
         if ( ret == 0 ) {
             //  Rate limit not exceeded, continue to process redirect
             goto succeed;
         }
-        debugf(DEBUG_INFO, "Hit the QoS rate limit %d, skip NAT_TYPE_REDIRECT process\n" , ret );
+        debugf(DEBUG_INFO, "Hit the QoS rate limit %d for %pI4:%d/%d, skip NAT_TYPE_REDIRECT process\n" , ret , &dest_ip , dst_port , ip_proto );
     }
     
     // search NAT_TYPE_BALANCING
@@ -213,7 +219,7 @@ static __always_inline struct mapvalue_affinity* get_affinity_and_update( struct
 
 //----------------------
 
-static __always_inline int execute_nat(struct bpf_sock_addr *ctx , __u32 debug_level ) {
+static __always_inline int execute_nat(struct bpf_sock_addr *ctx, __u32 debug_level, __u32 redirect_qos_limit) {
 
 	__u32 dst_ip = ctx->user_ip4;
 	// user_port is saved in network order, convert to host order
@@ -268,7 +274,7 @@ static __always_inline int execute_nat(struct bpf_sock_addr *ctx , __u32 debug_l
     // ------------- find service value
     struct mapkey_service svckey;
     struct mapvalue_service svcval;
-    if ( ! get_service( dst_ip , dst_port , ip_proto , &svckey, &svcval , debug_level ) ) {
+    if ( ! get_service(dst_ip, dst_port, ip_proto, &svckey, &svcval, debug_level, redirect_qos_limit) ) {
         // these packets may be forwarding for non-service
         debugf(DEBUG_VERSBOSE, "did not find service value for %pI4:%d\n" , &dst_ip  , dst_port   );
         return 2;
@@ -422,7 +428,7 @@ output_event:
 
 //----------------------
 
-static __always_inline int get_configure(__u32 *debug_level , __u32 *ipv4_enabled , __u32 *ipv6_enabled ) {
+static __always_inline int get_configure(__u32 *debug_level, __u32 *ipv4_enabled, __u32 *ipv6_enabled, __u32 *redirect_qos_limit) {
     __u32 map_index ;
     __u32 *ptr ;
     char fmt[] = "elb cgroup: failed to get configure " ;
@@ -452,6 +458,16 @@ static __always_inline int get_configure(__u32 *debug_level , __u32 *ipv4_enable
     }
     *ipv6_enabled = *ptr;
 
+    // Get redirect QoS limit
+    map_index = INDEX_REDIRECT_QOS_LIMIT;
+    ptr = bpf_map_lookup_elem(&map_configure, &map_index);
+    if (!ptr) {
+        // Use default if not found
+        *redirect_qos_limit = 0;
+    } else {
+        *redirect_qos_limit = *ptr;
+    }
+
     if ( *ipv4_enabled == 0 &&  *ipv6_enabled == 0 ) {
          bpf_trace_printk(fmt_err, sizeof(fmt_err) );
     }
@@ -468,7 +484,8 @@ int sock4_connect(struct bpf_sock_addr *ctx) {
     __u32 debug_level ;
     __u32 ipv4_enabled ;
     __u32 ipv6_enabled ;
-    if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled)!=0 ) {
+    __u32 redirect_qos_limit;
+    if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled, &redirect_qos_limit)!=0 ) {
         return SYS_PROCEED;
     }
     if (ipv4_enabled == 0) {
@@ -481,7 +498,7 @@ int sock4_connect(struct bpf_sock_addr *ctx) {
     //debugf(DEBUG_VERSBOSE, "connect4: src_ip=%pI4  \n" , ctx->msg_src_ip4  );
 
     // for tcp and udp
-	err = execute_nat(ctx, debug_level );
+	err = execute_nat(ctx, debug_level, redirect_qos_limit);
 
 	return SYS_PROCEED;
 }
@@ -494,7 +511,8 @@ int sock4_sendmsg(struct bpf_sock_addr *ctx)
     __u32 debug_level ;
     __u32 ipv4_enabled ;
     __u32 ipv6_enabled ;
-    if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled)!=0 ) {
+    __u32 redirect_qos_limit;
+    if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled, &redirect_qos_limit)!=0 ) {
         return SYS_PROCEED;
     }
     if (ipv4_enabled == 0) {
@@ -504,7 +522,7 @@ int sock4_sendmsg(struct bpf_sock_addr *ctx)
     //debugf(DEBUG_VERSBOSE , "sendmsg4: dst_ip=%pI4 dst_port=%d\n" ,&dst_ip, bpf_htons(dst_port) );
 
     // for UDP
-	err = execute_nat(ctx , debug_level );
+	err = execute_nat(ctx, debug_level, redirect_qos_limit);
 
 	return SYS_PROCEED;
 }
@@ -518,7 +536,8 @@ int sock4_recvmsg(struct bpf_sock_addr *ctx)
     __u32 debug_level ;
     __u32 ipv4_enabled ;
     __u32 ipv6_enabled ;
-    if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled)!=0 ) {
+    __u32 redirect_qos_limit;
+    if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled, &redirect_qos_limit)!=0 ) {
         return SYS_PROCEED;
     }
     if (ipv4_enabled == 0) {
@@ -538,7 +557,8 @@ int sock4_getpeername(struct bpf_sock_addr *ctx)
     __u32 debug_level ;
     __u32 ipv4_enabled ;
     __u32 ipv6_enabled ;
-    if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled)!=0 ) {
+    __u32 redirect_qos_limit;
+    if ( get_configure(&debug_level, &ipv4_enabled, &ipv6_enabled, &redirect_qos_limit)!=0 ) {
         return SYS_PROCEED;
     }
     if (ipv4_enabled == 0) {

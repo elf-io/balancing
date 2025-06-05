@@ -13,9 +13,10 @@
 
     ```shell
     make build_local_image
-    ```
 
-    > 对于中国区用户，可以使用代理源来加速构建：`make build_local_image -e USE_PROXY_SOURCE=true`
+    # 对于中国区用户，可以使用代理源来加速构建
+    make build_local_image -e USE_PROXY_SOURCE=true
+    ```
 
 2. 构建测试应用镜像
 

@@ -466,7 +466,7 @@ func (s *EbpfProgramStruct) PrintMapConfigure() error {
 				return fmt.Errorf("failed to batchlookup for %v\n", mapPtr.String())
 			}
 		}
-		for i := 0; i < len(keys) && i < c && i < MapConfigureKeyIndexEnd; i++ {
+		for i := 0; i < len(keys) && i < c && i < int(MapConfigureKeyIndexEnd); i++ {
 			fmt.Printf("%s\n", MapConfigureStr(uint32(i), uint32(vals[i])))
 		}
 		if finished {

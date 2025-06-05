@@ -196,7 +196,6 @@ struct {
 
 /* ebpf program use this for storage of flow count in current second */
 /* QoS rate limiting for NAT_TYPE_REDIRECT flows */
-#define MAX_QOS_LIMIT_PER_SECOND 10  /* Maximum requests per second */
 
 struct flow_key {
     __be32 dst_ip;
@@ -213,7 +212,7 @@ struct flow_value {
 
 struct {
     __uint(type, BPF_MAP_TYPE_LRU_HASH);
-    __uint(max_entries, 10240);
+    __uint(max_entries, DEFAULT_MAX_EBPF_MAP_ENTRIES);
     __type(key, struct flow_key);
     __type(value, struct flow_value);
 } map_qos_flows SEC(".maps");
@@ -286,11 +285,13 @@ struct {
 #define INDEX_DEBUG_LEVEL   0
 #define INDEX_ENABLE_IPV4   1
 #define INDEX_ENABLE_IPV6   2
+#define INDEX_REDIRECT_QOS_LIMIT 3
 
 /* This a array map for configuration
     0 :  debug level ( 0:VERBOSE , 1:INFO, 2:ERROR)
     1 :  enable ipv4 ( 0: disabled , 1:enabled)
     2 :  enable ipv6 ( 0: disabled , 1:enabled)
+    3 :  redirect qos limit per second for NAT_TYPE_REDIRECT flows (default: 10)
 */
 // https://docs.kernel.org/bpf/map_array.html
 struct {

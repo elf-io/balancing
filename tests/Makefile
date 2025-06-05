@@ -49,7 +49,7 @@ installE2eTools:
 
 .PHONY: install_proscope
 install_proscope:
-	if [ -n "$(E2E_PYROSCOPE_VM_PORT)" ] ; then \
+	if [ "$(E2E_INSTALL_PYROSCOPE)" == "true" ] && [ -n "$(E2E_PYROSCOPE_VM_PORT)" ] ; then \
   		echo "install proscope on vm $(E2E_VM_HOST)  " ; \
   		( cd vagrant ; ./ssh "$(E2E_VM_HOST)" "sudo docker stop $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
   		( cd vagrant ; ./ssh "$(E2E_VM_HOST)" "sudo docker rm $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \

@@ -228,9 +228,10 @@ func (t MapEventValue) String() string {
 // ------------------------------------------------- map configure
 
 const (
-	MapConfigureKeyIndexDebugLevel = iota
+	MapConfigureKeyIndexDebugLevel uint32 = iota
 	MapConfigureKeyIndexIpv4Enabled
 	MapConfigureKeyIndexIpv6Enabled
+	MapConfigureKeyIndexRedirectQoSLimit
 	MapConfigureKeyIndexEnd
 )
 
@@ -267,6 +268,12 @@ func MapConfigureStr(key, value uint32) string {
 			return "Ipv6Enabled: disabled"
 		} else {
 			return "Ipv6Enabled: enabled"
+		}
+	case MapConfigureKeyIndexRedirectQoSLimit:
+		if value==0 {
+			return "RedirectQoSLimit: disabled"
+		}else{
+			return fmt.Sprintf("RedirectQoSLimit: %d reqs/sec", value)
 		}
 	}
 	return "unknowKey: uknowValue"

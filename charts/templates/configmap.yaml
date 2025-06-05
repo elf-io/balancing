@@ -17,3 +17,4 @@ data:
     enableIPv6: {{ .Values.feature.enableIPv6 }}
     apiServerHost: {{ .Values.feature.apiServerHost | quote }}
     apiServerPort: {{ .Values.feature.apiServerPort | quote }}
+    redirectQosLimit: {{ .Values.feature.redirectQosLimit }}

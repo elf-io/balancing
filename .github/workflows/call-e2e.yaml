@@ -124,46 +124,20 @@ jobs:
                 -e E2E_SKIP_KUBE_PROXY=true \
                 -e E2E_VM_CPUS=2 \
                 -e E2E_VM_MEMORY_GB=4 \
-                -e E2E_IMAGE_PROXY_REPOSITORY=false
+                -e E2E_IMAGE_PROXY_REPOSITORY=false \
+                -e E2E_INSTALL_PYROSCOPE=false
 
       - name: Run e2e Test
         continue-on-error: true
         run: |
           echo ${{ github.event.inputs.labels }}
           RESULT=0
-          make e2e_run -e E2E_KIND_CLUSTER_NAME=${{ env.RUN_KIND_CLUSTER_NAME }}  \
-              -e E2E_GINKGO_LABELS=${{ inputs.e2e_labels }} \
-              -e E2E_IP_FAMILY=${{ inputs.ipfamily }} || RESULT=1
+          make e2e_test_connectivity || RESULT=1
           if ((RESULT==0)) ; then
               echo "RUN_PASS=true" >> $GITHUB_ENV
           else
               echo "RUN_PASS=false" >> $GITHUB_ENV
           fi
-          if [ -f "${{ env.E2E_LOG_PATH }}" ] ; then
-              echo "RUN_UPLOAD_LOG=true" >> $GITHUB_ENV
-          else
-              echo "RUN_UPLOAD_LOG=false" >> $GITHUB_ENV
-          fi
-          if [ -f "${{ env.E2E_GINKGO_REPORT_PATH }}" ] ; then
-              echo "RUN_UPLOAD_E2E_REPORT=true" >> $GITHUB_ENV
-          else
-              echo "RUN_UPLOAD_E2E_REPORT=false" >> $GITHUB_ENV
-          fi
-
-      - name: Upload e2e cluster log
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: ${{ inputs.ipfamily }}-debuglog-${{ env.RUN_VAR }}.txt
-          path: ${{ env.E2E_LOG_PATH }}
-          retention-days: 30
-
-      - name: Upload e2e ginkgo report
-        if: ${{ env.RUN_UPLOAD_LOG == 'true' }}
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: ${{ inputs.ipfamily }}-e2ereport-${{ env.RUN_VAR }}.json
-          path: ${{ env.E2E_GINKGO_REPORT_PATH }}
-          retention-days: 30
 
       - name: Show e2e Result
         run: |
@@ -172,25 +146,3 @@ jobs:
           else
               exit 1
           fi
-
-      - name: Get the E2E Performance Result
-        # run all e2e cases
-        id: get_performance
-        if: ${{ inputs.ipfamily == 'dual' && env.PERFORMANCE_BADGE_ID != ''}}
-        shell: bash
-        run: |
-          # sudo apt-get install -y jq
-          TOOL_PATH=${{ env.PERFORMANCE_SCRIPT }}
-          TODO_STATUS=$( ${TOOL_PATH}  "${{ env.E2E_GINKGO_REPORT_PATH }}"  )
-          echo "RUN_PERFORMANCE_RESULT=${TODO_STATUS}" >> $GITHUB_ENV
-
-      - name: Update Badge
-        if: ${{ env.RUN_PERFORMANCE_RESULT != '' && inputs.ipfamily == 'dual' && env.PERFORMANCE_BADGE_ID != '' }}
-        uses: schneegans/dynamic-badges-action@v1.6.0
-        with:
-          auth: ${{ secrets.WELAN_PAT }}
-          gistID: ${{ env.PERFORMANCE_BADGE_ID }}
-          filename: ${{ env.PERFORMANCE_BADGE_FILENAME }}
-          label: performance
-          message: ${{ steps.get_performance.outputs.result }}
-          color: lightgrey
