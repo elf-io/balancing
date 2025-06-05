@@ -236,7 +236,7 @@ case "$1" in
     echo "============================================================================"
     echo "start setting up vagrant cluster: $(date)"
     create_vagrantfile
-    vagrant up
+    sudo vagrant up
     SetKubeconfig
     echo "finish setting up vagrant cluster: $(date)"
     echo "============================================================================"
@@ -244,7 +244,7 @@ case "$1" in
   off)
     echo "============================================================================"
     echo "destroy vagrant cluster"
-    vagrant destroy -f controlvm workervm hostvm
+    sudo vagrant destroy -f controlvm workervm hostvm
     echo "============================================================================"
     ;;
   *)

@@ -41,23 +41,23 @@ else
 fi
 
 
-if ! VBoxManage -v &>/dev/null ; then
+if ! sudo VBoxManage -v &>/dev/null ; then
     echo "install virtual box"
     #https://www.virtualbox.org/wiki/Linux_Downloads
     wget https://download.virtualbox.org/virtualbox/7.0.20/virtualbox-7.0_7.0.20-163906~Ubuntu~jammy_amd64.deb
     sudo apt-get update  -y
     sudo apt install -y ./virtualbox-7.0_7.0.20-163906~Ubuntu~jammy_amd64.deb
-    VBoxManage -v
+    sudo VBoxManage -v
 else
     echo "pass virtual box is ready: $(vboxmanage --version) "
 fi
 
-if ! vagrant version &>/dev/null ; then
+if ! sudo vagrant version &>/dev/null ; then
     # https://developer.hashicorp.com/vagrant/downloads
     wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
     echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
     sudo apt update && sudo apt install -y vagrant
-    vagrant version
+    sudo vagrant version
 else
     echo "pass vagrant is ready: $(vagrant version) "
 fi

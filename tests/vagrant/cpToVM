@@ -20,8 +20,7 @@ if [ -z "$NODE_NAME" ] ; then
 fi
 ( [ ! -d "$HOST_PATH" ]  && [ ! -f "$HOST_PATH" ] ) && echo "error, no exist host path $HOST_PATH " >&2 && exit 4
 
-SSH_PORT=$(vagrant ssh-config ${NODE_NAME} | grep Port | awk '{print $2}')
+SSH_PORT=$(sudo vagrant ssh-config ${NODE_NAME} | grep Port | awk '{print $2}')
 echo "copy host:$HOST_PATH to vm ${NODE_NAME}:${VM_PATH} with port ${SSH_PORT} "
 rsync -Pav -e "sshpass -p vagrant ssh -p ${SSH_PORT} -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"\
     ${HOST_PATH}   vagrant@127.0.0.1:${VM_PATH}
-
