@@ -21,13 +21,16 @@ extra:
 
 plugins:
   - i18n:
-      default_language: en
+      default_language: !ENV [DEFAULT_LANGUAGE, "en"]
+      default_language_only: !ENV [DEFAULT_LANGUAGE_ONLY, false]
+      docs_structure: suffix
+      material_alternate: true
       languages:
-        en:
+        - locale: en
+          default: true
           name: English
           build: true
-          default: true
-        zh:
+        - locale: zh
           name: 中文
           build: true
   - tags
@@ -48,8 +51,8 @@ markdown_extensions:
   - pymdownx.caret
   - pymdownx.details
   - pymdownx.emoji:
-      emoji_index: !!python/name:pymdownx.emoji.twemoji
-      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.inlinehilite
   - pymdownx.keys
   - pymdownx.mark
@@ -67,21 +70,13 @@ markdown_extensions:
   - pymdownx.snippets
 
 nav:
-  - Overview: readme.en.md
+  - Overview: readme.md
   - Getting started:
-      - Install: usages/install.en.md
-      - Service: usages/service.en.md
-      - LocalRedirect: usages/localredirect.en.md
-      - Balancing: usages/balancing.en.md
+      - Install: usages/install.md
+      - Service: usages/service.md
+      - LocalRedirect: usages/localredirect.md
+      - Balancing: usages/balancing.md
   - Development:
-      - Development: develop/develop.en.md
-      - Debug: develop/ebpfDebug.en.md
-  - 概述: readme.zh.md
-  - 入门:
-      - 安装: usages/install.zh.md
-      - 服务: usages/service.zh.md
-      - 本地重定向: usages/localredirect.zh.md
-      - 负载均衡: usages/balancing.zh.md
-  - 开发:
-      - 开发: develop/develop.zh.md
-      - 调试: develop/ebpfDebug.zh.md
+      - Development: develop/develop.md
+      - Debug: develop/ebpfDebug.md
+

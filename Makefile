@@ -368,7 +368,7 @@ preview_doc:
         --entrypoint sh \
         --stop-timeout 3 \
         --stop-signal "SIGKILL" \
-        squidfunk/mkdocs-material:8.5.11 -c "cd /host ; pip install -q mkdocs-i18n mkdocs-material-extensions ; cp docs/mkdocs.yml ./ ; mkdocs serve -a 0.0.0.0:8000"
+        squidfunk/mkdocs-material:9.6.14 -c "cd /host ; pip install -q  mkdocs-static-i18n ; cp docs/mkdocs.yml ./ ; mkdocs serve -a 0.0.0.0:8000"
 	#sleep 10 ; if curl 127.0.0.1:8000 &>/dev/null  ; then echo "succeeded to set up preview server" ; else echo "error, failed to set up preview server" ; docker stop doc_previewer ; exit 1 ; fi
 
 
@@ -384,9 +384,9 @@ build_doc:
 	-@ rm -f ./docs/$(OUTPUT_TAR) || true
 	@echo "build doc html " ; \
 		docker run --rm --name doc_builder  \
-		-v ${ROOT_DIR}:/app -w /app  \
+		-v ${PROJECT_DOC_DIR}:/host/docs \
         --entrypoint sh \
-        python:3.9-slim -c " pwd && ls && ./tools/scripts/builddoc.sh  && cd site && tar -czvf site.tar.gz * && mv ${OUTPUT_TAR} ../docs/"
+        squidfunk/mkdocs-material:9.6.14 -c "cd /host ; pip install -q mkdocs-static-i18n ; cp docs/mkdocs.yml ./ ; mkdocs build ; cd site ; tar -czvf site.tar.gz * ; mv ${OUTPUT_TAR} ../docs/"
 	@ [ -f "$(PROJECT_DOC_DIR)/$(OUTPUT_TAR)" ] || { echo "failed to build site to $(PROJECT_DOC_DIR)/$(OUTPUT_TAR) " ; exit 1 ; }
 	@ mv $(PROJECT_DOC_DIR)/$(OUTPUT_TAR) $(DOC_OUTPUT)/$(OUTPUT_TAR)
 	@ echo "succeeded to build site to $(DOC_OUTPUT)/$(OUTPUT_TAR) "
@@ -405,7 +405,7 @@ check_doc:
 		MESSAGE=`docker run --rm --name doc_builder  \
 		-v ${PROJECT_DOC_DIR}:/host/docs \
         --entrypoint sh \
-        squidfunk/mkdocs-material:8.5.11 -c "cd /host && pip install -q mkdocs-i18n mkdocs-material-extensions && cp ./docs/mkdocs.yml ./ && mkdocs build 2>&1 && cd site && tar -czvf site.tar.gz * && mv ${OUTPUT_TAR} ../docs/" 2>&1` ; \
+        squidfunk/mkdocs-material:9.6.14 -c "cd /host && pip install -q mkdocs-static-i18n && cp ./docs/mkdocs.yml ./ && mkdocs build 2>&1 && cd site && tar -czvf site.tar.gz * && mv ${OUTPUT_TAR} ../docs/" 2>&1` ; \
         if (( $$? !=0 )) ; then \
         	echo "!!! error, failed to build doc: $${MESSAGE}" ; \
         	exit 1 ; \
