@@ -55,6 +55,7 @@ type EventInfo struct {
 	NatType           string
 	NatMode           string
 	Protocol          string
+	RedirectHitLimit  bool
 }
 
 func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
@@ -85,6 +86,7 @@ func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
 					NatType:   ebpf.GetNatTypeStr(event.NatType),
 					NatMode:   ebpf.GetNatModeStr(event.NatMode),
 					Protocol:  ebpf.GetProtocolStr(event.Protocol),
+					RedirectHitLimit: event.RedirectHitLimit != 0,
 				}
 
 				eventInfo.ClientPodName, eventInfo.ClientNamespace, eventInfo.ClientContainerId, eventInfo.ClientPodUuid, eventInfo.IsHostApp, err = podId.PodIdHander.LookupPodByPid(event.Pid)

@@ -72,7 +72,7 @@ static __always_inline __u32 check_qos_limit_exceeded(__be32 dest_ip, __u16 dst_
         
         if (last_second == current_second) {
             // Still in the same second, increment counter
-            if (flow_val->count > qos_limit) {
+            if ( flow_val->count >= qos_limit) {
                 return qos_limit; // Rate limit exceeded
             }
             
@@ -95,12 +95,13 @@ static __always_inline __u32 check_qos_limit_exceeded(__be32 dest_ip, __u16 dst_
         debugf(DEBUG_ERROR, "failed to update map_qos_flows");
     }
 
-    debugf(DEBUG_VERSBOSE, "qos count %d for %pI4:%d/%d, and does not exceed QoS rate limit %d \n", 
-           flow_val ? flow_val->count : 1, &dest_ip , dst_port , ip_proto , qos_limit);
+    debugf(DEBUG_VERSBOSE, "qos count %d for %pI4, and does not exceed QoS rate limit %d \n", 
+           flow_val ? flow_val->count : 1, &dest_ip, qos_limit);
+    debugf(DEBUG_VERSBOSE, "flow port %d proto %d\n", dst_port, ip_proto);
     return 0; // Rate limit not exceeded
 }
 
-static __always_inline bool get_service( __be32 dest_ip, __u16 dst_port, __u8 ip_proto, struct mapkey_service *svckey, struct mapvalue_service *svcval, __u32 debug_level, __u32 redirect_qos_limit) {
+static __always_inline bool get_service( __be32 dest_ip, __u16 dst_port, __u8 ip_proto, struct mapkey_service *svckey, struct mapvalue_service *svcval, __u32 debug_level, __u32 redirect_qos_limit, __u8 *redirect_hit_limit) {
     struct mapvalue_service *t ;
 
     svckey->address = dest_ip ;
@@ -125,7 +126,9 @@ static __always_inline bool get_service( __be32 dest_ip, __u16 dst_port, __u8 ip
             //  Rate limit not exceeded, continue to process redirect
             goto succeed;
         }
-        debugf(DEBUG_INFO, "Hit the QoS rate limit %d for %pI4:%d/%d, skip NAT_TYPE_REDIRECT process\n" , ret , &dest_ip , dst_port , ip_proto );
+        debugf(DEBUG_INFO, "Hit the QoS rate limit %d for %pI4, skip NAT_TYPE_REDIRECT\n" , ret , &dest_ip);
+        debugf(DEBUG_INFO, "flow port %d proto %d\n", dst_port, ip_proto);
+        *redirect_hit_limit = 1;
     }
     
     // search NAT_TYPE_BALANCING
@@ -244,6 +247,7 @@ static __always_inline int execute_nat(struct bpf_sock_addr *ctx, __u32 debug_le
         .pid = (__u32) ( 0x00000000ffffffff & bpf_get_current_pid_tgid() ),
         .failure_code = 0 ,
         .pad = 0 ,
+        .redirect_hit_limit = 0,
         .nat_mode = 0 ,
     } ;
 
@@ -274,7 +278,7 @@ static __always_inline int execute_nat(struct bpf_sock_addr *ctx, __u32 debug_le
     // ------------- find service value
     struct mapkey_service svckey;
     struct mapvalue_service svcval;
-    if ( ! get_service(dst_ip, dst_port, ip_proto, &svckey, &svcval, debug_level, redirect_qos_limit) ) {
+    if ( ! get_service(dst_ip, dst_port, ip_proto, &svckey, &svcval, debug_level, redirect_qos_limit, &evt.redirect_hit_limit) ) {
         // these packets may be forwarding for non-service
         debugf(DEBUG_VERSBOSE, "did not find service value for %pI4:%d\n" , &dst_ip  , dst_port   );
         return 2;

@@ -1,3 +1,5 @@
+//go:build !windows
+
 package main
 
 import (
@@ -11,6 +13,7 @@ import (
 	"regexp"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/cilium/ebpf"
@@ -55,13 +58,16 @@ func run(stdout io.Writer, args []string) (err error) {
 }
 
 type bpf2go struct {
-	stdout io.Writer
+	stdout  io.Writer
+	verbose bool
 	// Absolute path to a .c file.
 	sourceFile string
 	// Absolute path to a directory where .go are written
 	outputDir string
 	// Alternative output stem. If empty, identStem is used.
 	outputStem string
+	// Suffix in generated file names such as _test.
+	outputSuffix string
 	// Valid go package name.
 	pkg string
 	// Valid go identifier.
@@ -85,12 +91,19 @@ type bpf2go struct {
 	makeBase string
 }
 
+func (b2g *bpf2go) Debugln(a ...any) {
+	if b2g.verbose {
+		fmt.Fprintln(b2g.stdout, a...)
+	}
+}
+
 func newB2G(stdout io.Writer, args []string) (*bpf2go, error) {
 	b2g := &bpf2go{
 		stdout: stdout,
 	}
 
 	fs := flag.NewFlagSet("bpf2go", flag.ContinueOnError)
+	fs.BoolVar(&b2g.verbose, "verbose", getBool("V", false), "Enable verbose logging ($V)")
 	fs.StringVar(&b2g.cc, "cc", getEnv("BPF2GO_CC", "clang"),
 		"`binary` used to compile C to BPF ($BPF2GO_CC)")
 	fs.StringVar(&b2g.strip, "strip", getEnv("BPF2GO_STRIP", ""),
@@ -105,8 +118,15 @@ func newB2G(stdout io.Writer, args []string) (*bpf2go, error) {
 	fs.Var(&b2g.cTypes, "type", "`Name` of a type to generate a Go declaration for, may be repeated")
 	fs.BoolVar(&b2g.skipGlobalTypes, "no-global-types", false, "Skip generating types for map keys and values, etc.")
 	fs.StringVar(&b2g.outputStem, "output-stem", "", "alternative stem for names of generated files (defaults to ident)")
+	outputSuffix := ""
+	if strings.HasSuffix(getEnv("GOFILE", ""), "_test.go") {
+		outputSuffix = "_test"
+	}
+	fs.StringVar(&b2g.outputSuffix, "output-suffix", outputSuffix,
+		"suffix in generated file names such as _test (default based on $GOFILE)")
 	outDir := fs.String("output-dir", "", "target directory of generated files (defaults to current directory)")
 	outPkg := fs.String("go-package", "", "package for output go file (default as ENV GOPACKAGE)")
+
 	fs.SetOutput(b2g.stdout)
 	fs.Usage = func() {
 		fmt.Fprintf(fs.Output(), helpText, fs.Name())
@@ -181,6 +201,10 @@ func newB2G(stdout io.Writer, args []string) (*bpf2go, error) {
 
 	if b2g.outputStem != "" && strings.ContainsRune(b2g.outputStem, filepath.Separator) {
 		return nil, fmt.Errorf("-output-stem %q must not contain path separation characters", b2g.outputStem)
+	}
+
+	if strings.ContainsRune(b2g.outputSuffix, filepath.Separator) {
+		return nil, fmt.Errorf("-output-suffix %q must not contain path separation characters", b2g.outputSuffix)
 	}
 
 	targetArches := make(map[gen.Target]gen.GoArches)
@@ -259,6 +283,20 @@ func getEnv(key, defaultVal string) string {
 	return defaultVal
 }
 
+func getBool(key string, defaultVal bool) bool {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return defaultVal
+	}
+
+	b, err := strconv.ParseBool(val)
+	if err != nil {
+		return defaultVal
+	}
+
+	return b
+}
+
 func (b2g *bpf2go) convertAll() (err error) {
 	if _, err := os.Stat(b2g.sourceFile); os.IsNotExist(err) {
 		return fmt.Errorf("file %s doesn't exist", b2g.sourceFile)
@@ -295,7 +333,7 @@ func (b2g *bpf2go) convert(tgt gen.Target, goarches gen.GoArches) (err error) {
 		outputStem = strings.ToLower(b2g.identStem)
 	}
 
-	stem := fmt.Sprintf("%s_%s", outputStem, tgt.Suffix())
+	stem := fmt.Sprintf("%s_%s%s", outputStem, tgt.Suffix(), b2g.outputSuffix)
 
 	absOutPath, err := filepath.Abs(b2g.outputDir)
 	if err != nil {
@@ -351,10 +389,10 @@ func (b2g *bpf2go) convert(tgt gen.Target, goarches gen.GoArches) (err error) {
 		return fmt.Errorf("compile: %w", err)
 	}
 
-	fmt.Fprintln(b2g.stdout, "Compiled", objFileName)
-
-	if !b2g.disableStripping {
-		fmt.Fprintln(b2g.stdout, "Stripped", objFileName)
+	if b2g.disableStripping {
+		b2g.Debugln("Compiled object", "file", objFileName)
+	} else {
+		b2g.Debugln("Compiled and stripped object", "file", objFileName)
 	}
 
 	spec, err := ebpf.LoadCollectionSpec(objFileName)
@@ -368,6 +406,11 @@ func (b2g *bpf2go) convert(tgt gen.Target, goarches gen.GoArches) (err error) {
 		if !strings.HasPrefix(name, ".") {
 			maps = append(maps, name)
 		}
+	}
+
+	var variables []string
+	for name := range spec.Variables {
+		variables = append(variables, name)
 	}
 
 	var programs []string
@@ -397,6 +440,7 @@ func (b2g *bpf2go) convert(tgt gen.Target, goarches gen.GoArches) (err error) {
 		Stem:        b2g.identStem,
 		Constraints: constraints,
 		Maps:        maps,
+		Variables:   variables,
 		Programs:    programs,
 		Types:       types,
 		ObjectFile:  filepath.Base(objFileName),
@@ -406,7 +450,7 @@ func (b2g *bpf2go) convert(tgt gen.Target, goarches gen.GoArches) (err error) {
 		return fmt.Errorf("can't write %s: %s", goFileName, err)
 	}
 
-	fmt.Fprintln(b2g.stdout, "Wrote", goFileName)
+	b2g.Debugln("Generated bpf2go binding", "file", goFileName)
 
 	if b2g.makeBase == "" {
 		return
@@ -430,7 +474,8 @@ func (b2g *bpf2go) convert(tgt gen.Target, goarches gen.GoArches) (err error) {
 		return fmt.Errorf("can't adjust dependency information: %s", err)
 	}
 
-	fmt.Fprintln(b2g.stdout, "Wrote", depFileName)
+	b2g.Debugln("Wrote dependency", "file", depFileName)
+
 	return nil
 }
 
@@ -454,7 +499,7 @@ func (b2g *bpf2go) removeOldOutputFiles(outputStem string, tgt gen.Target) error
 			return err
 		}
 
-		fmt.Fprintln(b2g.stdout, "Removed obsolete", filename)
+		b2g.Debugln("Removed obsolete output file", "file", filename)
 	}
 
 	return nil

@@ -174,6 +174,7 @@ deploy_project:
 		HELM_OPTION+=" --set balancingAgent.debug.logLevel=debug --set balancingController.debug.logLevel=debug " ; \
 		HELM_OPTION+=" --set balancingAgent.prometheus.enabled=true --set balancingController.prometheus.enabled=true  " ; \
 		HELM_OPTION+=" --set balancingAgent.nodeEntryInterface=eth1 " ; \
+		HELM_OPTION+=" --set feature.redirectQosLimit=$(E2E_REDIRECT_QOS_LIMIT) " ; \
 		helm --kubeconfig=$(E2E_KUBECONFIG_PATH) install project $(ROOT_DIR)/charts \
 				-n $(E2E_INSTALL_NAMESPACE) --create-namespace --wait --debug \
 				--set global.imageTagOverride=$(PROJECT_IMAGE_TAG) \

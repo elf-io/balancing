@@ -27,13 +27,13 @@
 3. 部署基于虚拟机的双节点 Kubernetes 集群（不安装 kube-proxy 组件）
 
     ```shell
-    make e2e_init -e E2E_SKIP_KUBE_PROXY=true
+    make e2e_init -e E2E_SKIP_KUBE_PROXY=true -e E2E_INSTALL_PYROSCOPE=false
     ```
 
 4. 部署 balancing 和测试应用到集群中
 
     ```shell
-    make e2e_deploy
+    make e2e_deploy -e E2E_REDIRECT_QOS_LIMIT=1
     
     # 或者使用指定的镜像标签
     make e2e_deploy -e PROJECT_IMAGE_TAG=8877a79da7c0a9f159363660b5b23e5458480aea \
