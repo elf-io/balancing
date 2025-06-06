@@ -86,6 +86,11 @@ jobs:
         with:
           path: output/artifact-${{ inputs.ipfamily }}
 
+      - name: Build and Load Test App Image
+        run: |
+          make build_local_test_app_image
+          docker images
+
       - name: Load And Scan Images
         run: |
           PROJECT_DIR=`pwd`
@@ -106,7 +111,6 @@ jobs:
               done
           done
           docker images
-          make build_local_test_app_image
 
       # test against commit version
       - name: Setup Cluster
