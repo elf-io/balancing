@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1zh/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/readme/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1/readme/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1zh/readme/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/develop/develop/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1/develop/develop/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1zh/develop/develop/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/develop/ebpfDebug/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1/develop/ebpfDebug/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1zh/develop/ebpfDebug/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/usages/balancing/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1/usages/balancing/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1zh/usages/balancing/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/usages/install/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1/usages/install/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1zh/usages/install/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/usages/localredirect/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1/usages/localredirect/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1zh/usages/localredirect/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/usages/service/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1/usages/service/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1zh/usages/service/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/zh/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1/zh/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/zh/readme/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1/zh/readme/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1readme/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/zh/develop/develop/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1/zh/develop/develop/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1develop/develop/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/zh/develop/ebpfDebug/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1/zh/develop/ebpfDebug/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1develop/ebpfDebug/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/zh/usages/balancing/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1/zh/usages/balancing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1usages/balancing/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/zh/usages/install/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1/zh/usages/install/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1usages/install/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/zh/usages/localredirect/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1/zh/usages/localredirect/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1usages/localredirect/"/>
+    </url>
+    <url>
+        <loc>https://elf-io.github.io/balancing/v0.1/zh/usages/service/</loc>
+        <lastmod>2025-06-06</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://elf-io.github.io/balancing/v0.1/zh/usages/service/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://elf-io.github.io/balancing/v0.1usages/service/"/>
+    </url>
+</urlset>
