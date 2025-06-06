@@ -4,11 +4,11 @@
 package types
 
 type ConfigmapConfig struct {
-	EnableIPv4      bool   `yaml:"enableIPv4"`
-	EnableIPv6      bool   `yaml:"enableIPv6"`
+	EnableIPv4       bool   `yaml:"enableIPv4"`
+	EnableIPv6       bool   `yaml:"enableIPv6"`
 	RedirectQosLimit int32  `yaml:"redirectQosLimit"`
-	ApiServerHost   string `yaml:"apiServerHost"`
-	ApiServerPort   string `yaml:"apiServerPort"`
+	ApiServerHost    string `yaml:"apiServerHost"`
+	ApiServerPort    string `yaml:"apiServerPort"`
 }
 
 type EnvMapping struct {

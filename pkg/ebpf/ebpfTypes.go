@@ -271,9 +271,9 @@ func MapConfigureStr(key, value uint32) string {
 			return "Ipv6Enabled: enabled"
 		}
 	case MapConfigureKeyIndexRedirectQoSLimit:
-		if value==0 {
+		if value == 0 {
 			return "RedirectQoSLimit: disabled"
-		}else{
+		} else {
 			return fmt.Sprintf("RedirectQoSLimit: %d reqs/sec", value)
 		}
 	}
