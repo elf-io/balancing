@@ -58,7 +58,7 @@ jobs:
         if: ${{ env.REF == 'main' }}
         run: |
           echo "DOCS_TAG=${{ env.REF }}" >> $GITHUB_ENV
-          pip install mkdocs==1.5.2 mike==1.1.2 mkdocs-material==9.2.8 mkdocs-static-i18n==1.0.2
+          pip install mkdocs==1.5.2 mike==1.1.2 mkdocs-material==9.6.14 mkdocs-static-i18n==1.0.2
           git config user.email "robot@example.com"
           git config user.name "robot"
           cp ./docs/mkdocs.yml ./
@@ -107,7 +107,7 @@ jobs:
           git checkout ${{ env.REF }}
           ls
           echo "switch to the release version branch ${{ env.REF }}"
-          pip install mkdocs==1.5.2 mike==1.1.2 mkdocs-material==9.2.8 mkdocs-static-i18n==1.0.2
+          pip install mkdocs==1.5.2 mike==1.1.2 mkdocs-material==9.6.14 mkdocs-static-i18n==1.0.2
           git config user.email "robot@example.com"
           git config user.name "robot"
           cp ./docs/mkdocs.yml ./
