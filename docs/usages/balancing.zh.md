@@ -16,9 +16,9 @@ Balancing Policy 提供了一种新的负载均衡模式，补充了 Kubernetes 
 当前功能包括：
 * [x] 自定义负载均衡的 front 地址，可以是 Kubernetes 的 service name 或自定义的 VIP 和端口。
 * [x] 自定义负载均衡的 backend 地址，通过 pod label selector 指定后端对象，支持以下三种方式：
-    * **endpoint IP**：负载均衡地址被 DNAT 解析为 pod IP，适用于所有 POD。
-    * **HostPort**：负载均衡地址被 DNAT 解析为 pod 所在的 node IP 和 pod HostPort，适用于定义了 hostPort 的 POD。
-    * **nodeProxy**：负载均衡地址被 DNAT 解析为节点的 Proxy IP 和策略中定义的端口，适用于所有 POD。节点的 Proxy IP 定义在 node 对象的 annotation `"balancing.elf.io/nodeProxyIpv4": "192.168.0.10"`，可通过以下方式生成：
+    * **endpoint IP**：负载均衡地址被 DNAT 解析为 pod IP，适用于集群内的传统主机应用访问一个 VIP 地址。
+    * **HostPort**：负载均衡地址被 DNAT 解析为 pod 所在的 node IP 和 pod HostPort，适用于集群外部应用访问集群内定义了 hostPort 的 service
+    * **nodeProxy**：负载均衡地址被 DNAT 解析为节点的 Proxy IP 和策略中定义的端口，适用集群外部应用访问集群内的 POD, 而改入口地址是公有云的 Loadbalancer ， 或者由 kube-proxy 实施的 nodeport 。节点的 Proxy IP 定义在 node 对象的 annotation `"balancing.elf.io/nodeProxyIpv4": "192.168.0.10"`，可通过以下方式生成：
         * Balancing agent 自动在节点上建立隧道接口，并更新到 node 的 annotation 中，适用于多集群或集群外部主机应用。
         * 管理员可在 Node 对象上手动设置 annotation `"balancing.elf.io/nodeProxyIpv4"`，例如代理映射 IP 或公网映射 IP。
 

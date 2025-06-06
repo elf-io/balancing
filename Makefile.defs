@@ -183,6 +183,8 @@ E2E_HOSTPORT_API_SERVER=26443
 
 
 #====== pyroscope
+
+E2E_INSTALL_PYROSCOPE ?= true
 PYROSCOPE_CONTAINER_NAME := pyroscope
 PYROSCOPE_IMAGE_NAME := docker.m.daocloud.io/grafana/pyroscope:latest
 # empty to disable PYROSCOPE
@@ -212,3 +214,8 @@ E2E_KIND_IPV6_SERVICE_CIDR = fd41::/108
 
 E2E_KIND_IPV4_POD_CIDR = 172.40.0.0/16
 E2E_KIND_IPV6_POD_CIDR = fd40::/48
+
+#======= balancing 
+
+E2E_REDIRECT_QOS_LIMIT ?= 0
+

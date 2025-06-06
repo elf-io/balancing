@@ -55,6 +55,7 @@ type EventInfo struct {
 	NatType           string
 	NatMode           string
 	Protocol          string
+	RedirectHitLimit  bool
 }
 
 func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
@@ -75,16 +76,17 @@ func (s *ebpfEventStruct) WatchEbpfEvent(stopWatch chan struct{}) {
 				s.l.Sugar().Debugf("received an ebpf event: %s ", event)
 
 				eventInfo := EventInfo{
-					NodeName:  types.AgentConfig.LocalNodeName,
-					IsIpv4:    event.IsIpv4 != 0,
-					IsSuccess: event.IsSuccess != 0,
-					ClientPid: fmt.Sprintf("%d", event.Pid),
-					Failure:   ebpf.GetFailureStr(event.FailureCode),
-					TimeStamp: time.Now().UTC().Format("2006-01-02T15:04:05Z"),
-					ServiceId: fmt.Sprintf("%d", event.SvcId),
-					NatType:   ebpf.GetNatTypeStr(event.NatType),
-					NatMode:   ebpf.GetNatModeStr(event.NatMode),
-					Protocol:  ebpf.GetProtocolStr(event.Protocol),
+					NodeName:         types.AgentConfig.LocalNodeName,
+					IsIpv4:           event.IsIpv4 != 0,
+					IsSuccess:        event.IsSuccess != 0,
+					ClientPid:        fmt.Sprintf("%d", event.Pid),
+					Failure:          ebpf.GetFailureStr(event.FailureCode),
+					TimeStamp:        time.Now().UTC().Format("2006-01-02T15:04:05Z"),
+					ServiceId:        fmt.Sprintf("%d", event.SvcId),
+					NatType:          ebpf.GetNatTypeStr(event.NatType),
+					NatMode:          ebpf.GetNatModeStr(event.NatMode),
+					Protocol:         ebpf.GetProtocolStr(event.Protocol),
+					RedirectHitLimit: event.RedirectHitLimit != 0,
 				}
 
 				eventInfo.ClientPodName, eventInfo.ClientNamespace, eventInfo.ClientContainerId, eventInfo.ClientPodUuid, eventInfo.IsHostApp, err = podId.PodIdHander.LookupPodByPid(event.Pid)

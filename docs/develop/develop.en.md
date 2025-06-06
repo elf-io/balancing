@@ -2,7 +2,7 @@
 
 ## Host Software Preparation
 
-* vagrant and VirtualBox
+* Vagrant and VirtualBox
 * helm
 * kubectl
 * jq
@@ -13,9 +13,10 @@
 
     ```shell
     make build_local_image
-    ```
 
-    > For users in China, you can use a proxy source to speed up the build: `make build_local_image -e USE_PROXY_SOURCE=true`
+    # For users in China, you can use a proxy source to speed up the build
+    make build_local_image -e USE_PROXY_SOURCE=true
+    ```
 
 2. Build the test application image
 
@@ -23,16 +24,17 @@
     make build_local_test_app_image
     ```
 
-3. Deploy a dual-node Kubernetes cluster based on VMs (without kube-proxy component)
+3. Deploy a dual-node Kubernetes cluster based on VMs (without installing the kube-proxy component)
 
     ```shell
-    make e2e_init -e E2E_SKIP_KUBE_PROXY=true
+    make e2e_init -e E2E_SKIP_KUBE_PROXY=true -e E2E_INSTALL_PYROSCOPE=false
     ```
 
 4. Deploy balancing and test applications to the cluster
 
     ```shell
-    make e2e_deploy
+    make e2e_deploy -e E2E_REDIRECT_QOS_LIMIT=1
+    
     # Or use specified image tags
     make e2e_deploy -e PROJECT_IMAGE_TAG=8877a79da7c0a9f159363660b5b23e5458480aea \
                     -e TEST_APP_IMAGE_TAG=aa7693a44e205c13e9bd3bee63260c9c1048ce24
@@ -45,3 +47,14 @@
     ```
 
 6. Access `http://NodeIP:28000` in a browser to observe Golang sampling data in the Proscope Server.
+
+## Debugging eBPF on Local Machine
+
+```
+apt-get install clang llvm gcc-multilib libbpf-dev linux-headers-$(uname -r)
+
+cd pkg/ebpf/bpf
+
+# Check for syntax errors
+clang -fsyntax-only -I.  cgroup.c
+```

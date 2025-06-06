@@ -7,6 +7,7 @@ type AgentConfigStruct struct {
 	EnableMetric            bool
 	EnableIpv4              bool
 	EnableIpv6              bool
+	RedirectQosLimit        int32
 	MetricPort              int32
 	HttpPort                int32
 	GopsPort                int32
@@ -43,5 +44,6 @@ var AgentEnvMapping = []EnvMapping{
 	{"ENV_EBPF_LOG_LEVEL", "verbose", &AgentConfig.EbpfLogLevel},
 	{"ENV_ENABLE_IPV4", "", &AgentConfig.EnableIpv4},
 	{"ENV_ENABLE_IPV6", "", &AgentConfig.EnableIpv6},
+	{"ENV_REDIRECT_QOS_LIMIT", "10", &AgentConfig.RedirectQosLimit},
 	{"KUBECONFIG", "", &AgentConfig.KubeconfigPath},
 }

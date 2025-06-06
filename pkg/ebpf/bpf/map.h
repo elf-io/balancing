@@ -192,6 +192,31 @@ struct {
   //__uint(map_flags, 0);
 } map_nat_record SEC(".maps");
 
+//======================================= map ： QoS rate limiting for NAT_TYPE_REDIRECT flows
+
+/* ebpf program use this for storage of flow count in current second */
+/* QoS rate limiting for NAT_TYPE_REDIRECT flows */
+
+struct flow_key {
+    __be32 dst_ip;
+    __u16 dst_port;
+    __u8 proto;
+    __u8 pad[1];
+};
+
+struct flow_value {
+    __u64 last_timestamp;  /* Timestamp of the last request in nanoseconds */
+    __u32 count;          /* Number of requests since the beginning of the current second */
+    __u32 pad;
+};
+
+struct {
+    __uint(type, BPF_MAP_TYPE_LRU_HASH);
+    __uint(max_entries, DEFAULT_MAX_EBPF_MAP_ENTRIES);
+    __type(key, struct flow_key);
+    __type(value, struct flow_value);
+} map_qos_flows SEC(".maps");
+
 #endif
 
 
@@ -224,9 +249,9 @@ struct event_value {
     __be32 nat_v4ip ;    // 小端存储。
     __be32 original_dest_v4ip ;  /* 小端存储。 dest ip */
 
-	__be16 nat_port;   // 小端存储。
-	__be16 original_dest_port;   // 小端存储。
-	__u32  pid;
+	  __be16 nat_port;   // 小端存储。
+	  __be16 original_dest_port;   // 小端存储。
+	  __u32  pid;
 
     __u32  svc_id ;
     __u8   is_ipv4 ; /* 0 for ipv6 data, 1 for ipv4 data */
@@ -236,7 +261,8 @@ struct event_value {
 
     __u8   nat_mode;    /* 用于标识发生了哪种 IP 地址的 nat， 参考 NAT_MODE_* 标志 */
     __u8   protocol;
-    __u8   pad[6];
+    __u8   redirect_hit_limit;
+    __u8   pad[5];
 } ;
 
 // BPF_MAP_TYPE_PERF_EVENT_ARRAY 中的 key 和 value 并不存放真正的 数据， key 用来存放 cpu 索引， values 存放指向 perf event buffer 的地址
@@ -260,11 +286,13 @@ struct {
 #define INDEX_DEBUG_LEVEL   0
 #define INDEX_ENABLE_IPV4   1
 #define INDEX_ENABLE_IPV6   2
+#define INDEX_REDIRECT_QOS_LIMIT 3
 
 /* This a array map for configuration
     0 :  debug level ( 0:VERBOSE , 1:INFO, 2:ERROR)
     1 :  enable ipv4 ( 0: disabled , 1:enabled)
     2 :  enable ipv6 ( 0: disabled , 1:enabled)
+    3 :  redirect qos limit per second for NAT_TYPE_REDIRECT flows (default: 10)
 */
 // https://docs.kernel.org/bpf/map_array.html
 struct {

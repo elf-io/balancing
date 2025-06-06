@@ -207,7 +207,8 @@ type MapEventValue struct {
 	FailureCode          uint8
 	NatMode              uint8
 	Protocol             uint8
-	Pad                  [6]uint8
+	RedirectHitLimit     uint8 // 0 for not hit redirection qos limit, 1 for hit redirection qos limit
+	Pad                  [5]uint8
 }
 
 func GetIpv6Str(ipV6High, ipV6Low uint64) string {
@@ -220,17 +221,18 @@ func GetIpv6Str(ipV6High, ipV6Low uint64) string {
 }
 
 func (t MapEventValue) String() string {
-	return fmt.Sprintf(`{ CgroupId:%d, IsIpv4:%d, SvcId:%d, IsSuccess:%d, NatType:%s, NatMode:%s, Protocol:%s, OriginalDestV4Ip:%s, OriginalDestV6Ip:%s, OriginalDestPort:%d, NatV4Ip:%s, NatV6Ip:%s, NatPort:%d , Pid:%d, FailureCode:%s }`,
+	return fmt.Sprintf(`{ CgroupId:%d, IsIpv4:%d, SvcId:%d, IsSuccess:%d, NatType:%s, NatMode:%s, Protocol:%s, OriginalDestV4Ip:%s, OriginalDestV6Ip:%s, OriginalDestPort:%d, NatV4Ip:%s, NatV6Ip:%s, NatPort:%d , Pid:%d, FailureCode:%s, RedirectHitLimit:%d }`,
 		t.CgroupId, t.IsIpv4, t.SvcId, t.IsSuccess, GetNatTypeStr(t.NatType), GetNatModeStr(t.NatMode), GetProtocolStr(t.Protocol),
-		GetIpStr(t.OriginalDestV4Ip), GetIpv6Str(t.OriginalDestV6ipHigh, t.OriginalDestV6ipLow), t.OriginalDestPort, GetIpStr(t.NatV4Ip), GetIpv6Str(t.NatV6ipHigh, t.NatV6ipLow), t.NatPort, t.Pid, GetFailureStr(t.FailureCode))
+		GetIpStr(t.OriginalDestV4Ip), GetIpv6Str(t.OriginalDestV6ipHigh, t.OriginalDestV6ipLow), t.OriginalDestPort, GetIpStr(t.NatV4Ip), GetIpv6Str(t.NatV6ipHigh, t.NatV6ipLow), t.NatPort, t.Pid, GetFailureStr(t.FailureCode), t.RedirectHitLimit)
 }
 
 // ------------------------------------------------- map configure
 
 const (
-	MapConfigureKeyIndexDebugLevel = iota
+	MapConfigureKeyIndexDebugLevel uint32 = iota
 	MapConfigureKeyIndexIpv4Enabled
 	MapConfigureKeyIndexIpv6Enabled
+	MapConfigureKeyIndexRedirectQoSLimit
 	MapConfigureKeyIndexEnd
 )
 
@@ -267,6 +269,12 @@ func MapConfigureStr(key, value uint32) string {
 			return "Ipv6Enabled: disabled"
 		} else {
 			return "Ipv6Enabled: enabled"
+		}
+	case MapConfigureKeyIndexRedirectQoSLimit:
+		if value == 0 {
+			return "RedirectQoSLimit: disabled"
+		} else {
+			return fmt.Sprintf("RedirectQoSLimit: %d reqs/sec", value)
 		}
 	}
 	return "unknowKey: uknowValue"

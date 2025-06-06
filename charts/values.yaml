@@ -34,6 +34,9 @@ feature:
   ## @param feature.enableIPv6 enable ipv6
   enableIPv6: false
 
+  ## @param feature.redirectQosLimit the QoS limit for redirect traffic (requests per second)
+  redirectQosLimit: 1
+
   ## @param feature.apiServerHost the host address of api server, which should not be the clusterIP
   apiServerHost: ""
 

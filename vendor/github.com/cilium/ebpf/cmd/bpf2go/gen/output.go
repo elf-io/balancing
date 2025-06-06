@@ -1,3 +1,5 @@
+//go:build !windows
+
 package gen
 
 import (
@@ -49,6 +51,10 @@ func (n templateName) MapSpecs() string {
 	return string(n) + "MapSpecs"
 }
 
+func (n templateName) VariableSpecs() string {
+	return string(n) + "VariableSpecs"
+}
+
 func (n templateName) Load() string {
 	return n.maybeExport("load" + toUpperFirst(string(n)))
 }
@@ -63,6 +69,10 @@ func (n templateName) Objects() string {
 
 func (n templateName) Maps() string {
 	return string(n) + "Maps"
+}
+
+func (n templateName) Variables() string {
+	return string(n) + "Variables"
 }
 
 func (n templateName) Programs() string {
@@ -82,6 +92,8 @@ type GenerateArgs struct {
 	Constraints constraint.Expr
 	// Maps to be emitted.
 	Maps []string
+	// Variables to be emitted.
+	Variables []string
 	// Programs to be emitted.
 	Programs []string
 	// Types to be emitted.
@@ -90,10 +102,15 @@ type GenerateArgs struct {
 	ObjectFile string
 	// Output to write template to.
 	Output io.Writer
+	// Function which transforms the input into a valid go identifier. Uses the default behaviour if nil
+	Identifier func(string) string
 }
 
 // Generate bindings for a BPF ELF file.
 func Generate(args GenerateArgs) error {
+	if args.Identifier == nil {
+		args.Identifier = internal.Identifier
+	}
 	if !token.IsIdentifier(args.Stem) {
 		return fmt.Errorf("%q is not a valid identifier", args.Stem)
 	}
@@ -113,18 +130,23 @@ func Generate(args GenerateArgs) error {
 
 	maps := make(map[string]string)
 	for _, name := range args.Maps {
-		maps[name] = internal.Identifier(name)
+		maps[name] = args.Identifier(name)
+	}
+
+	variables := make(map[string]string)
+	for _, name := range args.Variables {
+		variables[name] = args.Identifier(name)
 	}
 
 	programs := make(map[string]string)
 	for _, name := range args.Programs {
-		programs[name] = internal.Identifier(name)
+		programs[name] = args.Identifier(name)
 	}
 
 	typeNames := make(map[btf.Type]string)
 	for _, typ := range args.Types {
 		// NB: This also deduplicates types.
-		typeNames[typ] = args.Stem + internal.Identifier(typ.TypeName())
+		typeNames[typ] = args.Stem + args.Identifier(typ.TypeName())
 	}
 
 	// Ensure we don't have conflicting names and generate a sorted list of
@@ -136,7 +158,7 @@ func Generate(args GenerateArgs) error {
 
 	gf := &btf.GoFormatter{
 		Names:      typeNames,
-		Identifier: internal.Identifier,
+		Identifier: args.Identifier,
 	}
 
 	ctx := struct {
@@ -146,6 +168,7 @@ func Generate(args GenerateArgs) error {
 		Constraints constraint.Expr
 		Name        templateName
 		Maps        map[string]string
+		Variables   map[string]string
 		Programs    map[string]string
 		Types       []btf.Type
 		TypeNames   map[btf.Type]string
@@ -157,6 +180,7 @@ func Generate(args GenerateArgs) error {
 		args.Constraints,
 		templateName(args.Stem),
 		maps,
+		variables,
 		programs,
 		types,
 		typeNames,

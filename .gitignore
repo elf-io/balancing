@@ -87,7 +87,7 @@ tests/vagrant/scripts/join.sh
 
 site
 docs/site.tar.gz
-mkdocs.yml
+
 
 tests/vagrant/Vagrantfile
 tests/vagrant/config_old

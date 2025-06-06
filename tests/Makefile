@@ -49,7 +49,7 @@ installE2eTools:
 
 .PHONY: install_proscope
 install_proscope:
-	if [ -n "$(E2E_PYROSCOPE_VM_PORT)" ] ; then \
+	if [ "$(E2E_INSTALL_PYROSCOPE)" == "true" ] && [ -n "$(E2E_PYROSCOPE_VM_PORT)" ] ; then \
   		echo "install proscope on vm $(E2E_VM_HOST)  " ; \
   		( cd vagrant ; ./ssh "$(E2E_VM_HOST)" "sudo docker stop $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
   		( cd vagrant ; ./ssh "$(E2E_VM_HOST)" "sudo docker rm $(PYROSCOPE_CONTAINER_NAME) &>/dev/null || true" ) ; \
@@ -174,6 +174,7 @@ deploy_project:
 		HELM_OPTION+=" --set balancingAgent.debug.logLevel=debug --set balancingController.debug.logLevel=debug " ; \
 		HELM_OPTION+=" --set balancingAgent.prometheus.enabled=true --set balancingController.prometheus.enabled=true  " ; \
 		HELM_OPTION+=" --set balancingAgent.nodeEntryInterface=eth1 " ; \
+		HELM_OPTION+=" --set feature.redirectQosLimit=$(E2E_REDIRECT_QOS_LIMIT) " ; \
 		helm --kubeconfig=$(E2E_KUBECONFIG_PATH) install project $(ROOT_DIR)/charts \
 				-n $(E2E_INSTALL_NAMESPACE) --create-namespace --wait --debug \
 				--set global.imageTagOverride=$(PROJECT_IMAGE_TAG) \
