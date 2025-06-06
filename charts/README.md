@@ -20,12 +20,13 @@
 
 ### feature parameters
 
-| Name                    | Description                                                       | Value   |
-| ----------------------- | ----------------------------------------------------------------- | ------- |
-| `feature.enableIPv4`    | enable ipv4                                                       | `true`  |
-| `feature.enableIPv6`    | enable ipv6                                                       | `false` |
-| `feature.apiServerHost` | the host address of api server, which should not be the clusterIP | `""`    |
-| `feature.apiServerPort` | the host port of api server, which should not be the clusterIP    | `""`    |
+| Name                       | Description                                                       | Value   |
+| -------------------------- | ----------------------------------------------------------------- | ------- |
+| `feature.enableIPv4`       | enable ipv4                                                       | `true`  |
+| `feature.enableIPv6`       | enable ipv6                                                       | `false` |
+| `feature.redirectQosLimit` | the QoS limit for redirect traffic (requests per second)          | `1`     |
+| `feature.apiServerHost`    | the host address of api server, which should not be the clusterIP | `""`    |
+| `feature.apiServerPort`    | the host port of api server, which should not be the clusterIP    | `""`    |
 
 ### balancingAgent parameters
 
