@@ -6,7 +6,7 @@ require (
 	github.com/cilium/ebpf v0.18.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/gops v0.3.28
-	github.com/grafana/pyroscope-go v1.2.0
+	github.com/grafana/pyroscope-go v1.2.2
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
 	github.com/pkg/errors v0.9.1
