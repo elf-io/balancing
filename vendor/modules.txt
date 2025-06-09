@@ -113,7 +113,7 @@ github.com/google/pprof/profile
 # github.com/google/uuid v1.6.0
 ## explicit
 github.com/google/uuid
-# github.com/grafana/pyroscope-go v1.2.0
+# github.com/grafana/pyroscope-go v1.2.2
 ## explicit; go 1.17
 github.com/grafana/pyroscope-go
 github.com/grafana/pyroscope-go/internal/flameql
