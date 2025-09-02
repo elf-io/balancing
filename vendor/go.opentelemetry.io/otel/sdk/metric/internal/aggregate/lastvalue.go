@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/sdk/metric/internal/exemplar"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 )
 
@@ -17,10 +16,10 @@ import (
 type datapoint[N int64 | float64] struct {
 	attrs attribute.Set
 	value N
-	res   exemplar.FilteredReservoir[N]
+	res   FilteredExemplarReservoir[N]
 }
 
-func newLastValue[N int64 | float64](limit int, r func() exemplar.FilteredReservoir[N]) *lastValue[N] {
+func newLastValue[N int64 | float64](limit int, r func(attribute.Set) FilteredExemplarReservoir[N]) *lastValue[N] {
 	return &lastValue[N]{
 		newRes: r,
 		limit:  newLimiter[datapoint[N]](limit),
@@ -33,7 +32,7 @@ func newLastValue[N int64 | float64](limit int, r func() exemplar.FilteredReserv
 type lastValue[N int64 | float64] struct {
 	sync.Mutex
 
-	newRes func() exemplar.FilteredReservoir[N]
+	newRes func(attribute.Set) FilteredExemplarReservoir[N]
 	limit  limiter[datapoint[N]]
 	values map[attribute.Distinct]datapoint[N]
 	start  time.Time
@@ -46,7 +45,7 @@ func (s *lastValue[N]) measure(ctx context.Context, value N, fltrAttr attribute.
 	attr := s.limit.Attributes(fltrAttr, s.values)
 	d, ok := s.values[attr.Equivalent()]
 	if !ok {
-		d.res = s.newRes()
+		d.res = s.newRes(attr)
 	}
 
 	d.attrs = attr
@@ -56,7 +55,9 @@ func (s *lastValue[N]) measure(ctx context.Context, value N, fltrAttr attribute.
 	s.values[attr.Equivalent()] = d
 }
 
-func (s *lastValue[N]) delta(dest *metricdata.Aggregation) int {
+func (s *lastValue[N]) delta(
+	dest *metricdata.Aggregation, //nolint:gocritic // The pointer is needed for the ComputeAggregation interface
+) int {
 	t := now()
 	// Ignore if dest is not a metricdata.Gauge. The chance for memory reuse of
 	// the DataPoints is missed (better luck next time).
@@ -76,7 +77,9 @@ func (s *lastValue[N]) delta(dest *metricdata.Aggregation) int {
 	return n
 }
 
-func (s *lastValue[N]) cumulative(dest *metricdata.Aggregation) int {
+func (s *lastValue[N]) cumulative(
+	dest *metricdata.Aggregation, //nolint:gocritic // The pointer is needed for the ComputeAggregation interface
+) int {
 	t := now()
 	// Ignore if dest is not a metricdata.Gauge. The chance for memory reuse of
 	// the DataPoints is missed (better luck next time).
@@ -115,7 +118,10 @@ func (s *lastValue[N]) copyDpts(dest *[]metricdata.DataPoint[N], t time.Time) in
 
 // newPrecomputedLastValue returns an aggregator that summarizes a set of
 // observations as the last one made.
-func newPrecomputedLastValue[N int64 | float64](limit int, r func() exemplar.FilteredReservoir[N]) *precomputedLastValue[N] {
+func newPrecomputedLastValue[N int64 | float64](
+	limit int,
+	r func(attribute.Set) FilteredExemplarReservoir[N],
+) *precomputedLastValue[N] {
 	return &precomputedLastValue[N]{lastValue: newLastValue[N](limit, r)}
 }
 
@@ -124,7 +130,9 @@ type precomputedLastValue[N int64 | float64] struct {
 	*lastValue[N]
 }
 
-func (s *precomputedLastValue[N]) delta(dest *metricdata.Aggregation) int {
+func (s *precomputedLastValue[N]) delta(
+	dest *metricdata.Aggregation, //nolint:gocritic // The pointer is needed for the ComputeAggregation interface
+) int {
 	t := now()
 	// Ignore if dest is not a metricdata.Gauge. The chance for memory reuse of
 	// the DataPoints is missed (better luck next time).
@@ -144,7 +152,9 @@ func (s *precomputedLastValue[N]) delta(dest *metricdata.Aggregation) int {
 	return n
 }
 
-func (s *precomputedLastValue[N]) cumulative(dest *metricdata.Aggregation) int {
+func (s *precomputedLastValue[N]) cumulative(
+	dest *metricdata.Aggregation, //nolint:gocritic // The pointer is needed for the ComputeAggregation interface
+) int {
 	t := now()
 	// Ignore if dest is not a metricdata.Gauge. The chance for memory reuse of
 	// the DataPoints is missed (better luck next time).

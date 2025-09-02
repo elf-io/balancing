@@ -9,25 +9,24 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/sdk/metric/internal/exemplar"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 )
 
 type sumValue[N int64 | float64] struct {
 	n     N
-	res   exemplar.FilteredReservoir[N]
+	res   FilteredExemplarReservoir[N]
 	attrs attribute.Set
 }
 
 // valueMap is the storage for sums.
 type valueMap[N int64 | float64] struct {
 	sync.Mutex
-	newRes func() exemplar.FilteredReservoir[N]
+	newRes func(attribute.Set) FilteredExemplarReservoir[N]
 	limit  limiter[sumValue[N]]
 	values map[attribute.Distinct]sumValue[N]
 }
 
-func newValueMap[N int64 | float64](limit int, r func() exemplar.FilteredReservoir[N]) *valueMap[N] {
+func newValueMap[N int64 | float64](limit int, r func(attribute.Set) FilteredExemplarReservoir[N]) *valueMap[N] {
 	return &valueMap[N]{
 		newRes: r,
 		limit:  newLimiter[sumValue[N]](limit),
@@ -42,7 +41,7 @@ func (s *valueMap[N]) measure(ctx context.Context, value N, fltrAttr attribute.S
 	attr := s.limit.Attributes(fltrAttr, s.values)
 	v, ok := s.values[attr.Equivalent()]
 	if !ok {
-		v.res = s.newRes()
+		v.res = s.newRes(attr)
 	}
 
 	v.attrs = attr
@@ -55,7 +54,7 @@ func (s *valueMap[N]) measure(ctx context.Context, value N, fltrAttr attribute.S
 // newSum returns an aggregator that summarizes a set of measurements as their
 // arithmetic sum. Each sum is scoped by attributes and the aggregation cycle
 // the measurements were made in.
-func newSum[N int64 | float64](monotonic bool, limit int, r func() exemplar.FilteredReservoir[N]) *sum[N] {
+func newSum[N int64 | float64](monotonic bool, limit int, r func(attribute.Set) FilteredExemplarReservoir[N]) *sum[N] {
 	return &sum[N]{
 		valueMap:  newValueMap[N](limit, r),
 		monotonic: monotonic,
@@ -71,7 +70,9 @@ type sum[N int64 | float64] struct {
 	start     time.Time
 }
 
-func (s *sum[N]) delta(dest *metricdata.Aggregation) int {
+func (s *sum[N]) delta(
+	dest *metricdata.Aggregation, //nolint:gocritic // The pointer is needed for the ComputeAggregation interface
+) int {
 	t := now()
 
 	// If *dest is not a metricdata.Sum, memory reuse is missed. In that case,
@@ -106,7 +107,9 @@ func (s *sum[N]) delta(dest *metricdata.Aggregation) int {
 	return n
 }
 
-func (s *sum[N]) cumulative(dest *metricdata.Aggregation) int {
+func (s *sum[N]) cumulative(
+	dest *metricdata.Aggregation, //nolint:gocritic // The pointer is needed for the ComputeAggregation interface
+) int {
 	t := now()
 
 	// If *dest is not a metricdata.Sum, memory reuse is missed. In that case,
@@ -144,7 +147,11 @@ func (s *sum[N]) cumulative(dest *metricdata.Aggregation) int {
 // newPrecomputedSum returns an aggregator that summarizes a set of
 // observations as their arithmetic sum. Each sum is scoped by attributes and
 // the aggregation cycle the measurements were made in.
-func newPrecomputedSum[N int64 | float64](monotonic bool, limit int, r func() exemplar.FilteredReservoir[N]) *precomputedSum[N] {
+func newPrecomputedSum[N int64 | float64](
+	monotonic bool,
+	limit int,
+	r func(attribute.Set) FilteredExemplarReservoir[N],
+) *precomputedSum[N] {
 	return &precomputedSum[N]{
 		valueMap:  newValueMap[N](limit, r),
 		monotonic: monotonic,
@@ -162,7 +169,9 @@ type precomputedSum[N int64 | float64] struct {
 	reported map[attribute.Distinct]N
 }
 
-func (s *precomputedSum[N]) delta(dest *metricdata.Aggregation) int {
+func (s *precomputedSum[N]) delta(
+	dest *metricdata.Aggregation, //nolint:gocritic // The pointer is needed for the ComputeAggregation interface
+) int {
 	t := now()
 	newReported := make(map[attribute.Distinct]N)
 
@@ -203,7 +212,9 @@ func (s *precomputedSum[N]) delta(dest *metricdata.Aggregation) int {
 	return n
 }
 
-func (s *precomputedSum[N]) cumulative(dest *metricdata.Aggregation) int {
+func (s *precomputedSum[N]) cumulative(
+	dest *metricdata.Aggregation, //nolint:gocritic // The pointer is needed for the ComputeAggregation interface
+) int {
 	t := now()
 
 	// If *dest is not a metricdata.Sum, memory reuse is missed. In that case,

@@ -114,7 +114,7 @@ func NewPeriodicReader(exporter Exporter, options ...PeriodicReaderOption) *Peri
 		cancel:   cancel,
 		done:     make(chan struct{}),
 		rmPool: sync.Pool{
-			New: func() interface{} {
+			New: func() any {
 				return &metricdata.ResourceMetrics{}
 			},
 		},
@@ -193,14 +193,16 @@ func (r *PeriodicReader) temporality(kind InstrumentKind) metricdata.Temporality
 }
 
 // aggregation returns what Aggregation to use for kind.
-func (r *PeriodicReader) aggregation(kind InstrumentKind) Aggregation { // nolint:revive  // import-shadow for method scoped by type.
+func (r *PeriodicReader) aggregation(
+	kind InstrumentKind,
+) Aggregation { // nolint:revive  // import-shadow for method scoped by type.
 	return r.exporter.Aggregation(kind)
 }
 
 // collectAndExport gather all metric data related to the periodicReader r from
 // the SDK and exports it with r's exporter.
 func (r *PeriodicReader) collectAndExport(ctx context.Context) error {
-	ctx, cancel := context.WithTimeout(ctx, r.timeout)
+	ctx, cancel := context.WithTimeoutCause(ctx, r.timeout, errors.New("reader collect and export timeout"))
 	defer cancel()
 
 	// TODO (#3047): Use a sync.Pool or persistent pointer instead of allocating rm every Collect.
@@ -232,7 +234,7 @@ func (r *PeriodicReader) Collect(ctx context.Context, rm *metricdata.ResourceMet
 }
 
 // collect unwraps p as a produceHolder and returns its produce results.
-func (r *PeriodicReader) collect(ctx context.Context, p interface{}, rm *metricdata.ResourceMetrics) error {
+func (r *PeriodicReader) collect(ctx context.Context, p any, rm *metricdata.ResourceMetrics) error {
 	if p == nil {
 		return ErrReaderNotRegistered
 	}
@@ -251,18 +253,17 @@ func (r *PeriodicReader) collect(ctx context.Context, p interface{}, rm *metricd
 	if err != nil {
 		return err
 	}
-	var errs []error
 	for _, producer := range r.externalProducers.Load().([]Producer) {
-		externalMetrics, err := producer.Produce(ctx)
-		if err != nil {
-			errs = append(errs, err)
+		externalMetrics, e := producer.Produce(ctx)
+		if e != nil {
+			err = errors.Join(err, e)
 		}
 		rm.ScopeMetrics = append(rm.ScopeMetrics, externalMetrics...)
 	}
 
 	global.Debug("PeriodicReader collection", "Data", rm)
 
-	return unifyErrors(errs)
+	return err
 }
 
 // export exports metric data m using r's exporter.
@@ -277,7 +278,7 @@ func (r *PeriodicReader) ForceFlush(ctx context.Context) error {
 	// Prioritize the ctx timeout if it is set.
 	if _, ok := ctx.Deadline(); !ok {
 		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, r.timeout)
+		ctx, cancel = context.WithTimeoutCause(ctx, r.timeout, errors.New("reader force flush timeout"))
 		defer cancel()
 	}
 
@@ -310,7 +311,7 @@ func (r *PeriodicReader) Shutdown(ctx context.Context) error {
 		// Prioritize the ctx timeout if it is set.
 		if _, ok := ctx.Deadline(); !ok {
 			var cancel context.CancelFunc
-			ctx, cancel = context.WithTimeout(ctx, r.timeout)
+			ctx, cancel = context.WithTimeoutCause(ctx, r.timeout, errors.New("reader shutdown timeout"))
 			defer cancel()
 		}
 
@@ -348,7 +349,7 @@ func (r *PeriodicReader) Shutdown(ctx context.Context) error {
 }
 
 // MarshalLog returns logging data about the PeriodicReader.
-func (r *PeriodicReader) MarshalLog() interface{} {
+func (r *PeriodicReader) MarshalLog() any {
 	r.mu.Lock()
 	down := r.isShutdown
 	r.mu.Unlock()
